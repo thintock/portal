@@ -18,9 +18,8 @@ return new class extends Migration
 
             // プロフィール関連
             $table->string('instagram_id', 100)->nullable()->after('display_name');
-            $table->unsignedBigInteger('avatar_media_id')->nullable()->after('instagram_id');
-            $table->foreign('avatar_media_id')->references('id')->on('media_files')->onDelete('set null');
-            $table->string('company_name', 50)->nullable()->after('avatar_media_id');
+            $table->string('company_name', 50)->nullable()->after('instagram_id');
+
             // 住所関連
             $table->string('postal_code', 10)->nullable()->after('company_name');
             $table->string('prefecture', 50)->nullable()->after('postal_code');
@@ -42,29 +41,27 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-        $table->dropForeign(['avatar_media_id']);
-        $table->dropColumn([
-            'first_name',
-            'last_name',
-            'first_name_kana',
-            'last_name_kana',
-            'display_name',
-            'instagram_id',
-            'avatar_media_id',
-            'company_name',
-            'postal_code',
-            'prefecture',
-            'address1',
-            'address2',
-            'address3',
-            'country',
-            'phone',
-            'role',
-            'user_type',
-            'user_status',
-            'email_notification',
-            'remarks',
-        ]);
-    });
+            $table->dropColumn([
+                'first_name',
+                'last_name',
+                'first_name_kana',
+                'last_name_kana',
+                'display_name',
+                'instagram_id',
+                'company_name',
+                'postal_code',
+                'prefecture',
+                'address1',
+                'address2',
+                'address3',
+                'country',
+                'phone',
+                'role',
+                'user_type',
+                'user_status',
+                'email_notification',
+                'remarks',
+            ]);
+        });
     }
 };

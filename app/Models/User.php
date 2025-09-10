@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +19,27 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
+        'first_name_kana',
+        'last_name_kana',
+        'display_name',
+        'instagram_id',
+        'avatar_media_id',
+        'company_name',
+        'postal_code',
+        'prefecture',
+        'address1',
+        'address2',
+        'address3',
+        'country',
+        'phone',
         'email',
+        'role',
+        'user_type',
+        'user_status',
+        'email_notification',
+        'remarks',
         'password',
     ];
 
@@ -35,7 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -44,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'email_notification' => 'boolean',
         ];
     }
 }

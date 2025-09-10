@@ -1,17 +1,18 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+    <x-slot name="header"><h2 class="font-semibold text-xl">ダッシュボード</h2></x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
+    <div class="p-6">
+        @auth
+            @if(auth()->user()->subscribed('default'))
+                <div class="alert alert-success mb-4">現在：<b>有料会員</b></div>
+                <a href="{{ route('billing.portal') }}" class="btn btn-outline">支払い情報の確認・変更</a>
+                <a href="{{ route('community.index') }}" class="btn btn-primary ml-2">コミュニティへ</a>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary ml-2">管理者画面へ</a>
+            @else
+                <div class="alert alert-info mb-4">現在：<b>無料会員</b></div>
+                <a href="{{ route('billing.show') }}" class="btn btn-primary">有料会員へアップグレード</a>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary ml-2">管理者画面へ</a>
+            @endif
+        @endauth
     </div>
 </x-app-layout>

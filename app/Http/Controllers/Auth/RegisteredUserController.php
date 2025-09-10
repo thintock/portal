@@ -44,6 +44,20 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        
+        // Stripe 顧客を作成して同期
+        try {
+            $user->createOrGetStripeCustomer();
+    
+            $stripeName = $user->display_name ?: $user->name;
+    
+            $user->updateStripeCustomer([
+                'name'    => $stripeName,
+                'email'   => $user->email,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('Stripe customer creation failed: '.$e->getMessage(), ['user_id' => $user->id]);
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

@@ -12,6 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->validateCsrfTokens(except: [
+            'stripe/*',
+        ]);
+        $middleware->alias([
+            'subscribed' => \App\Http\Middleware\EnsureUserIsSubscribed::class,
+            'is_admin'   => \App\Http\Middleware\EnsureUserIsAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -13,10 +13,32 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
+       
+       {{-- プロフィール画像 --}}
+        <div>
+            <x-input-label for="avatar" :value="__('プロフィール画像')" />
+        
+            {{-- ファイルアップロード欄 --}}
+            <input id="avatar" name="avatar" type="file"
+                   class="mt-1 block w-full"
+                   accept="image/*">
+        
+            {{-- 既存画像があれば表示 --}}
+            @if ($user->avatar)
+                <div class="mt-2">
+                    <img src="{{ Storage::url($user->avatar->path) }}"
+                         alt="{{ $user->avatar->alt ?? 'avatar' }}"
+                         class="w-12 h-12 rounded-full object-cover">
+                </div>
+            @endif
+        
+            <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+        </div>
 
+        
         {{-- 氏名 --}}
         <div>
             <x-input-label for="name" :value="__('姓（Last Name）')" />

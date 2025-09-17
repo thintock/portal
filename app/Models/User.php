@@ -18,8 +18,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'first_name',
+        'name',// first_name
         'last_name',
         'first_name_kana',
         'last_name_kana',
@@ -65,5 +64,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'email_notification' => 'boolean',
         ];
+    }
+    
+    public function avatar()
+    {
+        return $this->belongsTo(MediaFile::class, 'avatar_media_id');
     }
 }

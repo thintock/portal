@@ -21,7 +21,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-bold mb-4">管理メニュー</h3>
                 <div class="flex flex-col space-y-2">
-                    <a href="{{ route('admin.users') }}" class="text-blue-600 hover:underline">👤 ユーザー管理</a>
+                    <a href="{{ route('admin.users.index') }}" class="text-blue-600 hover:underline">👤 ユーザー管理</a>
                     <a href="" class="text-blue-600 hover:underline">📝 投稿管理</a>
                     <a href="" class="text-blue-600 hover:underline">📅 イベント管理</a>
                 </div>

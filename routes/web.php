@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminUserController;
 use Laravel\Cashier\Http\Controllers\WebhookController;
 
 // 誰でもOK
@@ -35,12 +36,12 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
 });
 
 // 管理者専用
-Route::middleware(['auth','verified','is_admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
+Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.')->group(function () {
+    
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // 今後の管理ページ用のルート（未実装でもOK）
-    Route::get('/users', fn() => 'ユーザー管理ページ')->name('admin.users');
+    Route::resource('users', AdminUserController::class)->names('users');
     Route::get('/posts', fn() => '投稿管理ページ')->name('admin.posts');
     Route::get('/events', fn() => 'イベント管理ページ')->name('admin.events');
 });

@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // 名前関連
-            $table->string('first_name', 50)->nullable()->after('name');
-            $table->string('last_name', 50)->nullable()->after('first_name');
+            $table->string('last_name', 50)->nullable()->after('name');
             $table->string('first_name_kana', 50)->nullable()->after('last_name');
             $table->string('last_name_kana', 50)->nullable()->after('first_name_kana');
             $table->string('display_name', 50)->nullable()->after('last_name_kana');
@@ -42,7 +41,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'first_name',
                 'last_name',
                 'first_name_kana',
                 'last_name_kana',

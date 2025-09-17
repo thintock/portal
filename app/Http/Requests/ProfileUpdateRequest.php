@@ -16,6 +16,8 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // プロフィール画像
+            'avatar'        => ['nullable', 'image', 'max:10240'], // 10MBまで
             // 基本情報
             'name'             => ['required', 'string', 'max:50'],
             'first_name'       => ['nullable', 'string', 'max:50'],

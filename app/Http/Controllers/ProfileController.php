@@ -39,7 +39,19 @@ class ProfileController extends Controller
         if (!empty($data['country'])) {
             $data['country'] = strtoupper(substr($data['country'], 0, 2));
         }
-    
+        
+        // avatar がアップロードされた場合
+        if ($request->hasFile('avatar')) {
+            $media = \App\Models\MediaFile::uploadAndCreate(
+                $request->file('avatar'),
+                $user,
+                'avatar',
+                null,
+                'avatars'
+            );
+            $user->avatar_media_id = $media->id;
+        }
+        
         // 3) 代入
         $user->fill($data);
     

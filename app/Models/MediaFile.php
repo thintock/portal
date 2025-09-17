@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class MediaFile extends Model
 {
@@ -49,6 +50,7 @@ class MediaFile extends Model
         return $this->hasOne(MediaFile::class, 'thumbnail_media_id');
     }
     
+    // ファイルのアップロード
     public static function uploadAndCreate(
         \Illuminate\Http\UploadedFile $file,
         Model $owner,
@@ -66,12 +68,29 @@ class MediaFile extends Model
         return self::create([
             'owner_type' => get_class($owner),
             'owner_id'   => $owner->getKey(),
-            'type'       => $type, // avatar,post_image, thumbnail, banner
+            'type'       => $type,
             'path'       => $path,
             'mime'       => $mime,
             'size'       => $size,
             'width'      => $width,
             'height'     => $height,
         ]);
+    }
+    
+    // ファイルの署名付きリンク生成
+    public function getUrlAttribute(): string
+    {
+        $disk = config('filesystems.default');
+
+        // S3なら署名付きURL
+        if ($disk === 's3') {
+            return Storage::disk($disk)->temporaryUrl(
+                $this->path,
+                now()->addMinutes(5)
+            );
+        }
+
+        // publicディスクなら直リンク
+        return Storage::disk($disk)->url($this->path);
     }
 }

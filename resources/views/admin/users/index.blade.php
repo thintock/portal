@@ -19,12 +19,8 @@
                             <tr>
                                 <th>ID</th>
                                 <th>プロフィール</th>
-                                <th>ユーザー名</th>
-                                <th>姓</th>
-                                <th>名</th>
-                                <th>表示名</th>
-                                <th>都道府県</th>
-                                <th>住所1</th>
+                                <th>お名前</th>
+                                <th>お住まい</th>
                                 <th>サブスク状態</th>
                                 <th>操作</th>
                             </tr>
@@ -37,19 +33,15 @@
                                     @if($user->avatar)
                                         <div class="avatar">
                                             <div class="w-10 rounded-full">
-                                                <img src="{{ Storage::url($user->avatar->path) }}" alt="avatar">
+                                                <img src="{{ $user->avatar->url }}" alt="avatar" class="w-12 h-12 rounded-full object-cover">
                                             </div>
                                         </div>
                                     @else
                                         <span class="badge badge-ghost">なし</span>
                                     @endif
                                 </td>
-                                <td>{{ $user->name }}</td>
-                                <td>{{ $user->last_name }}</td>
-                                <td>{{ $user->first_name }}</td>
-                                <td>{{ $user->display_name }}</td>
-                                <td>{{ $user->prefecture }}</td>
-                                <td>{{ $user->address1 }}</td>
+                                <td>{{ $user->display_name }}（{{ $user->name }} {{ $user->last_name }}）</td>
+                                <td>{{ $user->prefecture }}{{ $user->address1 }}</td>
                                 <td>
                                     @if($user->subscribed('default'))
                                         <span class="badge badge-success">有効</span>

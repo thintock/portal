@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // 名前関連
-            $table->string('first_name', 50)->nullable()->after('name');
-            $table->string('last_name', 50)->nullable()->after('first_name');
+            $table->string('last_name', 50)->nullable()->after('name');
             $table->string('first_name_kana', 50)->nullable()->after('last_name');
             $table->string('last_name_kana', 50)->nullable()->after('first_name_kana');
             $table->string('display_name', 50)->nullable()->after('last_name_kana');
@@ -23,9 +22,9 @@ return new class extends Migration
             // 住所関連
             $table->string('postal_code', 10)->nullable()->after('company_name');
             $table->string('prefecture', 50)->nullable()->after('postal_code');
-            $table->string('address1', 100)->nullable()->after('prefecture');
-            $table->string('address2', 100)->nullable()->after('address1');
-            $table->string('address3', 100)->nullable()->after('address2');
+            $table->string('address1', 200)->nullable()->after('prefecture');
+            $table->string('address2', 300)->nullable()->after('address1');
+            $table->string('address3', 400)->nullable()->after('address2');
             $table->string('country', 2)->nullable()->after('address3'); // ISO 2文字コード (JP, US, etc.)
             $table->string('phone', 20)->nullable()->after('country');
 
@@ -42,7 +41,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'first_name',
                 'last_name',
                 'first_name_kana',
                 'last_name_kana',

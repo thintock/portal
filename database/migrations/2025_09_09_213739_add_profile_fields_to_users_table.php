@@ -10,10 +10,11 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // 名前関連
-            $table->string('last_name', 20)->nullable()->after('name');
-            $table->string('first_name_kana', 20)->nullable()->after('last_name');
-            $table->string('last_name_kana', 20)->nullable()->after('first_name_kana');
-            $table->string('display_name', 20)->nullable()->after('last_name_kana');
+            $table->string('first_name', 50)->nullable()->after('name');
+            $table->string('last_name', 50)->nullable()->after('first_name');
+            $table->string('first_name_kana', 50)->nullable()->after('last_name');
+            $table->string('last_name_kana', 50)->nullable()->after('first_name_kana');
+            $table->string('display_name', 50)->nullable()->after('last_name_kana');
 
             // プロフィール関連
             $table->string('instagram_id', 100)->nullable()->after('display_name');
@@ -21,7 +22,7 @@ return new class extends Migration
 
             // 住所関連
             $table->string('postal_code', 10)->nullable()->after('company_name');
-            $table->string('prefecture', 20)->nullable()->after('postal_code');
+            $table->string('prefecture', 50)->nullable()->after('postal_code');
             $table->string('address1', 100)->nullable()->after('prefecture');
             $table->string('address2', 100)->nullable()->after('address1');
             $table->string('address3', 100)->nullable()->after('address2');
@@ -41,6 +42,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
+                'first_name',
                 'last_name',
                 'first_name_kana',
                 'last_name_kana',

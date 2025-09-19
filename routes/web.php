@@ -6,7 +6,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
-use Laravel\Cashier\Http\Controllers\WebhookController;
+use App\Http\Controllers\StripeWebhookController;
 
 // 誰でもOK
 Route::get('/', function () {
@@ -48,6 +48,6 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
 
 
 // Stripe Webhook
-Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook']);
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
 
 require __DIR__.'/auth.php';

@@ -1,11 +1,11 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+            <div class="badge badge-primary">会員番号：{{ $user->member_number ?? '' }}</div>　あなたのプロフィール
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            他のメンバーに公開される情報には印が付いています。それ以外の情報は公開されることはありません。
         </p>
     </header>
 
@@ -29,7 +29,7 @@
             {{-- 既存画像があれば表示 --}}
             @if ($user->avatar)
                 <div class="mt-2">
-                    <img src="{{ Storage::url($user->avatar->path) }}"
+                    <img src="{{ $user->avatar->url }}"
                          alt="{{ $user->avatar->alt ?? 'avatar' }}"
                          class="w-12 h-12 rounded-full object-cover">
                 </div>

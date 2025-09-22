@@ -13,7 +13,7 @@ class StripeWebhookController extends CashierWebhookController
      */
     protected function handleCustomerSubscriptionCreated(array $payload)
     {
-        Log::info('Webhook[Created] 受信', [
+        \Log::info('StripeWebhook[Created] 受信', [
             'event_id' => $payload['id'] ?? null,
             'type'     => $payload['type'] ?? null,
             'customer' => $payload['data']['object']['customer'] ?? null,
@@ -23,7 +23,7 @@ class StripeWebhookController extends CashierWebhookController
         if ($customerId) {
             $user = User::where('stripe_id', $customerId)->first();
             
-            Log::info('Webhook[Created] ユーザー検索結果', [
+            \Log::info('StripeWebhook[Created] ユーザー検索結果', [
                 'customerId' => $customerId,
                 'user_found' => $user ? $user->id : null,
             ]);
@@ -43,7 +43,7 @@ class StripeWebhookController extends CashierWebhookController
                     'assigned_at' => now(),
                 ]);
                 
-                Log::info('Webhook[Created] 会員番号を採番', [
+                \Log::info('StripeWebhook[Created] 会員番号を採番', [
                     'user_id'        => $user->id,
                     'assigned_number'=> $next,
                 ]);
@@ -58,7 +58,7 @@ class StripeWebhookController extends CashierWebhookController
      */
     protected function handleCustomerSubscriptionDeleted(array $payload)
     {
-        Log::info('Webhook[Deleted] 受信', [
+        \Log::info('StripeWebhook[Deleted] 受信', [
             'event_id' => $payload['id'] ?? null,
             'type'     => $payload['type'] ?? null,
             'customer' => $payload['data']['object']['customer'] ?? null,
@@ -68,7 +68,7 @@ class StripeWebhookController extends CashierWebhookController
         if ($customerId) {
             $user = User::where('stripe_id', $customerId)->first();
             
-            Log::info('Webhook[Deleted] ユーザー検索結果', [
+            \Log::info('StripeWebhook[Deleted] ユーザー検索結果', [
                 'customerId' => $customerId,
                 'user_found' => $user ? $user->id : null,
             ]);
@@ -77,7 +77,7 @@ class StripeWebhookController extends CashierWebhookController
                 $user->member_number = null;
                 $user->save();
                 
-                Log::info('Webhook[Deleted] 会員番号を削除', [
+                \Log::info('StripeWebhook[Deleted] 会員番号を削除', [
                     'user_id' => $user->id,
                 ]);
                 

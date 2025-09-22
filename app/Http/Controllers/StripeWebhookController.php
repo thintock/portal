@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 use App\Models\User;
 use App\Models\MemberNumberHistory;
-use Illuminate\Support\Facades\Mail;
 
 class StripeWebhookController extends CashierWebhookController
 {
@@ -15,14 +14,25 @@ class StripeWebhookController extends CashierWebhookController
     protected function handleCustomerSubscriptionCreated(array $payload)
     {
         $customerId = $payload['data']['object']['customer'] ?? null;
-        $msg = "Stripe Webhook: customer.subscription.created\n";
-        $msg .= "Event ID: " . ($payload['id'] ?? 'N/A') . "\n";
-        $msg .= "Customer ID: " . ($customerId ?? 'N/A') . "\n";
-        
-        Mail::raw($msg, function ($message) {
-            $message->to('koki.kusumoto@gmail.com')
-                    ->subject('[Webhook Log] Subscription Created');
-        });
+        if ($customerId) {
+            $user = User::where('stripe_id', $customerId)->first();
+            
+            if ($user && !$user->member_number) {
+                // historiesテーブルから最新番号を取得
+                $next = (MemberNumberHistory::max('number') ?? 0) + 1;
+    
+                // users に現在の会員番号を保存
+                $user->member_number = $next;
+                $user->save();
+    
+                // histories に記録
+                MemberNumberHistory::create([
+                    'user_id'     => $user->id,
+                    'number'      => $next,
+                    'assigned_at' => now(),
+                ]);
+            }
+        }
         return parent::handleCustomerSubscriptionCreated($payload);
     }
 

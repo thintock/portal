@@ -13,9 +13,21 @@ class StripeWebhookController extends CashierWebhookController
      */
     protected function handleCustomerSubscriptionCreated(array $payload)
     {
+        Log::info('Webhook[Created] 受信', [
+            'event_id' => $payload['id'] ?? null,
+            'type'     => $payload['type'] ?? null,
+            'customer' => $payload['data']['object']['customer'] ?? null,
+        ]);
+        
         $customerId = $payload['data']['object']['customer'] ?? null;
         if ($customerId) {
             $user = User::where('stripe_id', $customerId)->first();
+            
+            Log::info('Webhook[Created] ユーザー検索結果', [
+                'customerId' => $customerId,
+                'user_found' => $user ? $user->id : null,
+            ]);
+            
             if ($user && !$user->member_number) {
                 // historiesテーブルから最新番号を取得
                 $next = (MemberNumberHistory::max('number') ?? 0) + 1;
@@ -30,6 +42,12 @@ class StripeWebhookController extends CashierWebhookController
                     'number'      => $next,
                     'assigned_at' => now(),
                 ]);
+                
+                Log::info('Webhook[Created] 会員番号を採番', [
+                    'user_id'        => $user->id,
+                    'assigned_number'=> $next,
+                ]);
+                
             }
         }
         return parent::handleCustomerSubscriptionCreated($payload);
@@ -40,12 +58,29 @@ class StripeWebhookController extends CashierWebhookController
      */
     protected function handleCustomerSubscriptionDeleted(array $payload)
     {
+        Log::info('Webhook[Deleted] 受信', [
+            'event_id' => $payload['id'] ?? null,
+            'type'     => $payload['type'] ?? null,
+            'customer' => $payload['data']['object']['customer'] ?? null,
+        ]);
+        
         $customerId = $payload['data']['object']['customer'] ?? null;
         if ($customerId) {
             $user = User::where('stripe_id', $customerId)->first();
+            
+            Log::info('Webhook[Deleted] ユーザー検索結果', [
+                'customerId' => $customerId,
+                'user_found' => $user ? $user->id : null,
+            ]);
+            
             if ($user) {
                 $user->member_number = null;
                 $user->save();
+                
+                Log::info('Webhook[Deleted] 会員番号を削除', [
+                    'user_id' => $user->id,
+                ]);
+                
             }
         }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Room;
 use App\Models\Post;
 use App\Models\Event;
 use App\Models\Subscription;
@@ -22,7 +23,9 @@ class AdminDashboardController extends Controller
             //'posts_count'          => Post::count(),
             //'events_count'         => Event::count(),
         ];
+        
+        $rooms = Room::orderBy('sort_order')->get();
 
-        return view('admin.dashboard', compact('stats'));
+        return view('admin.dashboard', compact('stats', 'rooms'));
     }
 }

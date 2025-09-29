@@ -4,9 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CommunityController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomMemberController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
-// use Laravel\Cashier\Http\Controllers\WebhookController;
 use App\Http\Controllers\StripeWebhookController;
 
 // 誰でもOK
@@ -33,7 +36,19 @@ Route::middleware(['auth','verified'])->group(function () {
 
 // 有料会員専用
 Route::middleware(['auth','verified','subscribed'])->group(function () {
+    // コミュニティ全体
     Route::get('/community', [CommunityController::class, 'index'])->name('community.index');
+
+    
+    // RoomMembers（参加/退出/役割変更）
+    Route::post('rooms/{room}/join', [RoomMemberController::class, 'join'])->name('rooms.join');
+    Route::delete('rooms/{room}/leave', [RoomMemberController::class, 'leave'])->name('rooms.leave');
+    Route::patch('room-members/{member}/role', [RoomMemberController::class, 'updateRole'])->name('room_members.update_role');
+    
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
+    Route::resource('rooms.posts', PostController::class)->only(['store','edit','update','destroy']);
+    Route::resource('rooms.posts.comments', CommentController::class)->only(['store','edit','update','destroy']);
 });
 
 // 管理者専用
@@ -42,9 +57,10 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // 今後の管理ページ用のルート（未実装でもOK）
-    Route::resource('users', AdminUserController::class)->names('users');
     Route::get('/posts', fn() => '投稿管理ページ')->name('admin.posts');
     Route::get('/events', fn() => 'イベント管理ページ')->name('admin.events');
+    Route::resource('users', AdminUserController::class)->names('users');
+    Route::resource('rooms', RoomController::class)->except(['index','show']);
 });
 
 

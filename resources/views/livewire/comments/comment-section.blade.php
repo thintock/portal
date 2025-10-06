@@ -1,0 +1,329 @@
+<div class="space-y-3">
+  {{-- Livewireメッセージ --}}
+  @include('commons.messages')
+  {{-- トグルボタン --}}
+<div class="px-6">
+  <button type="button" class="btn btn-outline btn-xs w-full"
+          wire:click="$toggle('showForm')">
+    {{ $showForm ? 'キャンセル' : '新しいコメントを作成' }}
+  </button>
+</div>
+
+{{-- コメント投稿フォーム --}}
+@if($showForm)
+  <form wire:submit.prevent="save" class="mb-2 space-y-3">
+    
+    {{-- プレビュー + 画像追加 --}}
+    <div class="grid grid-cols-3 gap-3">
+      {{-- 既存ファイル --}}
+      @foreach($media as $i => $file)
+        <div class="relative">
+          <img src="{{ $file->temporaryUrl() }}" class="rounded-lg border object-cover w-full h-24" />
+          {{-- 削除 --}}
+          <button type="button" wire:click="removeMedia({{ $i }})"
+                  class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-white">✕</button>
+          {{-- 並び替え --}}
+          <div class="absolute bottom-1 right-1 flex space-x-1">
+            @if($i > 0)
+              <button type="button" wire:click="moveUp({{ $i }})" class="btn btn-xs btn-circle">⬆</button>
+            @endif
+            @if($i < count($media) - 1)
+              <button type="button" wire:click="moveDown({{ $i }})" class="btn btn-xs btn-circle">⬇</button>
+            @endif
+          </div>
+        </div>
+      @endforeach
+
+      @if(count($media) < 3)
+        <label class="flex items-center justify-center rounded-lg border border-dashed border-gray-400 w-full h-24 cursor-pointer hover:bg-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <input type="file" wire:model="newMedia" multiple accept="image/*,video/*" class="hidden"/>
+        </label>
+      @endif
+    </div>
+
+    <div wire:loading wire:target="newMedia" class="text-xs text-gray-500 mt-2">アップロード中...</div>
+
+    {{-- テキスト入力 --}}
+    <textarea wire:model.defer="body" rows="2"
+      class="textarea textarea-bordered w-full"
+      placeholder="コメントを追加..."
+      wire:key="comment-body-{{ $formKey }}"></textarea>
+
+    <button class="btn btn-primary btn-xs w-full" type="submit" wire:loading.attr="disabled" wire:target="newMedia,save">
+      <span wire:loading wire:target="newMedia">アップロード中...</span>
+      <span wire:loading wire:target="save">保存中...</span>
+      <span wire:loading.remove wire:target="newMedia,save">送信</span>
+    </button>
+  </form>
+@endif
+
+  {{-- コメント一覧 --}}
+  @forelse($parents as $comment)
+    <div class="flex items-start space-x-2 mb-4" wire:key="comment-{{ $comment->id }}">
+      {{-- アイコン --}}
+      <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+        @if($comment->user->avatar_media_id)
+          <img src="{{ Storage::url($comment->user->avatar->path ?? '') }}" 
+               alt="avatar" 
+               class="w-full h-full object-cover">
+        @else
+          <img src="{{ asset('images/avatar-dummy.png') }}" 
+               alt="dummy avatar" 
+               class="w-full h-full object-cover">
+        @endif
+      </div>
+
+      <div class="bg-gray-100 px-3 py-2 rounded-lg w-full relative">
+        {{-- ヘッダー --}}
+        <div class="flex justify-between items-center">
+          <div class=""><span class="text-sm font-semibold">{{ $comment->user->display_name }}</span>
+          <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
+          @if($comment->updated_at->ne($comment->created_at))
+            <span class="text-xs text-gray-500" title="更新: ">
+              ({{ $comment->updated_at->diffForHumans() }}:編集済み)
+            </span>
+          @endif
+          </div>
+          @if($comment->user_id === auth()->id())
+            {{-- ハンバーガーメニュー --}}
+            <div class="dropdown dropdown-end z-50">
+              <button tabindex="0" class="btn btn-ghost btn-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h.01M12 12h.01M18 12h.01"/>
+                </svg>
+              </button>
+              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-28">
+                <li><button type="button" wire:click="$dispatch('open-comment-edit', { commentId: {{ $comment->id }} })" class="w-full text-left">編集</button></li>
+                <li><a wire:click="delete({{ $comment->id }})" onclick="return confirm('削除しますか？')">削除</a></li>
+              </ul>
+            </div>
+          @endif
+        </div>
+
+        {{-- 本文 --}}
+        <div class="text-sm mt-1 break-words" x-data="{ open: false }">
+          @php
+            $body = $comment->body ?? '';
+            $short = mb_substr($body, 0, 100);
+          @endphp
+        
+          @if(mb_strlen($body) > 100)
+            {{-- 短縮表示 --}}
+            <span x-show="!open" class="break-words">{!! \App\Helpers\TextHelper::linkify($short) !!}…</span>
+        
+            {{-- 全文表示 --}}
+            <span x-show="open" class="break-words">{!! \App\Helpers\TextHelper::linkify($body) !!}</span>
+        
+            <button class="text-blue-600 text-xs ml-2"
+                    @click="open=!open"
+                    x-text="open?'閉じる':'…つづきを表示'"></button>
+          @else
+            <span class="break-words">{!! \App\Helpers\TextHelper::linkify($body) !!}</span>
+          @endif
+        </div>
+
+        {{-- 添付 --}}
+        @if($comment->media_json)
+          <div class="grid grid-cols-3 gap-2 mt-2">
+            @foreach($comment->media_json as $m)
+              @php $ext = strtolower(pathinfo($m, PATHINFO_EXTENSION)); @endphp
+              @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                {{-- サムネイル（クリックでモーダル表示） --}}
+                <img src="{{ Storage::url($m) }}" 
+                     class="rounded border object-cover w-full h-24 cursor-pointer"
+                     loading="lazy"
+                     @click="
+                     $dispatch('open-modal', 'image-viewer');
+                     $dispatch('set-image', { src: '{{ Storage::url($m) }}' })">
+              @elseif(in_array($ext, ['mp4','webm','mov','avi']))
+                <video controls class="rounded border max-h-40 w-full">
+                  <source src="{{ Storage::url($m) }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
+                </video>
+              @else
+                <a href="{{ Storage::url($m) }}" target="_blank" class="link link-primary text-xs">添付を開く</a>
+              @endif
+            @endforeach
+          </div>
+        @endif
+        
+        {{-- フッター --}}
+        <div class="flex justify-between items-center mt-2">
+          <button wire:click="setReplyTo({{ $comment->id }})" class="btn btn-link btn-xs text-blue-500">
+            {{ $replyTo === $comment->id ? 'キャンセル' : '返信' }}
+          </button>
+        </div>
+        
+        {{-- 返信フォーム --}}
+        @if($replyTo === $comment->id)
+          <form wire:submit.prevent="save({{ $comment->id }})" class="ml-8 mt-2 space-y-3">
+        
+            {{-- プレビュー + 画像追加 --}}
+            <div class="grid grid-cols-3 gap-3">
+              {{-- 選択済みファイル --}}
+              @foreach($media as $i => $file)
+                <div class="relative">
+                  @if(is_string($file))
+                    {{-- 既存パス（通常は返信は新規だけだが念のため） --}}
+                    <img src="{{ Storage::url($file) }}" class="rounded-lg border object-cover w-full h-24" />
+                  @else
+                    {{-- 新規アップロード直後 --}}
+                    <img src="{{ $file->temporaryUrl() }}" class="rounded-lg border object-cover w-full h-24" />
+                  @endif
+        
+                  {{-- 削除 --}}
+                  <button type="button"
+                          wire:click="removeMedia({{ $i }})"
+                          class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-white">✕</button>
+        
+                  {{-- 並べ替え --}}
+                  <div class="absolute bottom-1 right-1 flex space-x-1">
+                    @if($i > 0)
+                      <button type="button" wire:click="moveUp({{ $i }})" class="btn btn-xs btn-circle">⬆</button>
+                    @endif
+                    @if($i < count($media) - 1)
+                      <button type="button" wire:click="moveDown({{ $i }})" class="btn btn-xs btn-circle">⬇</button>
+                    @endif
+                  </div>
+                </div>
+              @endforeach
+        
+              {{-- 追加ボタン（最大3個まで） --}}
+              @if(count($media) < 3)
+                <label class="flex items-center justify-center rounded-lg border border-dashed border-gray-400 w-full h-24 cursor-pointer hover:bg-gray-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <input type="file" wire:model="newMedia" multiple accept="image/*,video/*" class="hidden"/>
+                </label>
+              @endif
+            </div>
+        
+            {{-- アップロード中 --}}
+            <div wire:loading wire:target="newMedia" class="text-xs text-gray-500 mt-2">アップロード中...</div>
+        
+            {{-- テキスト入力 --}}
+            <textarea wire:model.defer="body" rows="2"
+              class="textarea textarea-bordered w-full"
+              placeholder="返信を入力..."
+              wire:key="reply-body-{{ $formKey }}"></textarea>
+        
+            {{-- ボタン --}}
+            <button class="btn btn-primary btn-xs w-full" type="submit"
+                    wire:loading.attr="disabled"
+                    wire:target="newMedia,save">
+              <span wire:loading wire:target="newMedia">アップロード中...</span>
+              <span wire:loading wire:target="save">保存中...</span>
+              <span wire:loading.remove wire:target="newMedia,save">返信送信</span>
+            </button>
+          </form>
+        @endif
+
+      {{-- 子コメント一覧 --}}
+      @php
+        $visibleReplies = $comment->replies->take($repliesPerParent[$comment->id] ?? 3);
+      @endphp
+      
+      
+        @foreach($visibleReplies as $reply)
+            <div class="mt-3 flex items-start space-x-2" wire:key="reply-{{ $reply->id }}">
+            {{-- アイコン --}}
+            <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+              @if($comment->user->avatar_media_id)
+                <img src="{{ Storage::url($comment->user->avatar->path ?? '') }}" alt="avatar" class="w-full h-full object-cover">
+              @else
+                <img src="{{ asset('images/avatar-dummy.png') }}" alt="dummy avatar" class="w-full h-full object-cover">
+              @endif
+            </div>
+        
+            <div class="bg-white px-3 py-2 rounded-lg w-full relative">
+              {{-- ヘッダー --}}
+              <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm font-semibold">{{ $reply->user->name }}</span>
+                  <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+                  @if($reply->updated_at->ne($reply->created_at))
+                    <span class="text-gray-400 text-xs">
+                      ({{ $reply->updated_at->diffForHumans() }}:編集済み)
+                    </span>
+                  @endif
+                </div>
+        
+                @if($reply->user_id === auth()->id())
+                  {{-- ハンバーガーメニュー --}}
+                  <div class="dropdown dropdown-end z-50">
+                    <button tabindex="0" class="btn btn-ghost btn-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h.01M12 12h.01M18 12h.01"/>
+                      </svg>
+                    </button>
+                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-28">
+                      <li>
+                        <button type="button"
+                                wire:click="$dispatch('open-comment-edit', { commentId: {{ $reply->id }} })"
+                                class="w-full text-left">
+                          編集
+                        </button>
+                      </li>
+                      <li>
+                        <a wire:click="delete({{ $reply->id }})" onclick="return confirm('削除しますか？')">削除</a>
+                      </li>
+                    </ul>
+                  </div>
+                @endif
+              </div>
+        
+              {{-- 本文 --}}
+              <div class="text-sm mt-1 break-words">
+                {!! nl2br(e($reply->body)) !!}
+              </div>
+        
+              {{-- 添付 --}}
+              @if($reply->media_json)
+                <div class="grid grid-cols-3 gap-2 mt-2">
+                  @foreach($reply->media_json as $m)
+                    @php $ext = strtolower(pathinfo($m, PATHINFO_EXTENSION)); @endphp
+                    @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                      {{-- サムネイル --}}
+                      <img src="{{ Storage::url($m) }}"
+                           class="rounded border object-cover w-full h-20 cursor-pointer"
+                           loading="lazy"
+                           @click="
+                             $dispatch('open-modal', 'image-viewer');
+                             $dispatch('set-image', { src: '{{ Storage::url($m) }}' })">
+                    @elseif(in_array($ext, ['mp4','webm','mov','avi']))
+                      <video controls class="rounded border max-h-32 w-full">
+                        <source src="{{ Storage::url($m) }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
+                      </video>
+                    @else
+                      <a href="{{ Storage::url($m) }}" target="_blank" class="link link-primary text-xs">添付を開く</a>
+                    @endif
+                  @endforeach
+                </div>
+              @endif
+            </div>
+          </div>
+        @endforeach
+        {{-- 「さらに読み込む」ボタン --}}
+        @if(($repliesPerParent[$comment->id] ?? 3) < $comment->replies->count())
+          <div class="text-center mt-2 ml-8">
+            <button wire:click="loadMoreReplies({{ $comment->id }})" class="btn btn-outline btn-xs">
+              さらに返信を表示（{{ $comment->replies->count() - ($repliesPerParent[$comment->id] ?? 3) }}件）
+            </button>
+          </div>
+        @endif
+      </div>
+    </div>
+  @empty
+    <p class="text-gray-500 text-sm">コメントはまだありません。</p>
+  @endforelse
+
+  @if($parents->hasMorePages())
+    <div class="text-center mt-4">
+      <button wire:click="loadMore" class="btn btn-outline btn-xs">さらに読み込む</button>
+    </div>
+  @endif
+  
+</div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="cupcake">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +15,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased overflow-x-hidden">
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
@@ -35,5 +35,14 @@
                 @livewireScripts
             </main>
         </div>
+        {{--共通モーダルの定義--}}
+        <x-modal name="image-viewer" maxWidth="2xl">
+            <div x-data="{ src: '' }" x-on:set-image.window="src = $event.detail.src">
+                <img :src="src" class="max-w-full max-h-screen object-contain mx-auto rounded shadow-lg">
+            </div>
+        </x-modal> 
+          {{-- 投稿修正モーダル --}}
+          @livewire('posts.post-edit-modal')
+          @livewire('comments.comment-edit-modal')
     </body>
 </html>

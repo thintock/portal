@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BillingController;
-use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomMemberController;
 use App\Http\Controllers\PostController;
@@ -11,6 +10,8 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Livewire\Community;
+use App\Livewire\Room;
 
 // 誰でもOK
 Route::get('/', function () {
@@ -37,18 +38,14 @@ Route::middleware(['auth','verified'])->group(function () {
 // 有料会員専用
 Route::middleware(['auth','verified','subscribed'])->group(function () {
     // コミュニティ全体
-    Route::get('/community', [CommunityController::class, 'index'])->name('community.index');
-
+    Route::get('/community', Community::class)->name('community.index');
     
     // RoomMembers（参加/退出/役割変更）
     Route::post('rooms/{room}/join', [RoomMemberController::class, 'join'])->name('rooms.join');
     Route::delete('rooms/{room}/leave', [RoomMemberController::class, 'leave'])->name('rooms.leave');
     Route::patch('room-members/{member}/role', [RoomMemberController::class, 'updateRole'])->name('room_members.update_role');
     
-    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
-    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('rooms.show');
-    Route::resource('rooms.posts', PostController::class)->only(['store','edit','update','destroy']);
-    Route::resource('rooms.posts.comments', CommentController::class)->only(['store','edit','update','destroy']);
+    Route::get('/rooms/{room}', Room::class)->name('rooms.show');
 });
 
 // 管理者専用

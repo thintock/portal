@@ -10,24 +10,6 @@ use Illuminate\Support\Facades\Storage;
 class RoomController extends Controller
 {
     /**
-     * ルーム一覧
-     */
-    public function index()
-    {
-        $rooms = Room::where('is_active', true)
-            ->withCount([
-                'posts' => function ($query) {
-                    $query->whereNull('deleted_at'); // ← 論理削除を除外
-                }
-            ])
-            ->orderBy('sort_order')
-            ->orderByDesc('last_posted_at')
-            ->paginate(20);
-    
-        return view('rooms.index', compact('rooms'));
-    }
-
-    /**
      * ルーム作成フォーム
      */
     public function create()
@@ -69,15 +51,6 @@ class RoomController extends Controller
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'ルームを作成しました（現在は非公開です）');
-    }
-
-    /**
-     * ルーム詳細
-     */
-    public function show(Room $room)
-    {
-        $room->load(['owner', 'members.user']);
-        return view('rooms.show', compact('room'));
     }
 
     /**

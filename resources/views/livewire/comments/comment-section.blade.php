@@ -21,7 +21,7 @@
           <img src="{{ $file->temporaryUrl() }}" class="rounded-lg border object-cover w-full h-24" />
           {{-- 削除 --}}
           <button type="button" wire:click="removeMedia({{ $i }})"
-                  class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-white">✕</button>
+                  class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-base-100">✕</button>
           {{-- 並び替え --}}
           <div class="absolute bottom-1 right-1 flex space-x-1">
             @if($i > 0)
@@ -35,8 +35,8 @@
       @endforeach
 
       @if(count($media) < 3)
-        <label class="flex items-center justify-center rounded-lg border border-dashed border-gray-400 w-full h-24 cursor-pointer hover:bg-gray-100">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <label class="flex items-center justify-center rounded-lg border border-dashed w-full h-24 cursor-pointer hover:bg-base-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-base-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           <input type="file" wire:model="newMedia" multiple accept="image/*,video/*" class="hidden"/>
@@ -44,7 +44,7 @@
       @endif
     </div>
 
-    <div wire:loading wire:target="newMedia" class="text-xs text-gray-500 mt-2">アップロード中...</div>
+    <div wire:loading wire:target="newMedia" class="text-xs mt-2">アップロード中...</div>
 
     {{-- テキスト入力 --}}
     <textarea wire:model.defer="body" rows="2"
@@ -64,19 +64,19 @@
   @forelse($parents as $comment)
     <div class="flex items-start space-x-2 mb-4" wire:key="comment-{{ $comment->id }}">
       {{-- アイコン --}}
-      <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+      <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $comment->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
         @if($comment->user->avatar_media_id)
           <img src="{{ Storage::url($comment->user->avatar->path ?? '') }}" 
                alt="avatar" 
                class="w-full h-full object-cover">
         @else
-          <img src="{{ asset('images/avatar-dummy.png') }}" 
-               alt="dummy avatar" 
-               class="w-full h-full object-cover">
+          <span class="text-sm font-semibold text-gray-600">
+            {{ mb_substr($comment->user->display_name ?? '？', 0, 1) }}
+          </span>
         @endif
       </div>
 
-      <div class="bg-gray-100 px-3 py-2 rounded-lg w-full relative">
+      <div class="bg-base-200 px-3 py-2 rounded-lg w-full relative">
         {{-- ヘッダー --}}
         <div class="flex justify-between items-center">
           <div class=""><span class="text-sm font-semibold">{{ $comment->user->display_name }}</span>
@@ -151,6 +151,7 @@
         
         {{-- フッター --}}
         <div class="flex justify-between items-center mt-2">
+          <livewire:reactions.reaction-button :model="$comment" :key="'comment-like-'.$comment->id" />
           <button wire:click="setReplyTo({{ $comment->id }})" class="btn btn-link btn-xs text-blue-500">
             {{ $replyTo === $comment->id ? 'キャンセル' : '返信' }}
           </button>
@@ -230,19 +231,21 @@
         @foreach($visibleReplies as $reply)
             <div class="mt-3 flex items-start space-x-2" wire:key="reply-{{ $reply->id }}">
             {{-- アイコン --}}
-            <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-              @if($comment->user->avatar_media_id)
-                <img src="{{ Storage::url($comment->user->avatar->path ?? '') }}" alt="avatar" class="w-full h-full object-cover">
+            <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+              @if($reply->user->avatar_media_id)
+                <img src="{{ Storage::url($reply->user->avatar->path ?? '') }}" alt="avatar" class="w-full h-full object-cover">
               @else
-                <img src="{{ asset('images/avatar-dummy.png') }}" alt="dummy avatar" class="w-full h-full object-cover">
+                <span class="text-sm font-semibold text-gray-600">
+                  {{ mb_substr($reply->user->display_name ?? '？', 0, 1) }}
+                </span>
               @endif
             </div>
         
-            <div class="bg-white px-3 py-2 rounded-lg w-full relative">
+            <div class="bg-base-100 px-3 py-2 rounded-lg w-full relative">
               {{-- ヘッダー --}}
               <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm font-semibold">{{ $reply->user->name }}</span>
+                  <span class="text-sm font-semibold">{{ $reply->user->display_name }}</span>
                   <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
                   @if($reply->updated_at->ne($reply->created_at))
                     <span class="text-gray-400 text-xs">
@@ -303,6 +306,7 @@
                   @endforeach
                 </div>
               @endif
+              <livewire:reactions.reaction-button :model="$reply" :key="'reply-like-'.$reply->id" />
             </div>
           </div>
         @endforeach

@@ -107,10 +107,11 @@ class PostCreate extends Component
                 'media_json'     => $mediaPaths, // ← Postモデルでcasts設定推奨
                 'reaction_count' => 0,
                 'comment_count'  => 0,
+                'last_activity_at' => now(),
             ]);
-
             $this->room->increment('posts_count');
             $this->room->update(['last_posted_at' => now()]);
+            
         });
         
         // 初期化 & フィード更新イベント

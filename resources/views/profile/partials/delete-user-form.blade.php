@@ -1,55 +1,79 @@
 <section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Delete Account') }}
-        </h2>
+  {{-- ヘッダー --}}
+  <header>
+    <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+      <div class="badge badge-error badge-sm sm:badge-md text-xs sm:text-md text-white">アカウント削除手続き</div>
+    </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
-        </p>
-    </header>
+    <p class="mt-2 text-sm text-gray-600 leading-relaxed">
+      アカウントを削除すると、これまでの投稿・コメント・プロフィール情報などがすべて失われます。
+      <br class="hidden sm:block">
+      <strong class="text-error">削除後は元に戻すことができません。</strong>
+    </p>
+  </header>
+
+  {{-- 注意・アドバイス --}}
+  <div class="alert alert-warning bg-warning/20 border border-warning/40 text-sm leading-relaxed">
+    <div>
+      <h3 class="font-semibold text-warning text-base mb-1">⚠️ 削除の前にご確認ください</h3>
+      <ul class="list-disc list-inside space-y-1 text-gray-700">
+        <li>必ず <strong>サブスクリプションがキャンセル（中止）されている</strong> ことを確認してください。</li>
+        <li>サブスクリプションが中止されていれば、<strong>会員情報を残しておいても費用は発生しません。</strong></li>
+        <li>将来的に再入会の可能性がある場合は、<strong>削除せずそのまま保留</strong> しておくことをおすすめします。</li>
+      </ul>
+    </div>
+  </div>
+
+  {{-- 操作ボタン --}}
+  <div class="flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+    <p class="text-sm text-gray-500">
+      アカウント削除をご希望の方は、以下のボタンをクリックしてください。
+    </p>
 
     <x-danger-button
-        x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
+      class="btn-sm sm:btn-md shadow-md"
+      x-data=""
+      x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
+    >
+      アカウントを削除する
+    </x-danger-button>
+  </div>
 
-    <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
-            @csrf
-            @method('delete')
+  {{-- 確認モーダル --}}
+  <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
+    <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
+      @csrf
+      @method('delete')
 
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Are you sure you want to delete your account?') }}
-            </h2>
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">
+        本当にアカウントを削除しますか？
+      </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-            </p>
+      <p class="text-sm text-gray-600 leading-relaxed mb-4">
+        アカウント削除後は、データを復元することはできません。<br class="hidden sm:block">
+        続行する場合は、確認のためにパスワードを入力してください。
+      </p>
 
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
+      {{-- パスワード入力 --}}
+      <div class="form-control">
+        <x-input-label for="password" value="{{ __('パスワードの入力') }}" />
+        <x-text-input
+          id="password"
+          name="password"
+          type="password"
+          class="input input-bordered w-full sm:w-3/4 mt-1"
+          placeholder="現在のパスワードを入力"
+        />
+        <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
+      </div>
 
-                <x-text-input
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
+      {{-- ボタン --}}
+      <div class="mt-6 flex justify-end gap-3">
 
-                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
-
-                <x-danger-button class="ms-3">
-                    {{ __('Delete Account') }}
-                </x-danger-button>
-            </div>
-        </form>
-    </x-modal>
+        <x-danger-button class="btn-sm sm:btn-md">
+          削除を確定する
+        </x-danger-button>
+      </div>
+    </form>
+  </x-modal>
 </section>

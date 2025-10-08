@@ -1,191 +1,199 @@
 <section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            <div class="badge badge-primary">会員番号：{{ $user->member_number ?? '' }}</div>　あなたのプロフィール
-        </h2>
+  {{-- ヘッダー --}}
+  <header class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-800 flex items-center space-x-3">
+      <div class="badge badge-primary text-white">会員番号：{{ $user->member_number ?? '未発行' }}</div>
+      <span>あなたのプロフィール</span>
+    </h2>
+    <p class="mt-2 text-sm text-gray-600">
+      <span class="text-primary font-semibold">※</span> 印のついた項目は他のメンバーに公開されます。
+    </p>
+  </header>
 
-        <p class="mt-1 text-sm text-gray-600">
-            他のメンバーに公開される情報には印が付いています。それ以外の情報は公開されることはありません。
-        </p>
-    </header>
+  {{-- メール再送フォーム --}}
+  <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+    @csrf
+  </form>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
+  {{-- メインフォーム --}}
+  <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data"
+        class="space-y-8 bg-base-100 p-3 rounded-2xl shadow-inner border border-base-200">
+    @csrf
+    @method('patch')
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
-        @csrf
-        @method('patch')
-       
-       {{-- プロフィール画像 --}}
-        <div>
-            <x-input-label for="avatar" :value="__('プロフィール画像')" />
-        
-            {{-- ファイルアップロード欄 --}}
-            <input id="avatar" name="avatar" type="file"
-                   class="mt-1 block w-full"
-                   accept="image/*">
-        
-            {{-- 既存画像があれば表示 --}}
-            @if ($user->avatar)
-                <div class="mt-2">
-                    <img src="{{ $user->avatar->url }}"
-                         alt="{{ $user->avatar->alt ?? 'avatar' }}"
-                         class="w-12 h-12 rounded-full object-cover">
-                </div>
-            @endif
-        
-            <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
-        </div>
+    {{-- プロフィール画像 --}}
+    <div class="form-control">
+      <x-input-label for="avatar" :value="__('プロフィール画像')" />
 
-        
-        {{-- 氏名 --}}
-        <div>
-            <x-input-label for="last_name" :value="__('姓（Last Name）')" />
-            <x-text-input id="last_name" name="last_name" type="text" class="mt-1 block w-full"
-                :value="old('last_name', $user->last_name)" required autofocus autocomplete="family-name" />
-            <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
-        </div>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-3">
+        {{-- 既存画像 --}}
+        @if ($user->avatar)
+          <div class="avatar">
+            <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+              <img src="{{ $user->avatar->url }}" alt="プロフィール画像" class="object-cover" />
+            </div>
+          </div>
+        @else
+          <div class="avatar placeholder">
+            <div class="bg-neutral text-neutral-content rounded-full w-24">
+              <span class="text-2xl">{{ mb_substr($user->name ?? '？', 0, 1) }}</span>
+            </div>
+          </div>
+        @endif
 
-        <div>
-            <x-input-label for="name" :value="__('名（First Name）')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                :value="old('name', $user->name)" autocomplete="given-name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-        </div>
+        {{-- ファイルアップロード欄 --}}
+        <input id="avatar" name="avatar" type="file"
+               accept="image/*"
+               class="file-input file-input-bordered file-input-sm sm:file-input-md sm:w-auto" />
+      </div>
 
-        {{-- フリガナ --}}
-        <div>
-            <x-input-label for="last_name_kana" :value="__('姓（カナ）')" />
-            <x-text-input id="last_name_kana" name="last_name_kana" type="text" class="mt-1 block w-full"
-                :value="old('last_name_kana', $user->last_name_kana)" />
-            <x-input-error class="mt-2" :messages="$errors->get('last_name_kana')" />
-        </div>
+      <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+    </div>
 
-        <div>
-            <x-input-label for="first_name_kana" :value="__('名（カナ）')" />
-            <x-text-input id="first_name_kana" name="first_name_kana" type="text" class="mt-1 block w-full"
-                :value="old('first_name_kana', $user->first_name_kana)" />
-            <x-input-error class="mt-2" :messages="$errors->get('first_name_kana')" />
-        </div>
+    {{-- 氏名 --}}
+    <div class="divider text-sm text-gray-500">基本情報</div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <x-input-label for="last_name" :value="__('姓（Last Name）')" />
+        <x-text-input id="last_name" name="last_name" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('last_name', $user->last_name)" required />
+        <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
+      </div>
 
-        {{-- ニックネーム --}}
-        <div>
-            <x-input-label for="display_name" :value="__('表示名（ニックネーム）')" />
-            <x-text-input id="display_name" name="display_name" type="text" class="mt-1 block w-full"
-                :value="old('display_name', $user->display_name)" />
-            <x-input-error class="mt-2" :messages="$errors->get('display_name')" />
-        </div>
+      <div>
+        <x-input-label for="name" :value="__('名（First Name）')" />
+        <x-text-input id="name" name="name" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('name', $user->name)" required />
+        <x-input-error class="mt-2" :messages="$errors->get('name')" />
+      </div>
+    </div>
 
-        {{-- SNS --}}
-        <div>
-            <x-input-label for="instagram_id" :value="__('Instagram アカウント')" />
-            <x-text-input id="instagram_id" name="instagram_id" type="text" class="mt-1 block w-full"
-                :value="old('instagram_id', $user->instagram_id)" />
-            <x-input-error class="mt-2" :messages="$errors->get('instagram_id')" />
-        </div>
+    {{-- フリガナ --}}
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <x-input-label for="last_name_kana" :value="__('姓（かな）')" />
+        <x-text-input id="last_name_kana" name="last_name_kana" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('last_name_kana', $user->last_name_kana)" />
+      </div>
+      <div>
+        <x-input-label for="first_name_kana" :value="__('名（かな）')" />
+        <x-text-input id="first_name_kana" name="first_name_kana" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('first_name_kana', $user->first_name_kana)" />
+      </div>
+    </div>
 
-        {{-- 会社名 --}}
-        <div>
-            <x-input-label for="company_name" :value="__('会社名')" />
-            <x-text-input id="company_name" name="company_name" type="text" class="mt-1 block w-full"
-                :value="old('company_name', $user->company_name)" />
-            <x-input-error class="mt-2" :messages="$errors->get('company_name')" />
-        </div>
+    {{-- ニックネーム・SNS --}}
+    <div class="divider text-sm text-gray-500">公開プロフィール</div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <x-input-label for="display_name" :value="__('表示名（ニックネーム）')" />
+        <x-text-input id="display_name" name="display_name" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('display_name', $user->display_name)" />
+      </div>
 
-        {{-- 郵便番号・住所 --}}
-        <div>
-            <x-input-label for="postal_code" :value="__('郵便番号')" />
-            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                :value="old('postal_code', $user->postal_code)" />
-            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
-        </div>
+      <div>
+        <x-input-label for="instagram_id" :value="__('Instagram アカウント')" />
+        <x-text-input id="instagram_id" name="instagram_id" type="text"
+          class="input input-bordered w-full mt-1"
+          placeholder="@bakerista"
+          :value="old('instagram_id', $user->instagram_id)" />
+      </div>
+    </div>
 
-        <div>
-            <x-input-label for="prefecture" :value="__('都道府県')" />
-            <x-text-input id="prefecture" name="prefecture" type="text" class="mt-1 block w-full"
-                :value="old('prefecture', $user->prefecture)" />
-            <x-input-error class="mt-2" :messages="$errors->get('prefecture')" />
-        </div>
+    {{-- 住所 --}}
+    <div class="divider text-sm text-gray-500">住所情報</div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <x-input-label for="postal_code" :value="__('郵便番号')" />
+        <x-text-input id="postal_code" name="postal_code" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('postal_code', $user->postal_code)" />
+      </div>
 
-        <div>
-            <x-input-label for="address1" :value="__('住所1')" />
-            <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                :value="old('address1', $user->address1)" />
-            <x-input-error class="mt-2" :messages="$errors->get('address1')" />
-        </div>
+      <div>
+        <x-input-label for="prefecture" :value="__('都道府県')" />
+        <x-text-input id="prefecture" name="prefecture" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('prefecture', $user->prefecture)" />
+      </div>
+    </div>
 
-        <div>
-            <x-input-label for="address2" :value="__('住所2')" />
-            <x-text-input id="address2" name="address2" type="text" class="mt-1 block w-full"
-                :value="old('address2', $user->address2)" />
-            <x-input-error class="mt-2" :messages="$errors->get('address2')" />
-        </div>
+    <div>
+      <x-input-label for="address1" :value="__('住所1')" />
+      <x-text-input id="address1" name="address1" type="text"
+        class="input input-bordered w-full mt-1"
+        :value="old('address1', $user->address1)" />
+    </div>
+    <div>
+      <x-input-label for="address2" :value="__('住所2（建物名など）')" />
+      <x-text-input id="address2" name="address2" type="text"
+        class="input input-bordered w-full mt-1"
+        :value="old('address2', $user->address2)" />
+    </div>
 
-        <div>
-            <x-input-label for="address3" :value="__('住所3')" />
-            <x-text-input id="address3" name="address3" type="text" class="mt-1 block w-full"
-                :value="old('address3', $user->address3)" />
-            <x-input-error class="mt-2" :messages="$errors->get('address3')" />
-        </div>
+    {{-- 会社・電話 --}}
+    <div class="divider text-sm text-gray-500">勤務先・連絡先</div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <x-input-label for="company_name" :value="__('会社名')" />
+        <x-text-input id="company_name" name="company_name" type="text"
+          class="input input-bordered w-full mt-1"
+          :value="old('company_name', $user->company_name)" />
+      </div>
+      <div>
+        <x-input-label for="phone" :value="__('電話番号')" />
+        <x-text-input id="phone" name="phone" type="tel"
+          class="input input-bordered w-full mt-1"
+          :value="old('phone', $user->phone)" />
+      </div>
+    </div>
 
-        {{-- 国 --}}
-        <div>
-            <x-input-label for="country" :value="__('国 (例: JP, US)')" />
-            <x-text-input id="country" name="country" type="text" class="mt-1 block w-full"
-                :value="old('country', $user->country)" />
-            <x-input-error class="mt-2" :messages="$errors->get('country')" />
-        </div>
+    {{-- 通知設定 --}}
+    <div class="divider text-sm text-gray-500">通知設定</div>
+    <label for="email_notification" class="label cursor-pointer">
+      <span class="label-text">メール通知を受け取る</span>
+      <input id="email_notification" name="email_notification" type="checkbox" value="1"
+        {{ old('email_notification', $user->email_notification) ? 'checked' : '' }}
+        class="checkbox checkbox-primary ml-2" />
+    </label>
 
-        {{-- 電話番号 --}}
-        <div>
-            <x-input-label for="phone" :value="__('電話番号')" />
-            <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full"
-                :value="old('phone', $user->phone)" autocomplete="tel" />
-            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
-        </div>
+    {{-- Email --}}
+    <div class="divider text-sm text-gray-500">ログイン情報</div>
+    <div>
+      <x-input-label for="email" :value="__('Eメールアドレス')" />
+      <x-text-input id="email" name="email" type="email"
+        class="input input-bordered w-full mt-1"
+        :value="old('email', $user->email)" required />
+      <x-input-error class="mt-2" :messages="$errors->get('email')" />
+    </div>
 
-        {{-- 通知設定 --}}
-        <div class="flex items-center">
-            <x-input-label for="email_notification" :value="__('メール通知を受け取る')" class="mr-2" />
-            <input id="email_notification" name="email_notification" type="checkbox" value="1"
-                {{ old('email_notification', $user->email_notification) ? 'checked' : '' }}>
-            <x-input-error class="mt-2" :messages="$errors->get('email_notification')" />
-        </div>
+    {{-- 未認証時の警告 --}}
+    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+      <div class="alert alert-warning mt-3 text-sm">
+        <span>メールアドレスが未確認です。</span>
+        <button form="send-verification" class="link link-primary ml-2">
+          確認メールを再送する
+        </button>
+      </div>
+    @endif
 
-        {{-- Email --}}
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+    {{-- 保存ボタン --}}
+    <div class="flex items-center gap-4 pt-4">
+      <button type="submit"
+        class="btn btn-primary shadow-md w-full sm:w-auto btn-sm sm:btn-md">
+        保存する
+      </button>
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
-                        <button form="send-verification"
-                            class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition
-                   x-init="setTimeout(() => show = false, 2000)"
-                   class="text-sm text-gray-600">{{ __('Saved.') }}</p>
-            @endif
-        </div>
-    </form>
+      @if (session('status') === 'profile-updated')
+        <p x-data="{ show: true }" x-show="show" x-transition
+           x-init="setTimeout(() => show = false, 2000)"
+           class="text-sm text-success">保存しました。</p>
+      @endif
+    </div>
+  </form>
 </section>

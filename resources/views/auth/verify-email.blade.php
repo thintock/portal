@@ -1,31 +1,50 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
-
-    @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
-    @endif
-
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
+    <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-primary/10 via-base-100 to-accent/10 px-4">
+        <div class="w-full max-w-md bg-white shadow-xl rounded-xl p-8">
+            {{-- ロゴ --}}
+            <div class="text-center mb-6">
+                <img src="{{ asset('images/bakerista_logo.png') }}" alt="Bakerista" class="mx-auto w-24 mb-2">
+                <h1 class="text-2xl font-bold text-primary">ご登録ありがとうございます！</h1>
+                <p class="text-gray-500 text-sm mt-1">メールアドレスの確認をお願いいたします</p>
             </div>
-        </form>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
+            {{-- メッセージ --}}
+            <div class="text-sm text-gray-600 mb-4 leading-relaxed">
+                ご登録のメールアドレスに確認用リンクをお送りしました。<br>
+                メール内のリンクをクリックして登録を完了してください。<br><br>
+                メールが届いていない場合は、下のボタンから再送信できます。
+            </div>
 
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
-            </button>
-        </form>
+            {{-- 成功メッセージ --}}
+            @if (session('status') == 'verification-link-sent')
+                <div class="alert alert-success text-sm mb-4">
+                    ✅ 登録時のメールアドレス宛に新しい確認リンクを送信しました。
+                </div>
+            @endif
+
+            {{-- ボタン群 --}}
+            <div class="mt-6 space-y-4">
+                {{-- 再送信ボタン --}}
+                <form method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary w-full">
+                        メールを再送信する
+                    </button>
+                </form>
+
+                {{-- ログアウトボタン --}}
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-outline w-full">
+                        ログアウト
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {{-- コピーライト --}}
+        <footer class="mt-8 text-center text-xs text-gray-400">
+            © {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.
+        </footer>
     </div>
 </x-guest-layout>

@@ -4,15 +4,15 @@
     <div class="flex items-center justify-between px-4 py-3 border-b">
       <div class="flex items-center space-x-3">
         {{--アバター表示--}}
-        <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+        <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $post->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
           @if($post->user->avatar_media_id)
             <img src="{{ Storage::url($post->user->avatar->path ?? '') }}" 
                  alt="avatar" 
                  class="w-full h-full object-cover">
           @else
-            <img src="{{ asset('images/avatar-dummy.png') }}" 
-                 alt="dummy avatar" 
-                 class="w-full h-full object-cover">
+            <span class="text-sm font-semibold text-gray-600">
+                {{ mb_substr($post->user->display_name ?? '？', 0, 1) }}
+            </span>
           @endif
         </div>
         {{---ニックネーム表示--}}
@@ -96,10 +96,9 @@
     </div>
 
     
-    {{-- 4段目：アクション（ハートは今はダミー）--}}
+    {{-- 4段目：リアクション--}}
     <div class="px-2 flex items-center space-x-4">
-      <button class="btn btn-ghost btn-sm">❤️</button>
-      <span class="text-sm text-gray-500">{{ $post->reaction_count }} いいね</span>
+      <livewire:reactions.reaction-button :model="$post" :key="'post-like-'.$post->id" />
     </div>
 
     {{-- 5段目：コメント --}}

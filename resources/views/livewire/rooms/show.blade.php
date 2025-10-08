@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto py-8 space-y-6">
+<div class="max-w-4xl mx-auto p-1 py-8 space-y-6">
 
     {{-- カバー写真 --}}
     <div class="w-full h-48 rounded-lg overflow-hidden bg-gray-200">
@@ -23,39 +23,52 @@
                     </div>
                 @endif
                 <div>
-                    <h1 class="card-title text-2xl">{{ $room->name }}</h1>
+                    <h1 class="card-title text-2xl">{{ $room->display_name }}</h1>
                     <p class="text-gray-600">{{ $room->description }}</p>
                 </div>
             </div>
-
-            {{-- 参加/退出ボタン（public は非表示） --}} 
+            {{-- 参加/退出ボタン + メンバーアバター --}}
             @if($room->visibility !== 'public') 
-                <div class="mb-4"> 
-                @if($room->members->contains('user_id', auth()->id())) 
-                    <form method="POST" action="{{ route('rooms.leave', $room) }}"> 
-                    @csrf 
-                    @method('DELETE') 
-                        <button class="btn btn-error">退出する</button> 
-                    </form> 
-                @else 
-                    <form method="POST" action="{{ route('rooms.join', $room) }}"> 
-                    @csrf 
-                        <button class="btn btn-primary">参加する</button>
-                    </form> 
-                @endif 
-                </div> 
-            @endif
-
-            {{-- メンバー一覧（public 以外のみ） --}}
-            @if($room->visibility !== 'public')
-                <h2 class="text-xl font-semibold mt-6 mb-2">メンバー</h2>
-                <ul class="divide-y divide-gray-200">
-                    @foreach($room->members as $member)
-                        <li class="py-2 flex justify-between items-center">
-                            <span>{{ $member->user->name }} <span class="badge">{{ $member->role }}</span></span>
-                        </li>
-                    @endforeach
-                </ul>
+                <div class="flex items-center space-x-4 mb-4">
+                    {{-- ボタン --}}
+                    @if($room->members->contains('user_id', auth()->id())) 
+                        <form method="POST" action="{{ route('rooms.leave', $room) }}"> 
+                            @csrf 
+                            @method('DELETE') 
+                            <button class="btn btn-error">退出する</button> 
+                        </form> 
+                    @else 
+                        <form method="POST" action="{{ route('rooms.join', $room) }}"> 
+                            @csrf 
+                            <button class="btn btn-primary">参加する</button>
+                        </form> 
+                    @endif 
+            
+                    {{-- メンバーアバター表示（ランダム順） --}}
+                    <div class="flex -space-x-3">
+                        @foreach($room->memberUsers->shuffle()->take(10) as $user)
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}"
+                                 title="{{ $user->display_name }}">
+                                @if($user->avatar_media_id)
+                                    <img src="{{ Storage::url($user->avatar->path ?? '') }}" 
+                                         alt="avatar" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-sm font-semibold text-gray-600">
+                                        {{ mb_substr($user->display_name ?? '？', 0, 1) }}
+                                    </span>
+                                @endif
+                            </div>
+                        @endforeach
+            
+                        {{-- 残り人数表示 --}}
+                        @if($room->memberUsers->count() > 10)
+                            <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-sm border-2 border-base-100">
+                                +{{ $room->memberUsers->count() - 10 }}
+                            </div>
+                        @endif
+                    </div>
+                </div>
             @endif
         </div>
     </div>

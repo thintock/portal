@@ -1,39 +1,66 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+    <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-primary/10 via-base-100 to-accent/10 px-4">
+        <div class="w-full max-w-md bg-white shadow-xl rounded-xl p-8">
+            {{-- ロゴ --}}
+            <div class="text-center mb-6">
+                <img src="{{ asset('images/bakerista_logo.png') }}" alt="Bakerista" class="mx-auto w-24 mb-2">
+                <h1 class="text-2xl font-bold text-primary">新しいパスワードを設定</h1>
+                <p class="text-gray-500 text-sm mt-1">ご登録のメールアドレスに届いたリンクからアクセスしています</p>
+            </div>
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+            {{-- フォーム --}}
+            <form method="POST" action="{{ route('password.store') }}" class="space-y-5">
+                @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                {{-- トークン --}}
+                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                {{-- メールアドレス --}}
+                <div>
+                    <x-input-label for="email" :value="__('Eメール')" />
+                    <x-text-input id="email" type="email" name="email"
+                        class="input input-bordered w-full mt-1"
+                        :value="old('email', $request->email)" required autofocus autocomplete="username" />
+                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                </div>
+
+                {{-- 新しいパスワード --}}
+                <div>
+                    <x-input-label for="password" :value="__('新しいパスワード')" />
+                    <x-text-input id="password" type="password" name="password"
+                        class="input input-bordered w-full mt-1"
+                        required autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                </div>
+
+                {{-- パスワード確認 --}}
+                <div>
+                    <x-input-label for="password_confirmation" :value="__('パスワード（確認）')" />
+                    <x-text-input id="password_confirmation" type="password" name="password_confirmation"
+                        class="input input-bordered w-full mt-1"
+                        required autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                </div>
+
+                {{-- 送信ボタン --}}
+                <div class="pt-4">
+                    <button type="submit" class="btn btn-primary w-full">
+                        {{ __('パスワードを再設定する') }}
+                    </button>
+                </div>
+            </form>
+
+            {{-- 戻るリンク --}}
+            <div class="text-center mt-4">
+                <a href="{{ route('login') }}" class="link link-secondary text-sm">
+                    ログインページに戻る
+                </a>
+            </div>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
-    </form>
+        {{-- コピーライト --}}
+        <footer class="mt-8 text-center text-xs text-gray-400">
+            © {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.
+        </footer>
+    </div>
 </x-guest-layout>

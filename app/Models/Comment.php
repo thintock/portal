@@ -53,4 +53,9 @@ class Comment extends Model
     {
         return $this->belongsTo(Comment::class, 'root_id');
     }
+    
+    public function reactions()
+    {
+        return $this->morphMany(\App\Models\Reaction::class, 'reactionable');
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Livewire\Comments;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -114,7 +115,50 @@ class CommentSection extends Component
         } else {
             $this->post->increment('comment_count');
         }
+        
+        // 通知作成
+        $actor = Auth::user();
+        $receiverId = null;
+        $type = null;
+        $message = null;
+        $roomId = $this->post->room_id ?? null;
+        $commentExcerpt = mb_substr(strip_tags($comment->body), 0, 30);
+        if (mb_strlen($comment->body) > 30) {
+            $commentExcerpt .= '…';
+        }
+        
+        if ($parent) {
+            // 返信 → 親コメント投稿者に通知
+            if ($parent->user_id !== $actor->id) {
+                $receiverId = $parent->user_id;
+                $type = 'reply';
+                $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
+            }
+        } else {
+            // 新規コメント → 投稿者に通知
+            if ($this->post->user_id !== $actor->id) {
+                $receiverId = $this->post->user_id;
+                $type = 'comment';
+                $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
+            }
+        }
 
+        if ($receiverId && $type && $message) {
+            Notification::create([
+                'user_id'         => $receiverId,
+                'notifiable_id'   => $comment->id,
+                'notifiable_type' => Comment::class,
+                'type'            => $type,
+                'message'         => $message,
+                'room_id'         => $roomId,
+            ]);
+        }
+        
+        // Postsのアクティビティを更新
+        $this->post->update([
+            'last_activity_at' => now(),
+        ]);
+        
         // 初期化
         $this->reset(['body', 'media', 'replyTo']);
         $this->formKey++;
@@ -134,6 +178,17 @@ class CommentSection extends Component
         if ($comment->user_id !== Auth::id()) {
             abort(403);
         }
+        // 通知削除（このコメントが notifiable として登録されている通知）
+        Notification::where('notifiable_id', $comment->id)
+            ->where('notifiable_type', Comment::class)
+            ->delete();
+
+        // 子コメント（返信）がある場合、その通知も削除（任意）
+        Notification::whereIn(
+            'notifiable_id',
+            Comment::where('parent_id', $comment->id)->pluck('id')
+        )->where('notifiable_type', Comment::class)->delete();
+        
         $comment->delete();
         $this->post->decrement('comment_count');
         session()->flash('success', 'コメントを削除しました');
@@ -149,7 +204,7 @@ class CommentSection extends Component
         if (isset($this->repliesPerParent[$parentId])) {
             $this->repliesPerParent[$parentId] += 5;
         } else {
-            $this->repliesPerParent[$parentId] = 8; // 初期3 + 5
+            $this->repliesPerParent[$parentId] = 6; // 初期1 + 5
         }
     }
     
@@ -166,10 +221,10 @@ class CommentSection extends Component
             ->latest()
             ->paginate($this->perPage);
         
-        // 初期値設定：まだ存在しないキーには3をセット
+        // 初期値設定：まだ存在しないキーには1をセット
         foreach ($parents as $parent) {
             if (!isset($this->repliesPerParent[$parent->id])) {
-                $this->repliesPerParent[$parent->id] = 3;
+                $this->repliesPerParent[$parent->id] = 1;
             }
         }
 

@@ -39,7 +39,7 @@ class PostFeed extends Component
     public function render()
     {
         $posts = Post::where('room_id', $this->room->id)
-            ->latest()
+            ->orderByDesc('last_activity_at')
             ->paginate($this->perPage);
 
         return view('livewire.posts.post-feed', compact('posts'));

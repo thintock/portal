@@ -24,6 +24,7 @@ class Post extends Model
         'reaction_count',
         'comment_count',
         'pinned_at',
+        'last_activity_at',
     ];
 
     protected $casts = [
@@ -46,5 +47,10 @@ class Post extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+    
+    public function reactions()
+    {
+        return $this->morphMany(\App\Models\Reaction::class, 'reactionable');
     }
 }

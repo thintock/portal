@@ -34,33 +34,34 @@ class Room extends Model
 
     // --- リレーション ---
     
-    /**
-     * ルームの作成者（オーナー）
-     */
+    // ルームの作成者（オーナー）
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    /**
-     * ルームに所属するメンバー
-     */
-    public function members()
-    {
-        return $this->hasMany(RoomMember::class);
-    }
-
-    /**
-     * ルームに属する投稿
-     */
+    // * ルームに属する投稿
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+    
+    // ルームに所属するメンバー
+    public function members()
+    {
+        return $this->hasMany(RoomMember::class);
     }
     
     public function membersCount()
     {
         return $this->members()->count();
     }
+    
+    public function memberUsers()
+{
+    return $this->belongsToMany(User::class, 'room_members')
+        ->withPivot('role', 'joined_at')
+        ->inRandomOrder(); // ランダム並び
+}
 
 }

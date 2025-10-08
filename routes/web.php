@@ -1,26 +1,30 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomMemberController;
-use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\StripeWebhookController;
-use App\Livewire\Community;
 use App\Livewire\Room;
+use App\Livewire\PostShow;
+use App\Livewire\Dashboard\Index as DashboardIndex;
 
 // 誰でもOK
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('register');
 });
 
 // 無料会員（認証済み）
 Route::middleware(['auth','verified'])->group(function () {
-    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+    Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
 
     // プロフィール
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -37,15 +41,13 @@ Route::middleware(['auth','verified'])->group(function () {
 
 // 有料会員専用
 Route::middleware(['auth','verified','subscribed'])->group(function () {
-    // コミュニティ全体
-    Route::get('/community', Community::class)->name('community.index');
-    
     // RoomMembers（参加/退出/役割変更）
     Route::post('rooms/{room}/join', [RoomMemberController::class, 'join'])->name('rooms.join');
     Route::delete('rooms/{room}/leave', [RoomMemberController::class, 'leave'])->name('rooms.leave');
     Route::patch('room-members/{member}/role', [RoomMemberController::class, 'updateRole'])->name('room_members.update_role');
     
     Route::get('/rooms/{room}', Room::class)->name('rooms.show');
+    Route::get('/posts/{post}', PostShow::class)->name('posts.show');
 });
 
 // 管理者専用

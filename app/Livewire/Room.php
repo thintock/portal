@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Room as RoomModel;
 use Livewire\WithPagination;
+use Livewire\Attributes\On;
 
 class Room extends Component
 {
@@ -18,18 +19,20 @@ class Room extends Component
     public function refreshMembership($roomId)
     {
         if ($roomId == $this->room->id) {
-            $this->room->refresh()->load('members');
+            $this->room->refresh()->load(['members', 'mediaFiles']);
         }
     }
     
     public function mount(RoomModel $room)
     {
-        $this->room = $room->load('members');
+        // mediaFiles を事前ロード
+        $this->room = $room->load(['members', 'mediaFiles' => function ($q) {
+            $q->whereIn('type', ['room_icon', 'room_cover']);
+        }]);
     }
 
     public function render()
     {
-        // ルームの投稿一覧（コメントなどは post-card 内で処理）
         $posts = $this->room->posts()
             ->whereNull('deleted_at')
             ->with('user')

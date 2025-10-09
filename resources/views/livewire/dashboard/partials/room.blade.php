@@ -50,8 +50,8 @@
     @foreach($rooms as $room)
         <div class="card bg-base-100 shadow-md border overflow-hidden">
             {{-- カバー画像 --}}
-            @if($room->cover_image)
-                <img src="{{ Storage::url($room->cover_image) }}" alt="cover" class="w-full h-32 object-cover">
+            @if($room->cover_media)
+                <img src="{{ Storage::url($room->cover_media->path) }}" alt="cover" class="w-full h-32 object-cover">
             @else
                 <div class="w-full h-32 bg-gradient-to-r from-accent/30 to-primary/40 flex items-center">
                 </div>
@@ -60,8 +60,8 @@
             <div class="card-body">
                 <div class="flex items-center space-x-2">
                     {{-- アイコン --}}
-                    @if($room->icon)
-                        <img src="{{ Storage::url($room->icon) }}" alt="icon" class="w-8 h-8 rounded-full object-cover">
+                    @if($room->icon_media)
+                        <img src="{{ Storage::url($room->icon_media->path) }}" alt="icon" class="w-8 h-8 rounded-full object-cover">
                     @else
                         <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
                             {{ mb_substr($room->name, 0, 1) }}

@@ -2,8 +2,9 @@
 
     {{-- カバー写真 --}}
     <div class="w-full h-48 rounded-lg overflow-hidden bg-gray-200">
-        @if($room->cover_image)
-            <img src="{{ Storage::url($room->cover_image) }}" alt="cover" class="w-full h-full object-cover">
+        @if($room->cover_media)
+            <img src="{{ Storage::url($room->cover_media->path) }}" 
+                 alt="cover" class="w-full h-full object-cover">
         @else
             <div class="w-full h-full flex items-center justify-center text-gray-500">
                 No Cover Image
@@ -15,8 +16,9 @@
         <div class="card-body">
             {{-- プロフ写真 + ルーム情報 --}}
             <div class="flex items-center space-x-4 mb-4">
-                @if($room->icon)
-                    <img src="{{ Storage::url($room->icon) }}" alt="icon" class="w-16 h-16 rounded-full object-cover">
+                @if($room->icon_media)
+                    <img src="{{ Storage::url($room->icon_media->path) }}" 
+                         alt="icon" class="w-16 h-16 rounded-full object-cover border">
                 @else
                     <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-lg text-gray-600">
                         {{ mb_substr($room->name, 0, 1) }}
@@ -27,7 +29,7 @@
                     <p class="text-gray-600">{{ $room->description }}</p>
                 </div>
             </div>
-            {{-- 参加/退出ボタン + メンバーアバター --}}
+            {{-- 参加/退出ボタン --}}
             @if($room->visibility !== 'public') 
                 <div class="flex items-center space-x-4 mb-4">
                     {{-- ボタン --}}
@@ -49,8 +51,8 @@
                         @foreach($room->memberUsers->shuffle()->take(10) as $user)
                             <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}"
                                  title="{{ $user->display_name }}">
-                                @if($user->avatar_media_id)
-                                    <img src="{{ Storage::url($user->avatar->path ?? '') }}" 
+                                @if($user->avatar)
+                                    <img src="{{ Storage::url($user->avatar->path) }}" 
                                          alt="avatar" 
                                          class="w-full h-full object-cover">
                                 @else

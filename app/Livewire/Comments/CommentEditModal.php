@@ -4,8 +4,11 @@ namespace App\Livewire\Comments;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\Comment;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\Comment;
+use App\Models\MediaFile;
+use App\Models\MediaRelation;
 
 class CommentEditModal extends Component
 {
@@ -33,11 +36,23 @@ class CommentEditModal extends Component
 
     public function open($commentId)
     {
-        $this->commentId = $commentId;
-        $comment = Comment::findOrFail($this->commentId);
-
+        // 🔹 リレーションをロード
+        $comment = Comment::with(['mediaFiles' => function ($q) {
+            $q->orderBy('media_relations.sort_order');
+        }])->findOrFail($commentId);
+    
+        $this->commentId = $comment->id;
         $this->body = $comment->body;
-        $this->media = $comment->media_json ?? []; // 既存パスを配列でセット
+    
+        // 🔹 MediaFile を配列に変換（Bladeで統一して扱いやすく）
+        $this->media = $comment->mediaFiles->map(function ($file) {
+            return [
+                'id'   => $file->id,
+                'path' => $file->path,
+                'mime' => $file->mime,
+            ];
+        })->toArray();
+    
         $this->newMedia = [];
         $this->showModal = true;
     }
@@ -88,25 +103,56 @@ class CommentEditModal extends Component
     {
         $this->validate();
 
-        $mediaPaths = [];
-        foreach ($this->media as $item) {
-            if (is_string($item)) {
-                $mediaPaths[] = $item; // 既存のパス
-            } elseif (is_object($item)) {
-                $mediaPaths[] = $item->store('comments', 'public'); // 新規
-            }
-        }
-
         $comment = Comment::findOrFail($this->commentId);
         if ($comment->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $comment->update([
-            'body'       => $this->body,
-            'media_json' => $mediaPaths,
-        ]);
+        DB::transaction(function () use ($comment) {
+            // 1️⃣ 本文更新
+            $comment->update(['body' => $this->body]);
 
+            // 2️⃣ 既存のMediaRelationを削除（MediaFile自体は残す）
+            MediaRelation::where('mediable_type', Comment::class)
+                ->where('mediable_id', $comment->id)
+                ->delete();
+
+            $disk = config('filesystems.default');
+
+            // 3️⃣ 新しいメディアを登録または再リンク
+            foreach ($this->media as $index => $item) {
+                if (is_array($item) && isset($item['id'])) {
+                    // ✅ 既存MediaFileを再リンク
+                    MediaRelation::create([
+                        'mediable_type' => Comment::class,
+                        'mediable_id'   => $comment->id,
+                        'media_file_id' => $item['id'],
+                        'sort_order'    => $index,
+                    ]);
+                } elseif (is_object($item)) {
+                    // ✅ 新規アップロード
+                    $media = MediaFile::uploadAndCreate(
+                        $item,
+                        Auth::user(),
+                        'comment',
+                        $disk,
+                        'comments/' . $comment->id
+                    );
+
+                    MediaRelation::create([
+                        'mediable_type' => Comment::class,
+                        'mediable_id'   => $comment->id,
+                        'media_file_id' => $media->id,
+                        'sort_order'    => $index,
+                    ]);
+                }
+            }
+
+            // 4️⃣ 更新日時更新
+            $comment->update(['updated_at' => now()]);
+        });
+
+        // 5️⃣ リセットと通知
         $this->reset(['newMedia']);
         $this->formKey++;
         $this->showModal = false;

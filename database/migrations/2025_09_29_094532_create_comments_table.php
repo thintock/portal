@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('root_id')->nullable()->constrained('comments')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->text('body');
-            $table->json('media_json')->nullable();
             $table->string('status', 20)->default('published'); // published/hidden
             $table->integer('reaction_count')->default(0);
             $table->integer('replies_count')->default(0);
@@ -27,10 +26,7 @@ return new class extends Migration
             $table->softDeletes();
 
             // インデックス
-            $table->index('post_id');
-            $table->index('parent_id');
-            $table->index('root_id');
-            $table->index('user_id');
+            $table->index(['post_id', 'parent_id', 'root_id', 'user_id']);
         });
     }
 

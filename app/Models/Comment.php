@@ -58,4 +58,21 @@ class Comment extends Model
     {
         return $this->morphMany(\App\Models\Reaction::class, 'reactionable');
     }
+    
+    public function mediaFiles()
+    {
+        return $this->morphToMany(MediaFile::class, 'mediable', 'media_relations')
+            ->withPivot('sort_order')
+            ->orderBy('media_relations.sort_order');
+    }
+    
+    public function images()
+    {
+        return $this->mediaFiles()->where('media_files.type', 'comment_image');
+    }
+    
+    public function videos()
+    {
+        return $this->mediaFiles()->where('media_files.type', 'comment_video');
+    }
 }

@@ -125,29 +125,39 @@
           @endif
         </div>
 
-        {{-- 添付 --}}
-        @if($comment->media_json)
+        {{-- 添付メディア --}}
+        @if($comment->mediaFiles && $comment->mediaFiles->isNotEmpty())
           <div class="grid grid-cols-3 gap-2 mt-2">
-            @foreach($comment->media_json as $m)
-              @php $ext = strtolower(pathinfo($m, PATHINFO_EXTENSION)); @endphp
+            @foreach($comment->mediaFiles->sortBy('pivot.sort_order') as $media)
+              @php
+                $ext = strtolower(pathinfo($media->path, PATHINFO_EXTENSION));
+                $url = Storage::url($media->path);
+              @endphp
+        
               @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
-                {{-- サムネイル（クリックでモーダル表示） --}}
-                <img src="{{ Storage::url($m) }}" 
+                {{-- ✅ 画像サムネイル（クリックでモーダル拡大） --}}
+                <img src="{{ $url }}"
+                     alt="{{ $media->alt ?? 'image' }}"
                      class="rounded border object-cover w-full h-24 cursor-pointer"
                      loading="lazy"
                      @click="
-                     $dispatch('open-modal', 'image-viewer');
-                     $dispatch('set-image', { src: '{{ Storage::url($m) }}' })">
+                       $dispatch('open-modal', 'image-viewer');
+                       $dispatch('set-image', { src: '{{ $url }}' })">
+              
               @elseif(in_array($ext, ['mp4','webm','mov','avi']))
+                {{-- ✅ 動画プレビュー --}}
                 <video controls class="rounded border max-h-40 w-full">
-                  <source src="{{ Storage::url($m) }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
+                  <source src="{{ $url }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
                 </video>
+        
               @else
-                <a href="{{ Storage::url($m) }}" target="_blank" class="link link-primary text-xs">添付を開く</a>
+                {{-- ✅ その他ファイル --}}
+                <a href="{{ $url }}" target="_blank" class="link link-primary text-xs">添付を開く</a>
               @endif
             @endforeach
           </div>
         @endif
+
         
         {{-- フッター --}}
         <div class="flex justify-between items-center mt-2">
@@ -166,20 +176,11 @@
               {{-- 選択済みファイル --}}
               @foreach($media as $i => $file)
                 <div class="relative">
-                  @if(is_string($file))
-                    {{-- 既存パス（通常は返信は新規だけだが念のため） --}}
-                    <img src="{{ Storage::url($file) }}" class="rounded-lg border object-cover w-full h-24" />
-                  @else
-                    {{-- 新規アップロード直後 --}}
-                    <img src="{{ $file->temporaryUrl() }}" class="rounded-lg border object-cover w-full h-24" />
-                  @endif
-        
+                  <img src="{{ $file->temporaryUrl() }}" class="rounded-lg border object-cover w-full h-24" />
                   {{-- 削除 --}}
-                  <button type="button"
-                          wire:click="removeMedia({{ $i }})"
-                          class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-white">✕</button>
-        
-                  {{-- 並べ替え --}}
+                  <button type="button" wire:click="removeMedia({{ $i }})"
+                          class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-base-100">✕</button>
+                  {{-- 並び替え --}}
                   <div class="absolute bottom-1 right-1 flex space-x-1">
                     @if($i > 0)
                       <button type="button" wire:click="moveUp({{ $i }})" class="btn btn-xs btn-circle">⬆</button>
@@ -284,28 +285,40 @@
               </div>
         
               {{-- 添付 --}}
-              @if($reply->media_json)
+              @if($reply->mediaFiles && $reply->mediaFiles->isNotEmpty())
                 <div class="grid grid-cols-3 gap-2 mt-2">
-                  @foreach($reply->media_json as $m)
-                    @php $ext = strtolower(pathinfo($m, PATHINFO_EXTENSION)); @endphp
-                    @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
-                      {{-- サムネイル --}}
-                      <img src="{{ Storage::url($m) }}"
-                           class="rounded border object-cover w-full h-20 cursor-pointer"
-                           loading="lazy"
-                           @click="
-                             $dispatch('open-modal', 'image-viewer');
-                             $dispatch('set-image', { src: '{{ Storage::url($m) }}' })">
-                    @elseif(in_array($ext, ['mp4','webm','mov','avi']))
-                      <video controls class="rounded border max-h-32 w-full">
-                        <source src="{{ Storage::url($m) }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
-                      </video>
-                    @else
-                      <a href="{{ Storage::url($m) }}" target="_blank" class="link link-primary text-xs">添付を開く</a>
+                  @foreach($reply->mediaFiles as $media)
+                    @php
+                      $path = $media->path ?? $media->file_path ?? null;
+                      $url  = $path ? Storage::url($path) : null;
+                      $ext  = $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
+                    @endphp
+              
+                    @if($url)
+                      @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                        {{-- サムネイル --}}
+                        <img src="{{ $url }}"
+                             class="rounded border object-cover w-full h-20 cursor-pointer"
+                             loading="lazy"
+                             @click="
+                               $dispatch('open-modal', 'image-viewer');
+                               $dispatch('set-image', { src: '{{ $url }}' })">
+                      @elseif(in_array($ext, ['mp4','webm','mov','avi']))
+                        {{-- 動画 --}}
+                        <video controls class="rounded border max-h-32 w-full">
+                          <source src="{{ $url }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
+                        </video>
+                      @else
+                        {{-- その他 --}}
+                        <a href="{{ $url }}" target="_blank" class="link link-primary text-xs">
+                          添付を開く
+                        </a>
+                      @endif
                     @endif
                   @endforeach
                 </div>
               @endif
+
               <livewire:reactions.reaction-button :model="$reply" :key="'reply-like-'.$reply->id" />
             </div>
           </div>

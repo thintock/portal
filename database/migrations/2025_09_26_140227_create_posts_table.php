@@ -16,15 +16,14 @@ return new class extends Migration
             $table->text('body')->nullable();
             $table->string('visibility', 20)->default('public');
             $table->string('status', 20)->default('published'); // published / hidden / archived
-            $table->json('media_json')->nullable();
             $table->string('external_url', 500)->nullable();
             $table->json('link_preview_json')->nullable();
             $table->integer('reaction_count')->default(0);
             $table->integer('comment_count')->default(0);
+            $table->timestamp('last_activity_at')->nullable()->index()->comment('投稿またはコメントの最終アクティビティ日時');
             $table->timestamp('pinned_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
-
             $table->index('room_id', 'idx_posts_room');
             $table->index('user_id', 'idx_posts_user');
         });

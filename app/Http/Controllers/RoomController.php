@@ -3,23 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\MediaFile;
+use App\Models\MediaRelation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class RoomController extends Controller
 {
-    /**
-     * ルーム作成フォーム
-     */
     public function create()
     {
         return view('admin.rooms.create');
     }
 
-    /**
-     * ルーム保存
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -30,40 +26,66 @@ class RoomController extends Controller
             'icon'        => 'nullable|image|max:5120',
             'cover_image' => 'nullable|image|max:5120',
         ]);
-    
-        // ファイル保存
-        if ($request->hasFile('icon')) {
-            $data['icon'] = $request->file('icon')->store('rooms/icons', 'public');
-        }
-    
-        if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = $request->file('cover_image')->store('rooms/covers', 'public');
-        }
-    
-        // 追加項目（サーバ側で決定）
-        $data['slug']       = Str::slug($data['name']) . '-' . Str::random(6);
-        $data['owner_id']   = auth()->id();
-        $data['sort_order'] = (Room::max('sort_order') ?? 0) + 1;
-        $data['is_active']  = false;
-    
-        Room::create($data);
-    
+
+        DB::transaction(function () use ($request, $data) {
+            $room = new Room();
+            $room->name        = $data['name'];
+            $room->description = $data['description'] ?? null;
+            $room->visibility  = $data['visibility'];
+            $room->post_policy = $data['post_policy'];
+            $room->slug        = Str::slug($data['name']) . '-' . Str::random(6);
+            $room->owner_id    = auth()->id();
+            $room->sort_order  = (Room::max('sort_order') ?? 0) + 1;
+            $room->is_active   = false;
+            $room->save();
+
+            $disk = config('filesystems.default');
+
+            // ✅ アイコン画像
+            if ($request->hasFile('icon')) {
+                $media = MediaFile::uploadAndCreate(
+                    $request->file('icon'),
+                    $room,
+                    'room_icon',
+                    $disk,
+                    'rooms/icons'
+                );
+                MediaRelation::create([
+                    'mediable_type' => Room::class,
+                    'mediable_id'   => $room->id,
+                    'media_file_id' => $media->id,
+                    'sort_order'    => 0,
+                ]);
+            }
+
+            // ✅ カバー画像
+            if ($request->hasFile('cover_image')) {
+                $media = MediaFile::uploadAndCreate(
+                    $request->file('cover_image'),
+                    $room,
+                    'room_cover',
+                    $disk,
+                    'rooms/covers'
+                );
+                MediaRelation::create([
+                    'mediable_type' => Room::class,
+                    'mediable_id'   => $room->id,
+                    'media_file_id' => $media->id,
+                    'sort_order'    => 1,
+                ]);
+            }
+        });
+
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'ルームを作成しました（現在は非公開です）');
     }
 
-    /**
-     * ルーム編集フォーム
-     */
     public function edit(Room $room)
     {
         return view('admin.rooms.edit', compact('room'));
     }
 
-    /**
-     * ルーム更新
-     */
     public function update(Request $request, Room $room)
     {
         $data = $request->validate([
@@ -73,47 +95,84 @@ class RoomController extends Controller
             'post_policy' => 'required|in:admins_only,members',
             'icon'        => 'nullable|image|max:5120',
             'cover_image' => 'nullable|image|max:5120',
-            'is_active' => 'nullable|boolean',
+            'is_active'   => 'nullable|boolean',
         ]);
-    
-        // ファイル更新
-        if ($request->hasFile('icon')) {
-            $data['icon'] = $request->file('icon')->store('rooms/icons', 'public');
-        }
-    
-        if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = $request->file('cover_image')->store('rooms/covers', 'public');
-        }
-        
-        // チェックが外れていた場合はfalseにする
-        $date['is_active'] = $request->boolean('is_active');
-        
-        $room->update($data);
-    
+
+        DB::transaction(function () use ($request, $room, $data) {
+            $room->update([
+                'name'        => $data['name'],
+                'description' => $data['description'] ?? null,
+                'visibility'  => $data['visibility'],
+                'post_policy' => $data['post_policy'],
+                'is_active'   => $request->boolean('is_active'),
+            ]);
+
+            $disk = config('filesystems.default');
+
+            // ✅ アイコン更新
+            if ($request->hasFile('icon')) {
+                // 古いアイコンrelationを削除
+                MediaRelation::where('mediable_type', Room::class)
+                    ->where('mediable_id', $room->id)
+                    ->whereIn('media_file_id', function ($q) {
+                        $q->select('id')->from('media_files')->where('type', 'room_icon');
+                    })
+                    ->delete();
+
+                $media = MediaFile::uploadAndCreate(
+                    $request->file('icon'),
+                    $room,
+                    'room_icon',
+                    $disk,
+                    'rooms/icons'
+                );
+                MediaRelation::create([
+                    'mediable_type' => Room::class,
+                    'mediable_id'   => $room->id,
+                    'media_file_id' => $media->id,
+                    'sort_order'    => 0,
+                ]);
+            }
+
+            // ✅ カバー更新
+            if ($request->hasFile('cover_image')) {
+                MediaRelation::where('mediable_type', Room::class)
+                    ->where('mediable_id', $room->id)
+                    ->whereIn('media_file_id', function ($q) {
+                        $q->select('id')->from('media_files')->where('type', 'room_cover');
+                    })
+                    ->delete();
+
+                $media = MediaFile::uploadAndCreate(
+                    $request->file('cover_image'),
+                    $room,
+                    'room_cover',
+                    $disk,
+                    'rooms/covers'
+                );
+                MediaRelation::create([
+                    'mediable_type' => Room::class,
+                    'mediable_id'   => $room->id,
+                    'media_file_id' => $media->id,
+                    'sort_order'    => 1,
+                ]);
+            }
+        });
+
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'ルームを更新しました');
     }
 
-    /**
-     * ルーム削除
-     */
     public function destroy(Room $room)
     {
-        // 運用中のルームは削除禁止
         if ($room->is_active) {
             return redirect()->back()
-                ->with('error', 'このルームは運用中のため削除できません。運用を停止してから削除してください。');
+                ->with('error', 'このルームは運用中のため削除できません。');
         }
-    
-        // 投稿がある場合は削除禁止
-        // if ($room->posts()->exists()) {
-        //    return redirect()->back()
-        //        ->with('error', 'このルームには投稿が存在するため削除できません。投稿を削除してから再度お試しください。');
-        // }
-    
+
         $room->delete();
-    
+
         return redirect()->route('admin.dashboard')
             ->with('success', 'ルームを削除しました');
     }

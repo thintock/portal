@@ -71,4 +71,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(MediaFile::class, 'avatar_media_id');
     }
+    
+    public function mediaFiles()
+    {
+        return $this->morphToMany(MediaFile::class, 'mediable', 'media_relations')
+                    ->withPivot('sort_order')
+                    ->orderBy('sort_order');
+    }
+
 }

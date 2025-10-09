@@ -13,8 +13,6 @@ class Room extends Model
         'name',
         'slug',
         'description',
-        'icon',
-        'cover_image',
         'visibility',
         'post_policy',
         'owner_id',
@@ -58,10 +56,44 @@ class Room extends Model
     }
     
     public function memberUsers()
-{
-    return $this->belongsToMany(User::class, 'room_members')
-        ->withPivot('role', 'joined_at')
-        ->inRandomOrder(); // ランダム並び
-}
+    {
+        return $this->belongsToMany(User::class, 'room_members')
+            ->withPivot('role', 'joined_at')
+            ->inRandomOrder(); // ランダム並び
+    }
+    
+    // media_relations 経由で MediaFile を取得
+    public function mediaFiles()
+    {
+        return $this->morphToMany(MediaFile::class, 'mediable', 'media_relations')
+            ->withPivot('sort_order')
+            ->orderBy('media_relations.sort_order');
+    }
+
+    // アイコン画像
+    public function icon()
+    {
+        return $this->mediaFiles()
+            ->where('media_files.type', 'room_icon')
+            ->first();
+    }
+
+    // カバー画像
+    public function coverImage()
+    {
+        return $this->mediaFiles()
+            ->where('media_files.type', 'room_cover')
+            ->first();
+    }
+    
+    public function getIconMediaAttribute()
+    {
+        return $this->mediaFiles->firstWhere('type', 'room_icon');
+    }
+    
+    public function getCoverMediaAttribute()
+    {
+        return $this->mediaFiles->firstWhere('type', 'room_cover');
+    }
 
 }

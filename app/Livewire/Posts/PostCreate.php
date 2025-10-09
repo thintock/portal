@@ -4,6 +4,8 @@ namespace App\Livewire\Posts;
 
 use App\Models\Post;
 use App\Models\Room;
+use App\Models\MediaFile;
+use App\Models\MediaRelation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -87,41 +89,57 @@ class PostCreate extends Component
     public function save(): void
     {
         $this->validate();
-
-        // ファイル保存
-        $mediaPaths = [];
-        foreach ($this->media as $file) {
-            $mediaPaths[] = $file->store('posts', 'public');
-        }
-
-        DB::transaction(function () use ($mediaPaths) {
-            Post::create([
-                'room_id'        => $this->room->id,
-                'user_id'        => Auth::id(),
-                'post_type'      => 'post',
-                'body'           => $this->body,
-                'visibility'     => 'public',
-                'status'         => 'published',
-                // モデルで $casts = ['media_json' => 'array'] があるなら配列のままでOK
-                // なければ json_encode してください。
-                'media_json'     => $mediaPaths, // ← Postモデルでcasts設定推奨
-                'reaction_count' => 0,
-                'comment_count'  => 0,
+    
+        DB::transaction(function () {
+            // 1️⃣ 投稿本体を作成
+            $post = Post::create([
+                'room_id'          => $this->room->id,
+                'user_id'          => Auth::id(),
+                'post_type'        => 'post',
+                'body'             => $this->body,
+                'visibility'       => 'public',
+                'status'           => 'published',
+                'reaction_count'   => 0,
+                'comment_count'    => 0,
                 'last_activity_at' => now(),
             ]);
+    
+            // 2️⃣ 添付ファイル登録（MediaFile::uploadAndCreateで統一）
+            if (!empty($this->media)) {
+                $disk = config('filesystems.default');
+    
+                foreach ($this->media as $i => $file) {
+                    // ファイルアップロード & MediaFile作成
+                    $media = MediaFile::uploadAndCreate(
+                        $file,
+                        Auth::user(),
+                        'post',
+                        $disk,
+                        'posts/' . $post->id
+                    );
+    
+                    // 中間テーブル MediaRelation 登録
+                    MediaRelation::create([
+                        'media_file_id' => $media->id,
+                        'mediable_type' => Post::class,
+                        'mediable_id'   => $post->id,
+                        'sort_order'    => $i,
+                    ]);
+                }
+            }
+    
+            // 3️⃣ ルーム情報更新
             $this->room->increment('posts_count');
             $this->room->update(['last_posted_at' => now()]);
-            
         });
-        
-        // 初期化 & フィード更新イベント
+    
+        // 4️⃣ フォームリセット
         $this->reset(['body', 'media', 'newMedia']);
         $this->formKey++;
         $this->dispatch('post-created');
         $this->showForm = false;
-        
+    
         session()->flash('success', '投稿しました');
-        
     }
 
     public function render()

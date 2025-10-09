@@ -2,7 +2,9 @@
   {{-- ヘッダー --}}
   <header class="mb-6">
     <h2 class="text-lg font-semibold text-gray-800 flex items-center space-x-3">
-      <div class="badge badge-primary text-white">会員番号：{{ $user->member_number ?? '未発行' }}</div>
+      <div class="badge badge-primary text-white">
+        会員番号：{{ $user->member_number ?? '未発行' }}
+      </div>
       <span>あなたのプロフィール</span>
     </h2>
     <p class="mt-2 text-sm text-gray-600">
@@ -26,11 +28,18 @@
       <x-input-label for="avatar" :value="__('プロフィール画像')" />
 
       <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-3">
-        {{-- 既存画像 --}}
-        @if ($user->avatar)
+        {{-- 既存画像（media_files経由） --}}
+        @php
+          $avatar = $user->mediaFiles()
+                        ->wherePivot('media_files.type', 'avatar')
+                        ->orderBy('media_relations.sort_order', 'asc')
+                        ->first();
+        @endphp
+
+        @if ($avatar)
           <div class="avatar">
             <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-              <img src="{{ $user->avatar->url }}" alt="プロフィール画像" class="object-cover" />
+              <img src="{{ Storage::url($avatar->path) }}" alt="プロフィール画像" class="object-cover" />
             </div>
           </div>
         @else
@@ -42,9 +51,21 @@
         @endif
 
         {{-- ファイルアップロード欄 --}}
-        <input id="avatar" name="avatar" type="file"
-               accept="image/*"
-               class="file-input file-input-bordered file-input-sm sm:file-input-md sm:w-auto" />
+        <div class="flex flex-col">
+          <input id="avatar" name="avatar" type="file"
+                 accept="image/*"
+                 class="file-input file-input-bordered file-input-sm sm:file-input-md sm:w-auto" />
+
+          @if ($avatar)
+            <label class="label text-xs mt-2 text-gray-500">
+              現在の画像を置き換える場合は新しい画像を選択してください。
+            </label>
+          @else
+            <label class="label text-xs mt-2 text-gray-500">
+              プロフィール画像をアップロードしてください。
+            </label>
+          @endif
+        </div>
       </div>
 
       <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
@@ -54,7 +75,7 @@
     <div class="divider text-sm text-gray-500">基本情報</div>
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="last_name" :value="__('姓（Last Name）')" />
+        <x-input-label for="last_name" :value="__('姓')" />
         <x-text-input id="last_name" name="last_name" type="text"
           class="input input-bordered w-full mt-1"
           :value="old('last_name', $user->last_name)" required />
@@ -62,7 +83,7 @@
       </div>
 
       <div>
-        <x-input-label for="name" :value="__('名（First Name）')" />
+        <x-input-label for="name" :value="__('名')" />
         <x-text-input id="name" name="name" type="text"
           class="input input-bordered w-full mt-1"
           :value="old('name', $user->name)" required />
@@ -73,13 +94,13 @@
     {{-- フリガナ --}}
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="last_name_kana" :value="__('姓（かな）')" />
+        <x-input-label for="last_name_kana" :value="__('せい（かな）')" />
         <x-text-input id="last_name_kana" name="last_name_kana" type="text"
           class="input input-bordered w-full mt-1"
           :value="old('last_name_kana', $user->last_name_kana)" />
       </div>
       <div>
-        <x-input-label for="first_name_kana" :value="__('名（かな）')" />
+        <x-input-label for="first_name_kana" :value="__('めい（かな）')" />
         <x-text-input id="first_name_kana" name="first_name_kana" type="text"
           class="input input-bordered w-full mt-1"
           :value="old('first_name_kana', $user->first_name_kana)" />
@@ -90,7 +111,7 @@
     <div class="divider text-sm text-gray-500">公開プロフィール</div>
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="display_name" :value="__('表示名（ニックネーム）')" />
+        <x-input-label for="display_name" :value="__('ニックネーム（公開されます）')" />
         <x-text-input id="display_name" name="display_name" type="text"
           class="input input-bordered w-full mt-1"
           :value="old('display_name', $user->display_name)" />
@@ -100,7 +121,7 @@
         <x-input-label for="instagram_id" :value="__('Instagram アカウント')" />
         <x-text-input id="instagram_id" name="instagram_id" type="text"
           class="input input-bordered w-full mt-1"
-          placeholder="@bakerista"
+          placeholder="@bakerista_official"
           :value="old('instagram_id', $user->instagram_id)" />
       </div>
     </div>

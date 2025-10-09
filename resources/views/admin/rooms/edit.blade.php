@@ -24,11 +24,18 @@
             {{-- アイコン画像 --}}
             <div>
                 <label class="block font-semibold mb-1">アイコン画像</label>
-                @if($room->icon)
+                @php
+                    $iconMedia = $room->mediaFiles()
+                        ->where('media_files.type', 'room_icon')
+                        ->first();
+                @endphp
+
+                @if($iconMedia)
                     <div class="mb-2">
-                        <img src="{{ Storage::url($room->icon) }}" alt="icon" class="w-16 h-16 rounded-full">
+                        <img src="{{ Storage::url($iconMedia->path) }}" alt="icon" class="w-16 h-16 rounded-full object-cover border">
                     </div>
                 @endif
+
                 <input type="file" name="icon" class="file-input file-input-bordered w-full">
                 <p class="text-xs text-gray-500 mt-1">新しい画像をアップロードすると置き換わります</p>
             </div>
@@ -36,11 +43,18 @@
             {{-- カバー画像 --}}
             <div>
                 <label class="block font-semibold mb-1">カバー画像</label>
-                @if($room->cover_image)
+                @php
+                    $coverMedia = $room->mediaFiles()
+                        ->where('media_files.type', 'room_cover')
+                        ->first();
+                @endphp
+
+                @if($coverMedia)
                     <div class="mb-2">
-                        <img src="{{ Storage::url($room->cover_image) }}" alt="cover" class="w-full max-h-40 object-cover">
+                        <img src="{{ Storage::url($coverMedia->path) }}" alt="cover" class="w-full max-h-40 object-cover border rounded">
                     </div>
                 @endif
+
                 <input type="file" name="cover_image" class="file-input file-input-bordered w-full">
                 <p class="text-xs text-gray-500 mt-1">新しい画像をアップロードすると置き換わります</p>
             </div>

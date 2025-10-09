@@ -42,29 +42,41 @@
       
       
     </div>
-    {{-- 2段目：メディア（最小カルーセル） --}}
-    @if($post->media_json)
+    {{-- 2段目：メディア（カルーセル） --}}
+    @if($post->mediaFiles->isNotEmpty())
       <div class="relative">
         <div class="carousel w-full">
-          @foreach($post->media_json as $i => $media)
-            @php $ext = strtolower(pathinfo($media, PATHINFO_EXTENSION)); @endphp
+          @foreach($post->mediaFiles as $i => $media)
+            @php
+              $ext = strtolower(pathinfo($media->path, PATHINFO_EXTENSION));
+              $url = Storage::url($media->path);
+            @endphp
+    
             <div id="slide-{{ $post->id }}-{{ $i }}" class="carousel-item relative w-full">
+              {{-- 画像表示 --}}
               @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
-                <img src="{{ Storage::url($media) }}" class="w-full max-h-96 object-contain" @click="$dispatch('open-modal', 'image-viewer'); $dispatch('set-image', { src: '{{ Storage::url($media) }}' })">
+                <img 
+                  src="{{ $url }}" 
+                  class="w-full max-h-96 object-contain cursor-pointer"
+                  @click="$dispatch('open-modal', 'image-viewer'); $dispatch('set-image', { src: '{{ $url }}' })"
+                >
+              
+              {{-- 動画表示 --}}
               @elseif(in_array($ext, ['mp4','webm','mov','avi']))
-                <video controls class="rounded border max-h-40 w-full">
-                  {{-- mov は quicktime --}}
-                  <source src="{{ Storage::url($media) }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
+                <video controls class="rounded border max-h-60 w-full">
+                  <source src="{{ $url }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
                 </video>
+              
+              {{-- その他ファイル --}}
               @else
-                <a class="link link-primary" href="{{ Storage::url($media) }}" target="_blank">添付を開く</a>
+                <a class="link link-primary" href="{{ $url }}" target="_blank">添付を開く</a>
               @endif
-
-              {{-- 矢印 --}}
+    
+              {{-- カルーセル矢印 --}}
               @if($i > 0)
                 <a href="#slide-{{ $post->id }}-{{ $i-1 }}" class="absolute left-2 top-1/2 btn btn-circle btn-sm">❮</a>
               @endif
-              @if($i < count($post->media_json)-1)
+              @if($i < $post->mediaFiles->count() - 1)
                 <a href="#slide-{{ $post->id }}-{{ $i+1 }}" class="absolute right-2 top-1/2 btn btn-circle btn-sm">❯</a>
               @endif
             </div>
@@ -72,6 +84,7 @@
         </div>
       </div>
     @endif
+
     
     {{-- 3段目：本文（200文字で省略表示） --}}
     <div class="px-2 md:px-6 text-sm text-gray-800 break-words" x-data="{open:false}">

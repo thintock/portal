@@ -36,6 +36,7 @@ class Index extends Component
             ->withCount([
                 'posts' => fn($q) => $q->whereNull('deleted_at'),
             ])
+            ->with(['mediaFiles' => fn($q) => $q->whereIn('type', ['room_icon', 'room_cover'])])
             ->orderBy('sort_order')
             ->orderByDesc('last_posted_at')
             ->paginate(12);

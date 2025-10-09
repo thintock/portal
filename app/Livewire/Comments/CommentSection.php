@@ -5,7 +5,11 @@ namespace App\Livewire\Comments;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Notification;
+use App\Models\MediaFile;
+use App\Models\MediaRelation;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -28,6 +32,7 @@ class CommentSection extends Component
     protected $listeners = [
         'comment-created' => '$refresh',
         'comment-updated' => '$refresh',
+        'deleteComment' => 'delete',
         ];
         
     protected function rules(): array
@@ -89,82 +94,104 @@ class CommentSection extends Component
     public function save(?int $parentId = null): void
     {
         $this->validate();
-
-        $paths = [];
-        foreach ($this->media as $file) {
-            $paths[] = $file->store('comments', 'public');
-        }
-
-        // 親コメントを取得（返信の場合）
-        $parent = $parentId ? Comment::find($parentId) : null;
-
-        $comment = Comment::create([
-            'post_id'    => $this->post->id,
-            'user_id'    => Auth::id(),
-            'parent_id'  => $parent?->id,
-            'root_id'    => $parent ? ($parent->root_id ?? $parent->id) : null,
-            'body'       => $this->body,
-            'media_json' => !empty($paths) ? $paths : null,
-            'status'     => 'published',
-            'depth'      => $parent ? $parent->depth + 1 : 0,
-        ]);
-
-        // カウント更新
-        if ($parent) {
-            $parent->increment('replies_count');
-        } else {
-            $this->post->increment('comment_count');
-        }
-        
-        // 通知作成
-        $actor = Auth::user();
-        $receiverId = null;
-        $type = null;
-        $message = null;
-        $roomId = $this->post->room_id ?? null;
-        $commentExcerpt = mb_substr(strip_tags($comment->body), 0, 30);
-        if (mb_strlen($comment->body) > 30) {
-            $commentExcerpt .= '…';
-        }
-        
-        if ($parent) {
-            // 返信 → 親コメント投稿者に通知
-            if ($parent->user_id !== $actor->id) {
-                $receiverId = $parent->user_id;
-                $type = 'reply';
-                $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
-            }
-        } else {
-            // 新規コメント → 投稿者に通知
-            if ($this->post->user_id !== $actor->id) {
-                $receiverId = $this->post->user_id;
-                $type = 'comment';
-                $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
-            }
-        }
-
-        if ($receiverId && $type && $message) {
-            Notification::create([
-                'user_id'         => $receiverId,
-                'notifiable_id'   => $comment->id,
-                'notifiable_type' => Comment::class,
-                'type'            => $type,
-                'message'         => $message,
-                'room_id'         => $roomId,
+    
+        DB::transaction(function () use ($parentId) {
+            // 親コメントを取得（返信の場合）
+            $parent = $parentId ? Comment::find($parentId) : null;
+    
+            // コメント登録
+            $comment = Comment::create([
+                'post_id'   => $this->post->id,
+                'user_id'   => Auth::id(),
+                'parent_id' => $parent?->id,
+                'root_id'   => $parent ? ($parent->root_id ?? $parent->id) : null,
+                'body'      => $this->body,
+                'status'    => 'published',
+                'depth'     => $parent ? $parent->depth + 1 : 0,
             ]);
-        }
-        
-        // Postsのアクティビティを更新
-        $this->post->update([
-            'last_activity_at' => now(),
-        ]);
-        
-        // 初期化
+    
+            // 添付ファイル登録（MediaFile::uploadAndCreate 統一版）
+            if (!empty($this->media)) {
+                $disk = config('filesystems.default');
+    
+                foreach ($this->media as $index => $file) {
+                    // ファイルアップロード & MediaFile作成
+                    $media = MediaFile::uploadAndCreate(
+                        $file,
+                        Auth::user(),
+                        'comment',
+                        $disk,
+                        'comments/' . $comment->id
+                    );
+    
+                    // MediaRelation登録（コメントとの紐付け）
+                    MediaRelation::create([
+                        'media_file_id' => $media->id,
+                        'mediable_type' => Comment::class,
+                        'mediable_id'   => $comment->id,
+                        'sort_order'    => $index,
+                    ]);
+                }
+            }
+    
+            // カウント更新
+            if ($parent) {
+                $parent->increment('replies_count');
+            } else {
+                $this->post->increment('comment_count');
+            }
+    
+            // 通知作成
+            $actor = Auth::user();
+            $receiverId = null;
+            $type = null;
+            $message = null;
+            $roomId = $this->post->room_id ?? null;
+    
+            $commentExcerpt = mb_substr(strip_tags($comment->body), 0, 30);
+            if (mb_strlen($comment->body) > 30) {
+                $commentExcerpt .= '…';
+            }
+    
+            if ($parent) {
+                // 返信 → 親コメント投稿者に通知
+                if ($parent->user_id !== $actor->id) {
+                    $receiverId = $parent->user_id;
+                    $type = 'reply';
+                    $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
+                }
+            } else {
+                // 新規コメント → 投稿者に通知
+                if ($this->post->user_id !== $actor->id) {
+                    $receiverId = $this->post->user_id;
+                    $type = 'comment';
+                    $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
+                }
+            }
+    
+            if ($receiverId && $type && $message) {
+                Notification::create([
+                    'user_id'         => $receiverId,
+                    'notifiable_id'   => $comment->id,
+                    'notifiable_type' => Comment::class,
+                    'type'            => $type,
+                    'message'         => $message,
+                    'room_id'         => $roomId,
+                ]);
+            }
+    
+            // Postsのアクティビティを更新
+            $this->post->update([
+                'last_activity_at' => now(),
+            ]);
+        });
+    
+        // 初期化処理（トランザクション外）
         $this->reset(['body', 'media', 'replyTo']);
         $this->formKey++;
         $this->showForm = false;
-
-        session()->flash('success', $parent ? '返信を投稿しました' : 'コメントを投稿しました');
+    
+        session()->flash('success', $parentId ? '返信を投稿しました' : 'コメントを投稿しました');
     }
 
     public function setReplyTo($commentId): void
@@ -174,10 +201,14 @@ class CommentSection extends Component
 
     public function delete($commentId): void
     {
-        $comment = Comment::where('post_id', $this->post->id)->findOrFail($commentId);
+        $comment = Comment::where('post_id', $this->post->id)
+            ->with('mediaFiles') // メディアも一緒に取得
+            ->findOrFail($commentId);
+    
         if ($comment->user_id !== Auth::id()) {
             abort(403);
         }
+        
         // 通知削除（このコメントが notifiable として登録されている通知）
         Notification::where('notifiable_id', $comment->id)
             ->where('notifiable_type', Comment::class)
@@ -189,8 +220,20 @@ class CommentSection extends Component
             Comment::where('parent_id', $comment->id)->pluck('id')
         )->where('notifiable_type', Comment::class)->delete();
         
+        // --- media_relations のみ削除（media_files は保持）---
+        MediaRelation::where('mediable_id', $comment->id)
+            ->where('mediable_type', Comment::class)
+            ->delete();
+        
         $comment->delete();
-        $this->post->decrement('comment_count');
+        
+        // 親コメント or 投稿のコメント数調整
+        if ($comment->parent_id) {
+            Comment::where('id', $comment->parent_id)->decrement('replies_count');
+        } else {
+            $this->post->decrement('comment_count');
+        }
+        
         session()->flash('success', 'コメントを削除しました');
     }
 

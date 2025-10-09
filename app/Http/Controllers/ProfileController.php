@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\MediaFile;
+use App\Models\MediaRelation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -16,8 +19,18 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        // ✅ 現在のアバターを取得
+        // media_files.type = 'avatar' を基準に取得
+        $avatar = $user->mediaFiles()
+            ->where('media_files.type', 'avatar')
+            ->orderBy('media_relations.sort_order', 'asc')
+            ->first();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user'   => $user,
+            'avatar' => $avatar,
         ]);
     }
 
@@ -27,49 +40,78 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-    
-        // 1) バリデーション済みデータを取得
         $data = $request->validated();
-    
-        // 2) 追加整形
-        // チェックボックス: 未送信なら false
+
+        // チェックボックス
         $data['email_notification'] = (bool) ($data['email_notification'] ?? false);
-    
-        // 国コードは大文字2桁に正規化（例: jp -> JP）
+
+        // 国コード正規化
         if (!empty($data['country'])) {
             $data['country'] = strtoupper(substr($data['country'], 0, 2));
         }
-        
-        // avatar がアップロードされた場合
+
+        /** 
+         * ================================
+         * ✅ Avatarのアップロード処理
+         * ================================
+         */
         if ($request->hasFile('avatar')) {
-            $media = \App\Models\MediaFile::uploadAndCreate(
-                $request->file('avatar'),
-                $user,
-                'avatar',
-                null,
-                'avatars'
-            );
-            $user->avatar_media_id = $media->id;
+            $file = $request->file('avatar');
+
+            // 1. 新しいファイルをmedia_filesに登録
+            $media = MediaFile::create([
+                'owner_type' => get_class($user),
+                'owner_id'   => $user->id,
+                'type'       => 'avatar',
+                'path'       => $file->store('avatars', 'public'),
+                'mime'       => $file->getMimeType(),
+                'size'       => $file->getSize(),
+                'alt'        => $user->name . 'のプロフィール画像',
+            ]);
+
+            // 2. 既存のアバターrelationを削除（1対1管理）
+            MediaRelation::where('mediable_type', get_class($user))
+                ->where('mediable_id', $user->id)
+                ->whereIn('media_file_id', function ($query) {
+                    $query->select('id')
+                          ->from('media_files')
+                          ->where('type', 'avatar');
+                })
+                ->delete();
+
+            // 3. 新しいrelationを登録
+            MediaRelation::create([
+                'mediable_type' => get_class($user),
+                'mediable_id'   => $user->id,
+                'media_file_id' => $media->id,
+                'type'          => 'avatar',
+                'sort_order'    => 0,
+            ]);
         }
-        
-        // 3) 代入
+
+        /**
+         * ================================
+         * ✅ 基本情報の更新
+         * ================================
+         */
         $user->fill($data);
-    
-        // 4) メール変更時は再認証フラグをクリア
+
+        // メール変更時は再認証
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
-    
-        // 5) 保存
+
         $user->save();
-    
-        // 6) Stripe 顧客情報にも反映（任意：税計算・請求書の住所/電話に使われます）
+
+        /**
+         * ================================
+         * ✅ Stripe 顧客情報更新
+         * ================================
+         */
         try {
-            $user->createOrGetStripeCustomer(); // 未作成なら作る
-    
-            // 名前の優先度: display_name > name
+            $user->createOrGetStripeCustomer();
             $stripeName = $user->display_name ?: $user->name;
-            
+
             $user->updateStripeCustomer([
                 'name'    => $stripeName,
                 'email'   => $user->email,
@@ -82,13 +124,13 @@ class ProfileController extends Controller
                     'postal_code' => $user->postal_code,
                     'country'     => $user->country ?? 'JP',
                 ],
-                // 必要に応じて tax_exempt や tax_id_data などもここで
             ]);
         } catch (\Throwable $e) {
-            // ログだけ残して処理は継続（ユーザー更新は成功させる）
-            \Log::warning('Stripe customer update failed: '.$e->getMessage(), ['user_id' => $user->id]);
+            Log::warning('Stripe customer update failed: '.$e->getMessage(), [
+                'user_id' => $user->id,
+            ]);
         }
-    
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -102,8 +144,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-
         Auth::logout();
+
+        // メディアも削除
+        MediaRelation::where('mediable_type', get_class($user))
+            ->where('mediable_id', $user->id)
+            ->delete();
 
         $user->delete();
 

@@ -33,24 +33,62 @@ class Post extends Model
         'pinned_at'         => 'datetime',
     ];
 
-    // --- リレーション ---
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * 投稿が属するルーム
+     */
     public function room()
     {
         return $this->belongsTo(Room::class);
     }
 
+    /**
+     * 投稿者（ユーザー）
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
+
+    /**
+     * コメント一覧
+     */
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
-    
+
+    /**
+     * リアクション一覧（いいね等）
+     */
     public function reactions()
     {
-        return $this->morphMany(\App\Models\Reaction::class, 'reactionable');
+        return $this->morphMany(Reaction::class, 'reactionable');
+    }
+    
+    /**
+     * この投稿に紐づく MediaRelation
+     */
+    public function mediaRelations()
+    {
+        return $this->morphMany(MediaRelation::class, 'mediable')
+            ->with('mediaFile')
+            ->orderBy('sort_order');
+    }
+
+    /**
+     * 投稿に添付された MediaFile 一覧
+     * 直接 MediaFile モデルを取得したい場合に便利
+     */
+    public function mediaFiles()
+    {
+        return $this->morphToMany(MediaFile::class, 'mediable', 'media_relations')
+                    ->withPivot('sort_order')
+                    ->orderBy('sort_order');
     }
 }

@@ -93,4 +93,14 @@ class MediaFile extends Model
         // publicディスクなら直リンク
         return Storage::disk($disk)->url($this->path);
     }
+    
+    public function relations()
+    {
+        return $this->hasMany(MediaRelation::class, 'media_file_id');
+    }
+    
+    public function attachedTo()
+    {
+        return $this->morphToMany(MediaRelation::class, 'mediable');
+    }
 }

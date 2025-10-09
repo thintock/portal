@@ -16,8 +16,6 @@ return new class extends Migration
             $table->string('name', 80);
             $table->string('slug', 80)->unique();
             $table->string('description', 200)->nullable();
-            $table->string('icon', 255)->nullable();
-            $table->string('cover_image', 255)->nullable();
             $table->string('visibility', 20)->default('public'); // public/members/private
             $table->string('post_policy', 20)->default('members'); // admins_only/moderators/members
             $table->foreignId('owner_id')->constrained('users');

@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-primary/10 via-base-100 to-accent/10 px-4">
+    <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-primary/40 via-accent/30 to-secondary/40 px-4">
         <div class="w-full max-w-md bg-white shadow-xl rounded-xl p-8">
             {{-- ロゴ --}}
             <div class="text-center mb-6">

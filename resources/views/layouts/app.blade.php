@@ -10,7 +10,11 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#ffffff">
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -39,9 +43,7 @@
         </main>
 
         {{-- フッター --}}
-        <footer class="footer footer-center p-6 bg-base-300 text-base-content text-xs sm:text-sm">
-            <p>© {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.</p>
-        </footer>
+        @include('commons.footer')
     </div>
 
     {{-- 共通モーダル --}}

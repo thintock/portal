@@ -35,7 +35,10 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             プロフィール設定
                         </x-dropdown-link>
-
+                        {{-- Stripe決済ページリンク追加 --}}
+                        <x-dropdown-link :href="route('billing.show')">
+                            お支払い情報
+                        </x-dropdown-link>
                         {{-- ログアウト --}}
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -86,7 +89,10 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     プロフィール設定
                 </x-responsive-nav-link>
-
+                {{-- Stripe決済ページリンク追加 --}}
+                <x-responsive-nav-link :href="route('billing.show')">
+                    お支払い情報
+                </x-responsive-nav-link>
                 {{-- ログアウト --}}
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

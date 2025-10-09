@@ -158,79 +158,17 @@
           </div>
         @endif
 
-        
-        {{-- フッター --}}
-        <div class="flex justify-between items-center mt-2">
-          <livewire:reactions.reaction-button :model="$comment" :key="'comment-like-'.$comment->id" />
-          <button wire:click="setReplyTo({{ $comment->id }})" class="btn btn-link btn-xs text-blue-500">
-            {{ $replyTo === $comment->id ? 'キャンセル' : '返信' }}
-          </button>
-        </div>
-        
         {{-- 返信フォーム --}}
-        @if($replyTo === $comment->id)
-          <form wire:submit.prevent="save({{ $comment->id }})" class="ml-8 mt-2 space-y-3">
-        
-            {{-- プレビュー + 画像追加 --}}
-            <div class="grid grid-cols-3 gap-3">
-              {{-- 選択済みファイル --}}
-              @foreach($media as $i => $file)
-                <div class="relative">
-                  <img src="{{ $file->temporaryUrl() }}" class="rounded-lg border object-cover w-full h-24" />
-                  {{-- 削除 --}}
-                  <button type="button" wire:click="removeMedia({{ $i }})"
-                          class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-base-100">✕</button>
-                  {{-- 並び替え --}}
-                  <div class="absolute bottom-1 right-1 flex space-x-1">
-                    @if($i > 0)
-                      <button type="button" wire:click="moveUp({{ $i }})" class="btn btn-xs btn-circle">⬆</button>
-                    @endif
-                    @if($i < count($media) - 1)
-                      <button type="button" wire:click="moveDown({{ $i }})" class="btn btn-xs btn-circle">⬇</button>
-                    @endif
-                  </div>
-                </div>
-              @endforeach
-        
-              {{-- 追加ボタン（最大3個まで） --}}
-              @if(count($media) < 3)
-                <label class="flex items-center justify-center rounded-lg border border-dashed border-gray-400 w-full h-24 cursor-pointer hover:bg-gray-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <input type="file" wire:model="newMedia" accept="image/*,video/*" class="hidden"/>
-                </label>
-              @endif
-            </div>
-        
-            {{-- アップロード中 --}}
-            <div wire:loading wire:target="newMedia" class="text-xs text-gray-500 mt-2">アップロード中...</div>
-        
-            {{-- テキスト入力 --}}
-            <textarea wire:model.defer="body" rows="2"
-              class="textarea textarea-bordered w-full"
-              placeholder="返信を入力..."
-              wire:key="reply-body-{{ $formKey }}"></textarea>
-        
-            {{-- ボタン --}}
-            <button class="btn btn-primary btn-xs w-full" type="submit"
-                    wire:loading.attr="disabled"
-                    wire:target="newMedia,save">
-              <span wire:loading wire:target="newMedia">アップロード中...</span>
-              <span wire:loading wire:target="save">保存中...</span>
-              <span wire:loading.remove wire:target="newMedia,save">返信送信</span>
-            </button>
-          </form>
-        @endif
+        <livewire:comments.reply-form :parent="$comment" :key="'reply-form-'.$comment->id" />
 
-      {{-- 子コメント一覧 --}}
-      @php
-        $visibleReplies = $comment->replies->take($repliesPerParent[$comment->id] ?? 3);
-      @endphp
-      
-      
+        {{-- 子コメント一覧 --}}
+        @php
+          $visibleReplies = $comment->replies->take($repliesPerParent[$comment->id] ?? 3);
+        @endphp
+        
+        {{--子コメント--}}
         @foreach($visibleReplies as $reply)
-            <div class="mt-3 flex items-start space-x-2" wire:key="reply-{{ $reply->id }}">
+          <div class="mt-3 flex items-start space-x-2" wire:key="reply-{{ $reply->id }}">
             {{-- アイコン --}}
             <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
               @if($reply->user->avatar_media_id)
@@ -323,6 +261,8 @@
             </div>
           </div>
         @endforeach
+
+        
         {{-- 「さらに読み込む」ボタン --}}
         @if(($repliesPerParent[$comment->id] ?? 3) < $comment->replies->count())
           <div class="text-center mt-2 ml-8">
@@ -343,4 +283,6 @@
     </div>
   @endif
   
+  
+
 </div>

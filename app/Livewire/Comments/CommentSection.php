@@ -33,6 +33,7 @@ class CommentSection extends Component
         'comment-created' => '$refresh',
         'comment-updated' => '$refresh',
         'deleteComment' => 'delete',
+        'reply-created' => '$refresh',
         ];
         
     protected function rules(): array
@@ -244,10 +245,11 @@ class CommentSection extends Component
     
     public function loadMoreReplies($parentId)
     {
+        $initial = 1;
         if (isset($this->repliesPerParent[$parentId])) {
             $this->repliesPerParent[$parentId] += 5;
         } else {
-            $this->repliesPerParent[$parentId] = 6; // 初期1 + 5
+            $this->repliesPerParent[$parentId] = $initial + 5; // 初期1 + 5
         }
     }
     

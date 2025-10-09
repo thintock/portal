@@ -37,7 +37,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M12 4v16m8-8H4" />
               </svg>
-              <input type="file" wire:model="newMedia" multiple accept="image/*,video/*" class="hidden"/>
+              <input type="file" wire:model="newMedia" accept="image/*,video/*" class="hidden" />
           </label>
         </div>
         {{-- アップロード中表示 --}}

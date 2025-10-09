@@ -39,7 +39,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-base-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          <input type="file" wire:model="newMedia" multiple accept="image/*,video/*" class="hidden"/>
+          <input type="file" wire:model="newMedia" accept="image/*,video/*" class="hidden"/>
         </label>
       @endif
     </div>
@@ -198,7 +198,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
-                  <input type="file" wire:model="newMedia" multiple accept="image/*,video/*" class="hidden"/>
+                  <input type="file" wire:model="newMedia" accept="image/*,video/*" class="hidden"/>
                 </label>
               @endif
             </div>

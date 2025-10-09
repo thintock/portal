@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -50,43 +51,44 @@ class ProfileController extends Controller
             $data['country'] = strtoupper(substr($data['country'], 0, 2));
         }
 
-        /** 
+        /**
          * ================================
          * ✅ Avatarのアップロード処理
          * ================================
          */
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
-
-            // 1. 新しいファイルをmedia_filesに登録
-            $media = MediaFile::create([
-                'owner_type' => get_class($user),
-                'owner_id'   => $user->id,
-                'type'       => 'avatar',
-                'path'       => $file->store('avatars', 'public'),
-                'mime'       => $file->getMimeType(),
-                'size'       => $file->getSize(),
-                'alt'        => $user->name . 'のプロフィール画像',
-            ]);
-
-            // 2. 既存のアバターrelationを削除（1対1管理）
-            MediaRelation::where('mediable_type', get_class($user))
-                ->where('mediable_id', $user->id)
-                ->whereIn('media_file_id', function ($query) {
-                    $query->select('id')
-                          ->from('media_files')
-                          ->where('type', 'avatar');
-                })
-                ->delete();
-
-            // 3. 新しいrelationを登録
-            MediaRelation::create([
-                'mediable_type' => get_class($user),
-                'mediable_id'   => $user->id,
-                'media_file_id' => $media->id,
-                'type'          => 'avatar',
-                'sort_order'    => 0,
-            ]);
+            $disk = config('filesystems.default'); // s3 or public
+    
+            DB::transaction(function () use ($user, $file, $disk) {
+                // 1️⃣ 既存アバターrelation削除（1対1管理）
+                MediaRelation::where('mediable_type', get_class($user))
+                    ->where('mediable_id', $user->id)
+                    ->whereIn('media_file_id', function ($query) {
+                        $query->select('id')
+                              ->from('media_files')
+                              ->where('type', 'avatar');
+                    })
+                    ->delete();
+    
+                // 2️⃣ MediaFile::uploadAndCreateを使用して登録
+                $media = MediaFile::uploadAndCreate(
+                    $file,
+                    $user,
+                    'avatar',
+                    $disk,
+                    'avatars/' . $user->id
+                );
+    
+                // 3️⃣ 新しいrelationを登録
+                MediaRelation::create([
+                    'mediable_type' => get_class($user),
+                    'mediable_id'   => $user->id,
+                    'media_file_id' => $media->id,
+                    'type'          => 'avatar',
+                    'sort_order'    => 0,
+                ]);
+            });
         }
 
         /**

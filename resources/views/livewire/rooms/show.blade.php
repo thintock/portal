@@ -49,10 +49,17 @@
                     {{-- メンバーアバター表示（ランダム順） --}}
                     <div class="flex -space-x-3">
                         @foreach($room->memberUsers->shuffle()->take(10) as $user)
-                            <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}"
+                            @php
+                                $avatar = $user->mediaFiles()
+                                    ->where('media_files.type', 'avatar')
+                                    ->first();
+                            @endphp
+                    
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 
+                                        {{ $user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}"
                                  title="{{ $user->display_name }}">
-                                @if($user->avatar)
-                                    <img src="{{ Storage::url($user->avatar->path) }}" 
+                                @if($avatar)
+                                    <img src="{{ Storage::url($avatar->path) }}" 
                                          alt="avatar" 
                                          class="w-full h-full object-cover">
                                 @else
@@ -62,6 +69,7 @@
                                 @endif
                             </div>
                         @endforeach
+
             
                         {{-- 残り人数表示 --}}
                         @if($room->memberUsers->count() > 10)

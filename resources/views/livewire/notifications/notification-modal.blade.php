@@ -47,6 +47,13 @@
                     $icon = '🔔';
                     $title = 'お知らせ';
             }
+            $sender = $n->sender ?? null;
+              $avatar = null;
+              if ($sender) {
+                  $avatar = $sender->mediaFiles()
+                      ->where('media_files.type', 'avatar')
+                      ->first();
+              }
           @endphp
 
           <a href="#"
@@ -54,9 +61,23 @@
              class="block p-3 rounded-lg border transition duration-150
                     {{ $n->read_at ? 'bg-neutral/5 border-neutral/30 hover:bg-neutral/10' : 'bg-info/5 border-info/30 hover:bg-info/10' }}">
             <div class="flex space-x-3 items-start">
-              {{-- アイコン --}}
-              <div class="text-2xl">{{ $icon }}</div>
-
+              {{-- アバター＋通知アイコン --}}
+              <div class="relative w-10 h-10 shrink-0">
+                {{-- アバター画像 --}}
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 border-base-300">
+                  @if($avatar)
+                    <img src="{{ Storage::url($avatar->path) }}" alt="avatar" class="w-full h-full object-cover">
+                  @else
+                    <span class="text-sm font-semibold text-gray-600">
+                      {{ mb_substr($sender->display_name ?? '？', 0, 1) }}
+                    </span>
+                  @endif
+                </div>
+                {{-- 通知タイプアイコン（右上に重ねる） --}}
+                <span class="absolute -top-1 -right-1 text-xs bg-base-100 border border-base-300 rounded-full px-1.5 py-0.5 shadow-sm">
+                  {{ $icon }}
+                </span>
+              </div>
               {{-- 本文 --}}
               <div class="flex-1">
                 {{-- 送信者名 --}}

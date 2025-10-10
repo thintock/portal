@@ -187,15 +187,25 @@
               <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
                   {{-- アイコン --}}
-                  <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
-                    @if($reply->user->avatar_media_id)
-                      <img src="{{ $reply->user->avatar->url ?? '' }}" alt="avatar" class="w-full h-full object-cover">
+                  @php
+                      $avatar = $reply->user->mediaFiles()
+                          ->where('media_files.type', 'avatar')
+                          ->first();
+                  @endphp
+                  
+                  <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 
+                              {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+                    @if($avatar)
+                      <img src="{{ Storage::url($avatar->path) }}" 
+                           alt="avatar" 
+                           class="w-full h-full object-cover">
                     @else
                       <span class="text-sm font-semibold text-gray-600">
                         {{ mb_substr($reply->user->display_name ?? '？', 0, 1) }}
                       </span>
                     @endif
                   </div>
+
                   <div class="flex items-center space-x-2">
                     <span class="text-sm font-semibold">{{ $reply->user->display_name }}</span>
                     <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>

@@ -24,7 +24,7 @@
         </div>
         {{---ニックネーム表示--}}
         <div>
-          <span class="font-semibold">{{ $post->user->display_name }}</span>
+          <span class="font-semibold">{{ $post->user->display_name ?? 'ユーザー名未登録' }}</span>
           <span class="text-xs text-gray-500">{{ $post->created_at->diffForHumans() }}
           @if($post->updated_at->ne($post->created_at))
           <span title="更新: {{ $post->updated_at->diffForHumans() }}">({{ $post->updated_at->diffForHumans() }}:編集済み)</span>

@@ -82,7 +82,7 @@
               <div class="flex-1">
                 {{-- 送信者名 --}}
                 <p class="text-sm font-semibold text-primary">
-                  {{ $n->sender->display_name ?? '不明なユーザー' }} <span class="text-xs text-neutral font-normal">さん</span> <span class="text-xs text-neutral/50 mt-1">{{ $n->created_at?->diffForHumans() ?? '' }}</span>
+                  {{ $n->sender->display_name ?? 'ユーザー名未登録' }} <span class="text-xs text-neutral font-normal">さん</span> <span class="text-xs text-neutral/50 mt-1">{{ $n->created_at?->diffForHumans() ?? '' }}</span>
                 </p>
               
                 {{-- 通知タイトル --}}

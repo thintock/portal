@@ -89,7 +89,7 @@
               @endif
             </div>
             <div>
-              <span class="font-semibold">{{ $comment->user->display_name ?? '新規ユーザー' }}</span>
+              <span class="font-semibold">{{ $comment->user->display_name ?? 'ユーザー名未登録' }}</span>
               <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
               @if($comment->updated_at->ne($comment->created_at))
               <span class="text-xs text-gray-500" title="更新: ">
@@ -207,7 +207,7 @@
                   </div>
 
                   <div class="flex items-center space-x-2">
-                    <span class="text-sm font-semibold">{{ $reply->user->display_name }}</span>
+                    <span class="text-sm font-semibold">{{ $reply->user->display_name ?? 'ユーザー名未登録' }}</span>
                     <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
                     @if($reply->updated_at->ne($reply->created_at))
                       <span class="text-gray-400 text-xs">

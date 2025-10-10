@@ -69,7 +69,10 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public function avatar()
     {
-        return $this->belongsTo(MediaFile::class, 'avatar_media_id');
+        return $this->mediaFiles()
+                    ->where('media_files.type', 'avatar')
+                    ->orderBy('media_relations.sort_order')
+                    ->first();
     }
     
     public function mediaFiles()
@@ -77,6 +80,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->morphToMany(MediaFile::class, 'mediable', 'media_relations')
                     ->withPivot('sort_order')
                     ->orderBy('sort_order');
+    }
+    /**
+     * 🔹 旧設計互換（avatar_media_id経由）
+     */
+    public function legacyAvatar()
+    {
+        return $this->belongsTo(MediaFile::class, 'avatar_media_id');
     }
 
 }

@@ -71,15 +71,16 @@
           <div class="flex items-center space-x-3">
             {{-- アイコン --}}
             <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $comment->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
-              @if($comment->user->avatar_media_id)
-                <img src="{{ $comment->user->avatar->url ?? '' }}" 
-                     alt="avatar" 
-                     class="w-full h-full object-cover">
+              @if($comment->user->avatar)
+                <img src="{{ $comment->user->avatar->url }}"
+                     alt="avatar"
+                     class="w-full h-full object-cover rounded-full">
               @else
                 <span class="text-sm font-semibold text-gray-600">
                   {{ mb_substr($comment->user->display_name ?? '？', 0, 1) }}
                 </span>
               @endif
+
             </div>
             <div>
               <span class="font-semibold">{{ $comment->user->display_name ?? '新規ユーザー' }}</span>

@@ -45,7 +45,7 @@
         @else
           <div class="avatar placeholder">
             <div class="bg-neutral text-neutral-content rounded-full w-24">
-              <span class="text-2xl">{{ mb_substr($user->name ?? '？', 0, 1) }}</span>
+              <span class="text-2xl">{{ mb_substr($user->display_name ?? '？', 0, 1) }}</span>
             </div>
           </div>
         @endif

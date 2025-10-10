@@ -3,15 +3,22 @@
     {{-- 1段目：ヘッダー --}}
     <div class="flex items-center justify-between px-4 py-3 border-b">
       <div class="flex items-center space-x-3">
-        {{--アバター表示--}}
-        <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $post->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
-          @if($post->user->avatar_media_id)
-            <img src="{{ $post->user->avatar->url ?? '' }}"
-             alt="avatar"
-             class="w-full h-full object-cover">
+        {{-- アバター表示 --}}
+        @php
+            $avatar = $post->user->mediaFiles()
+                ->where('media_files.type', 'avatar')
+                ->first();
+        @endphp
+        
+        <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 
+                    {{ $post->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+          @if($avatar)
+            <img src="{{ Storage::url($avatar->path) }}"
+                 alt="avatar"
+                 class="w-full h-full object-cover">
           @else
             <span class="text-sm font-semibold text-gray-600">
-                {{ mb_substr($post->user->display_name ?? '？', 0, 1) }}
+              {{ mb_substr($post->user->display_name ?? '？', 0, 1) }}
             </span>
           @endif
         </div>

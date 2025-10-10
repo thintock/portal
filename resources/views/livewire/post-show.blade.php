@@ -2,7 +2,7 @@
   {{-- 戻るボタン --}}
   <div class="mb-4">
     <a href="{{ route('rooms.show', $post->room_id) }}" class="btn btn-outline btn-sm">
-      ← ルーム
+      ← {{ $post->room->name ?? 'ルーム' }}
     </a>
   </div>
 

@@ -24,7 +24,7 @@
     <div class="min-h-screen flex flex-col">
         
         {{-- ナビゲーション --}}
-        @include('layouts.navigation')
+        @livewire('layouts.navigation-menu')
 
         {{-- ページヘッダー --}}
         @isset($header)

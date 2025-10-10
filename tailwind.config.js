@@ -24,6 +24,6 @@ export default {
     ],
 
     daisyui: {
-        themes: ["light", "dark", "cupcake"], // 好きなテーマを追加
+        themes: ["cupcake"], // 好きなテーマを追加
     },
 };

@@ -89,7 +89,7 @@ class ReactionButton extends Component
              * 🔔 通知作成処理
              */
             $targetUserId = null;
-            $type = 'like';
+            $type = 'reaction';
             $message = null;
             $roomId = null;
             $excerpt = '';
@@ -118,14 +118,15 @@ class ReactionButton extends Component
 
                 // 通知メッセージをモデルに応じて分岐
                 $message = match ($modelName) {
-                    'Post' => "{$user->display_name}さんがあなたの投稿「{$excerpt}」に「❤️」しました。",
-                    'Comment' => "{$user->display_name}さんがあなたのコメント「{$excerpt}」に「❤️️」しました。",
-                    default => "{$user->display_name}さんがリアクションしました。",
+                    'Post' => "{$excerpt}」",
+                    'Comment' => "{$excerpt}」",
+                    default => "リアクションしました。",
                 };
-
+                
                 // 通知レコードを作成
                 Notification::create([
                     'user_id'         => $targetUserId,
+                    'sender_id'       => Auth::id(),
                     'notifiable_id'   => $reaction->id,
                     'notifiable_type' => Reaction::class,
                     'type'            => $type,

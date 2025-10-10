@@ -86,6 +86,15 @@ class NotificationModal extends Component
     
     public function render()
     {
-        return view('livewire.notifications.notification-modal');
+        $notifications = Notification::with('sender')
+            ->where('notifiable_type', '!=', null)
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->take(30)
+            ->get();
+    
+        return view('livewire.notifications.notification-modal', [
+            'notifications' => $notifications,
+        ]);
     }
 }

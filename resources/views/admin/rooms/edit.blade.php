@@ -10,7 +10,7 @@
             <div>
                 <label class="block font-semibold mb-1">ルーム名 <span class="text-red-500">*</span></label>
                 <input type="text" name="name" value="{{ old('name', $room->name) }}" 
-                       class="input input-bordered w-full">
+                       class="input input-bordered w-full text-base">
                 @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
             </div>
 
@@ -18,7 +18,7 @@
             <div>
                 <label class="block font-semibold mb-1">説明</label>
                 <textarea name="description" rows="3" 
-                          class="textarea textarea-bordered w-full">{{ old('description', $room->description) }}</textarea>
+                          class="textarea textarea-bordered w-full leading-tight text-base">{{ old('description', $room->description) }}</textarea>
             </div>
 
             {{-- アイコン画像 --}}

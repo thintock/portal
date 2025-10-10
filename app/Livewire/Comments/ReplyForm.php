@@ -77,7 +77,9 @@ class ReplyForm extends Component
                 'depth'     => $this->parent->depth + 1,
                 'status'    => 'published',
             ]);
-
+            // ===============================
+            // 🔹 メディアのアップロード処理
+            // ===============================
             $disk = config('filesystems.default');
             foreach ($this->media as $i => $file) {
                 $media = MediaFile::uploadAndCreate(
@@ -97,6 +99,25 @@ class ReplyForm extends Component
             }
 
             $this->parent->increment('replies_count');
+            // ===============================
+            // 🔔 通知作成処理
+            // ===============================
+            if ($this->parent->user_id !== Auth::id()) {
+                // 本文の冒頭30文字を抜粋
+                $commentExcerpt = mb_substr(strip_tags($comment->body), 0, 30);
+                if (mb_strlen($comment->body) > 30) {
+                    $commentExcerpt .= '…';
+                }
+                \App\Models\Notification::create([
+                    'user_id'         => $this->parent->user_id, // 通知の受信者
+                    'sender_id'       => Auth::id(),             // 通知の送信者（返信した人）
+                    'notifiable_id'   => $comment->id,
+                    'notifiable_type' => Comment::class,
+                    'type'            => 'reply',
+                    'message'         => $commentExcerpt,
+                    'room_id'         => $this->parent->post->room_id ?? null,
+                ]);
+            }
         });
 
         $this->reset(['body', 'media', 'newMedia']);

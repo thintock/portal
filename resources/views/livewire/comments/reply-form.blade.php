@@ -1,4 +1,4 @@
-<div class="mt-2 ml-8">
+<div class="mt-2">
 
   {{-- フッター（返信／キャンセル切り替え） --}}
   <div class="flex justify-between items-center">
@@ -59,7 +59,7 @@
 
       {{-- テキスト入力 --}}
       <textarea wire:model.defer="body" rows="2"
-        class="textarea textarea-bordered w-full"
+        class="textarea textarea-bordered w-full leading-tight text-base"
         placeholder="返信を入力..."
         wire:key="reply-body-{{ $formKey }}"
         wire:loading.attr="disabled"

@@ -52,7 +52,7 @@
           x-init="$refs.textarea.style.height = $refs.textarea.scrollHeight + 'px'" 
           @input="$refs.textarea.style.height = 'auto'; $refs.textarea.style.height = $refs.textarea.scrollHeight + 'px'" 
           rows="3" 
-          class="textarea textarea-bordered w-full mb-3" 
+          class="textarea textarea-bordered w-full mb-3 leading-tight text-base" 
           placeholder="どんなことを共有したい？"></textarea>
           
         <button class="btn btn-primary btn-sm w-full" type="submit" wire:loading.attr="disabled" wire:target="newMedia,save">

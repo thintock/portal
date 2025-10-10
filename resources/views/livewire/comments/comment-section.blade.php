@@ -48,7 +48,7 @@
 
     {{-- テキスト入力 --}}
     <textarea wire:model.defer="body" rows="2"
-      class="textarea textarea-bordered w-full"
+      class="textarea textarea-bordered w-full leading-tight text-base"
       placeholder="コメントを追加..."
       wire:key="comment-body-{{ $formKey }}"></textarea>
 
@@ -63,29 +63,34 @@
   {{-- コメント一覧 --}}
   @forelse($parents as $comment)
     <div class="flex items-start space-x-2 mb-4" wire:key="comment-{{ $comment->id }}">
-      {{-- アイコン --}}
-      <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $comment->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
-        @if($comment->user->avatar_media_id)
-          <img src="{{ Storage::url($comment->user->avatar->path ?? '') }}" 
-               alt="avatar" 
-               class="w-full h-full object-cover">
-        @else
-          <span class="text-sm font-semibold text-gray-600">
-            {{ mb_substr($comment->user->display_name ?? '？', 0, 1) }}
-          </span>
-        @endif
-      </div>
+      
 
       <div class="bg-base-200 px-3 py-2 rounded-lg w-full relative">
         {{-- ヘッダー --}}
         <div class="flex justify-between items-center">
-          <div class=""><span class="text-sm font-semibold">{{ $comment->user->display_name }}</span>
-          <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
-          @if($comment->updated_at->ne($comment->created_at))
-            <span class="text-xs text-gray-500" title="更新: ">
-              ({{ $comment->updated_at->diffForHumans() }}:編集済み)
-            </span>
-          @endif
+          <div class="flex items-center space-x-3">
+            {{-- アイコン --}}
+            <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $comment->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+              @if($comment->user->avatar_media_id)
+                <img src="{{ $comment->user->avatar->url ?? '' }}" 
+                     alt="avatar" 
+                     class="w-full h-full object-cover">
+              @else
+                <span class="text-sm font-semibold text-gray-600">
+                  {{ mb_substr($comment->user->display_name ?? '？', 0, 1) }}
+                </span>
+              @endif
+            </div>
+            <div>
+              <span class="font-semibold">{{ $comment->user->display_name ?? '新規ユーザー' }}</span>
+              <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
+              @if($comment->updated_at->ne($comment->created_at))
+              <span class="text-xs text-gray-500" title="更新: ">
+                ({{ $comment->updated_at->diffForHumans() }}:編集済み)
+              </span>
+              @endif
+            </div>
+          
           </div>
           @if($comment->user_id === auth()->id())
             {{-- ハンバーガーメニュー --}}
@@ -135,7 +140,7 @@
               @endphp
         
               @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
-                {{-- ✅ 画像サムネイル（クリックでモーダル拡大） --}}
+                {{-- 画像サムネイル（クリックでモーダル拡大） --}}
                 <img src="{{ $url }}"
                      alt="{{ $media->alt ?? 'image' }}"
                      class="rounded border object-cover w-full h-24 cursor-pointer"
@@ -145,13 +150,13 @@
                        $dispatch('set-image', { src: '{{ $url }}' })">
               
               @elseif(in_array($ext, ['mp4','webm','mov','avi']))
-                {{-- ✅ 動画プレビュー --}}
+                {{-- 動画プレビュー --}}
                 <video controls class="rounded border max-h-40 w-full">
                   <source src="{{ $url }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
                 </video>
         
               @else
-                {{-- ✅ その他ファイル --}}
+                {{-- その他ファイル --}}
                 <a href="{{ $url }}" target="_blank" class="link link-primary text-xs">添付を開く</a>
               @endif
             @endforeach
@@ -168,31 +173,33 @@
         
         {{--子コメント--}}
         @foreach($visibleReplies as $reply)
+            
           <div class="mt-3 flex items-start space-x-2" wire:key="reply-{{ $reply->id }}">
-            {{-- アイコン --}}
-            <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
-              @if($reply->user->avatar_media_id)
-                <img src="{{ Storage::url($reply->user->avatar->path ?? '') }}" alt="avatar" class="w-full h-full object-cover">
-              @else
-                <span class="text-sm font-semibold text-gray-600">
-                  {{ mb_substr($reply->user->display_name ?? '？', 0, 1) }}
-                </span>
-              @endif
-            </div>
-        
             <div class="bg-base-100 px-3 py-2 rounded-lg w-full relative">
               {{-- ヘッダー --}}
               <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                  <span class="text-sm font-semibold">{{ $reply->user->display_name }}</span>
-                  <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
-                  @if($reply->updated_at->ne($reply->created_at))
-                    <span class="text-gray-400 text-xs">
-                      ({{ $reply->updated_at->diffForHumans() }}:編集済み)
-                    </span>
-                  @endif
+                <div class="flex items-center space-x-3">
+                  {{-- アイコン --}}
+                  <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+                    @if($reply->user->avatar_media_id)
+                      <img src="{{ $reply->user->avatar->url ?? '' }}" alt="avatar" class="w-full h-full object-cover">
+                    @else
+                      <span class="text-sm font-semibold text-gray-600">
+                        {{ mb_substr($reply->user->display_name ?? '？', 0, 1) }}
+                      </span>
+                    @endif
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-sm font-semibold">{{ $reply->user->display_name }}</span>
+                    <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+                    @if($reply->updated_at->ne($reply->created_at))
+                      <span class="text-gray-400 text-xs">
+                        ({{ $reply->updated_at->diffForHumans() }}:編集済み)
+                      </span>
+                    @endif
+                  </div>
                 </div>
-        
+                
                 @if($reply->user_id === auth()->id())
                   {{-- ハンバーガーメニュー --}}
                   <div class="dropdown dropdown-end z-50">

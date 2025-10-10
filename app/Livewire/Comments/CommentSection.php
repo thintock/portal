@@ -143,42 +143,34 @@ class CommentSection extends Component
             }
     
             // 通知作成
-            $actor = Auth::user();
             $receiverId = null;
             $type = null;
             $message = null;
             $roomId = $this->post->room_id ?? null;
     
+            // コメント本文を30文字で抜粋
             $commentExcerpt = mb_substr(strip_tags($comment->body), 0, 30);
             if (mb_strlen($comment->body) > 30) {
                 $commentExcerpt .= '…';
             }
+            
+            // 投稿者とコメント投稿者が異なる場合のみ通知
+            if ($this->post->user_id !== Auth::id()) {
+                $receiverId = $this->post->user_id;
+                $type = 'comment';
+                $message = $commentExcerpt;
     
-            if ($parent) {
-                // 返信 → 親コメント投稿者に通知
-                if ($parent->user_id !== $actor->id) {
-                    $receiverId = $parent->user_id;
-                    $type = 'reply';
-                    $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
+                if ($receiverId && $type && $message) {
+                    Notification::create([
+                        'user_id'         => $receiverId,
+                        'sender_id'       => Auth::id(),
+                        'notifiable_id'   => $comment->id,
+                        'notifiable_type' => Comment::class,
+                        'type'            => $type,
+                        'message'         => $message,
+                        'room_id'         => $roomId,
+                    ]);
                 }
-            } else {
-                // 新規コメント → 投稿者に通知
-                if ($this->post->user_id !== $actor->id) {
-                    $receiverId = $this->post->user_id;
-                    $type = 'comment';
-                    $message = "{$actor->display_name}さんからコメント「{$commentExcerpt}」";
-                }
-            }
-    
-            if ($receiverId && $type && $message) {
-                Notification::create([
-                    'user_id'         => $receiverId,
-                    'notifiable_id'   => $comment->id,
-                    'notifiable_type' => Comment::class,
-                    'type'            => $type,
-                    'message'         => $message,
-                    'room_id'         => $roomId,
-                ]);
             }
     
             // Postsのアクティビティを更新

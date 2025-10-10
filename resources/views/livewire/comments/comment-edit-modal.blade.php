@@ -2,7 +2,7 @@
   {{--Livewireメッセージ--}}
   @include('commons.messages')
   @if($showModal)
-    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div x-data @click.self="$wire.set('showModal', false)" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold mb-4">コメントを編集</h2>
@@ -106,7 +106,7 @@
         <div wire:loading wire:target="newMedia" class="text-xs text-gray-500 mb-2">アップロード中...</div>
 
         {{-- 本文 --}}
-        <textarea wire:model="body" rows="8" class="textarea textarea-bordered w-full mb-3"wire:key="comment-body-{{ $formKey }}"></textarea>
+        <textarea wire:model="body" rows="8" class="textarea textarea-bordered w-full mb-3 text-base leading-tight" wire:key="comment-body-{{ $formKey }}"></textarea>
         {{-- ボタン --}}
         <button wire:click="save" class="btn btn-primary btn-sm w-full" wire:loading.attr="disabled" wire:target="newMedia,save">
           <span wire:loading wire:target="newMedia">アップロード中...</span>

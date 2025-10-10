@@ -6,9 +6,9 @@
         {{--アバター表示--}}
         <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $post->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
           @if($post->user->avatar_media_id)
-            <img src="{{ Storage::url($post->user->avatar->path ?? '') }}" 
-                 alt="avatar" 
-                 class="w-full h-full object-cover">
+            <img src="{{ $post->user->avatar->url ?? '' }}"
+             alt="avatar"
+             class="w-full h-full object-cover">
           @else
             <span class="text-sm font-semibold text-gray-600">
                 {{ mb_substr($post->user->display_name ?? '？', 0, 1) }}

@@ -77,7 +77,7 @@
       <div>
         <x-input-label for="last_name" :value="__('姓')" />
         <x-text-input id="last_name" name="last_name" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('last_name', $user->last_name)" required />
         <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
       </div>
@@ -85,7 +85,7 @@
       <div>
         <x-input-label for="name" :value="__('名')" />
         <x-text-input id="name" name="name" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('name', $user->name)" required />
         <x-input-error class="mt-2" :messages="$errors->get('name')" />
       </div>
@@ -96,13 +96,13 @@
       <div>
         <x-input-label for="last_name_kana" :value="__('せい（かな）')" />
         <x-text-input id="last_name_kana" name="last_name_kana" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('last_name_kana', $user->last_name_kana)" />
       </div>
       <div>
         <x-input-label for="first_name_kana" :value="__('めい（かな）')" />
         <x-text-input id="first_name_kana" name="first_name_kana" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('first_name_kana', $user->first_name_kana)" />
       </div>
     </div>
@@ -113,14 +113,14 @@
       <div>
         <x-input-label for="display_name" :value="__('ニックネーム（公開されます）')" />
         <x-text-input id="display_name" name="display_name" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('display_name', $user->display_name)" />
       </div>
 
       <div>
         <x-input-label for="instagram_id" :value="__('Instagram アカウント')" />
         <x-text-input id="instagram_id" name="instagram_id" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           placeholder="@bakerista_official"
           :value="old('instagram_id', $user->instagram_id)" />
       </div>
@@ -132,14 +132,14 @@
       <div>
         <x-input-label for="postal_code" :value="__('郵便番号')" />
         <x-text-input id="postal_code" name="postal_code" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('postal_code', $user->postal_code)" />
       </div>
 
       <div>
         <x-input-label for="prefecture" :value="__('都道府県')" />
         <x-text-input id="prefecture" name="prefecture" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('prefecture', $user->prefecture)" />
       </div>
     </div>
@@ -147,13 +147,13 @@
     <div>
       <x-input-label for="address1" :value="__('住所1')" />
       <x-text-input id="address1" name="address1" type="text"
-        class="input input-bordered w-full mt-1"
+        class="input input-bordered w-full mt-1 text-base"
         :value="old('address1', $user->address1)" />
     </div>
     <div>
       <x-input-label for="address2" :value="__('住所2（建物名など）')" />
       <x-text-input id="address2" name="address2" type="text"
-        class="input input-bordered w-full mt-1"
+        class="input input-bordered w-full mt-1 text-base"
         :value="old('address2', $user->address2)" />
     </div>
 
@@ -163,13 +163,13 @@
       <div>
         <x-input-label for="company_name" :value="__('会社名')" />
         <x-text-input id="company_name" name="company_name" type="text"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('company_name', $user->company_name)" />
       </div>
       <div>
         <x-input-label for="phone" :value="__('電話番号')" />
         <x-text-input id="phone" name="phone" type="tel"
-          class="input input-bordered w-full mt-1"
+          class="input input-bordered w-full mt-1 text-base"
           :value="old('phone', $user->phone)" />
       </div>
     </div>
@@ -188,7 +188,7 @@
     <div>
       <x-input-label for="email" :value="__('Eメールアドレス')" />
       <x-text-input id="email" name="email" type="email"
-        class="input input-bordered w-full mt-1"
+        class="input input-bordered w-full mt-1 text-base"
         :value="old('email', $user->email)" required />
       <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>

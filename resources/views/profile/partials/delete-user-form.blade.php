@@ -61,7 +61,7 @@
           id="password"
           name="password"
           type="password"
-          class="input input-bordered w-full sm:w-3/4 mt-1"
+          class="input input-bordered w-full sm:w-3/4 mt-1 text-base"
           placeholder="現在のパスワードを入力"
         />
         <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />

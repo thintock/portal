@@ -1,3 +1,4 @@
+@section('title', '')
 {{-- resources/views/billing/success.blade.php --}}
 <x-app-layout>
     <x-slot name="header">
@@ -19,9 +20,8 @@
                     <a href="{{ route('dashboard') }}" class="btn btn-primary">
                         ダッシュボードへ戻る
                     </a>
-                    <a href="" class="btn btn-outline">
-                        コミュニティページへ
-                    </a>
+                    
+                    <a class="btn btn-outline" href="{{ route('billing.portal') }}">支払い情報の確認・変更</a>
                 </div>
             </div>
         </div>

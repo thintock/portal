@@ -3,14 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Cashier\Subscription;
 
 class BillingController extends Controller
 {
     /** プラン選択画面 */
     public function show()
     {
+        $user = Auth::user();
+        
         $prices = config('services.stripe.prices');
-        return view('billing.show', compact('prices'));
+        
+        // 現在のユーザーのsubscriptionを取得（type = 'default'）
+        $subscription = Subscription::where('user_id', $user->id)
+            ->where('type', 'default')
+            ->latest()
+            ->first();
+        
+        return view('billing.show', compact('prices', 'subscription'));
     }
 
     /** Checkout に遷移してサブスク開始 */

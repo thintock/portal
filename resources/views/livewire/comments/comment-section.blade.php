@@ -1,9 +1,9 @@
-<div class="space-y-3">
+<div class="p-2 sm:p-4 md:p-6">
   {{-- Livewireメッセージ --}}
   @include('commons.messages')
   {{-- トグルボタン --}}
-<div class="px-6">
-  <button type="button" class="btn btn-outline btn-xs w-full"
+<div class="pb-2 sm:pb-4 md:pb-6">
+  <button type="button" class="btn btn-outline btn-xs sm:btn-sm md:btn-md w-full"
           wire:click="$toggle('showForm')">
     {{ $showForm ? 'キャンセル' : '新しいコメントを作成' }}
   </button>
@@ -47,12 +47,12 @@
     <div wire:loading wire:target="newMedia" class="text-xs mt-2">アップロード中...</div>
 
     {{-- テキスト入力 --}}
-    <textarea wire:model.defer="body" rows="2"
+    <textarea wire:model.defer="body" rows="5"
       class="textarea textarea-bordered w-full leading-tight text-base"
       placeholder="コメントを追加..."
       wire:key="comment-body-{{ $formKey }}"></textarea>
 
-    <button class="btn btn-primary btn-xs w-full" type="submit" wire:loading.attr="disabled" wire:target="newMedia,save">
+    <button class="btn btn-primary btn-xs sm:btn-sm md:btn-md w-full" type="submit" wire:loading.attr="disabled" wire:target="newMedia,save">
       <span wire:loading wire:target="newMedia">アップロード中...</span>
       <span wire:loading wire:target="save">保存中...</span>
       <span wire:loading.remove wire:target="newMedia,save">送信</span>
@@ -65,9 +65,9 @@
     <div class="flex items-start space-x-2 mb-4" wire:key="comment-{{ $comment->id }}">
       
 
-      <div class="bg-base-200 px-3 py-2 rounded-lg w-full relative">
+      <div class="bg-base-200 p-2 sm:p-4 md:p-6 rounded-lg w-full relative">
         {{-- ヘッダー --}}
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center border-base-300 border-b pb-2 md:pb-4">
           <div class="flex items-center space-x-3">
             {{-- アイコン --}}
             <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $comment->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
@@ -116,7 +116,7 @@
         </div>
 
         {{-- 本文 --}}
-        <div class="text-sm mt-1 break-words" x-data="{ open: false }">
+        <div class="text-sm mt-2 sm:mt-4 md:mt-6 break-words" x-data="{ open: false }">
           @php
             $body = $comment->body ?? '';
             $short = mb_substr($body, 0, 100);
@@ -182,9 +182,9 @@
         @foreach($visibleReplies as $reply)
             
           <div class="mt-3 flex items-start space-x-2" wire:key="reply-{{ $reply->id }}">
-            <div class="bg-base-100 px-3 py-2 rounded-lg w-full relative">
+            <div class="bg-base-100 p-2 sm:p-4 md:p-6 rounded-lg w-full relative">
               {{-- ヘッダー --}}
-              <div class="flex justify-between items-center">
+              <div class="flex justify-between items-center pb-2 md:pb-4 border-b border-base-200">
                 <div class="flex items-center space-x-3">
                   {{-- アイコン --}}
                   @php
@@ -242,7 +242,7 @@
               </div>
         
               {{-- 本文 --}}
-              <div class="text-sm mt-1 break-words">
+              <div class="text-sm mt-2 sm:mt-4 break-words">
                 {!! nl2br(e($reply->body)) !!}
               </div>
         

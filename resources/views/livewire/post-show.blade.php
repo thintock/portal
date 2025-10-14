@@ -1,3 +1,4 @@
+@section('title', Str::limit(strip_tags($post->body), 30))
 <div class="max-w-4xl mx-auto p-1 py-8 space-y-6">
   {{-- 戻るボタン --}}
   <div class="mb-4">

@@ -18,7 +18,18 @@
                     </x-nav-link>
                 </div>
             </div>
-
+            
+            {{-- ✅ 中央：ルームタイトル（スマホのみ表示） --}}
+            @if(isset($room) && $room)
+                <div class="flex items-center justify-center absolute inset-x-0 top-0 h-16 sm:hidden pointer-events-none">
+                    <span class="text-sm text-gray-700 truncate w-2/3 text-center">{{ $room->name }}</span>
+                </div>
+            @elseif(View::hasSection('pageTitle'))
+                <div class="flex items-center justify-center absolute inset-x-0 top-0 h-16 sm:hidden pointer-events-none">
+                    <span class="text-sm text-gray-700 truncate w-2/3 text-center">@yield('pageTitle')</span>
+                </div>
+            @endif
+            
             {{-- 右側：ユーザードロップダウン --}}
             <div class="hidden sm:flex sm:items-center sm:ml-6">
               {{-- 通知ボタン --}}
@@ -54,11 +65,11 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            プロフィール設定
+                            会員情報
                         </x-dropdown-link>
                         {{-- Stripe決済ページリンク追加 --}}
                         <x-dropdown-link :href="route('billing.show')">
-                            お支払い情報
+                            ご利用状況
                         </x-dropdown-link>
                         {{-- ログアウト --}}
                         <form method="POST" action="{{ route('logout') }}">
@@ -128,11 +139,11 @@
             {{-- メニュー下部 --}}
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    プロフィール設定
+                    会員情報
                 </x-responsive-nav-link>
                 {{-- Stripe決済ページリンク追加 --}}
                 <x-responsive-nav-link :href="route('billing.show')">
-                    お支払い情報
+                    ご利用状況
                 </x-responsive-nav-link>
                 {{-- ログアウト --}}
                 <form method="POST" action="{{ route('logout') }}">

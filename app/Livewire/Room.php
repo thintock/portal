@@ -38,10 +38,12 @@ class Room extends Component
             ->with('user')
             ->latest()
             ->paginate(10);
+            
+        view()->share('room', $this->room);    
 
         return view('livewire.rooms.show', [
             'room' => $this->room,
             'posts' => $posts,
-        ])->layout('layouts.app');
+        ])->layout('layouts.app',);
     }
 }

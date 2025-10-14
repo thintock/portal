@@ -58,7 +58,7 @@
       </div>
 
       {{-- テキスト入力 --}}
-      <textarea wire:model.defer="body" rows="2"
+      <textarea wire:model.defer="body" rows="5"
         class="textarea textarea-bordered w-full leading-tight text-base"
         placeholder="返信を入力..."
         wire:key="reply-body-{{ $formKey }}"
@@ -66,7 +66,7 @@
         wire:target="newMedia"></textarea>
 
       {{-- 送信ボタン --}}
-      <button class="btn btn-primary btn-xs w-full"
+      <button class="btn btn-primary btn-xs sm:btn-sm md:btn-md w-full"
               type="submit"
               wire:loading.attr="disabled"
               wire:target="newMedia,save">

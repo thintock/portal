@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'ベーカリスタサークル') }}</title>
+    <title>{{ config('app.name', 'ベーカリスタサークル') }}
+        @hasSection('title')
+         | @yield('title')
+        @endif
+    </title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -22,9 +26,8 @@
 
 <body class="font-sans antialiased overflow-x-hidden bg-base-200 text-base-content">
     <div class="min-h-screen flex flex-col">
-        
         {{-- ナビゲーション --}}
-        @livewire('layouts.navigation-menu')
+        @livewire('layouts.navigation-menu', ['room' => $room ?? null])
 
         {{-- ページヘッダー --}}
         @isset($header)

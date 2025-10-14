@@ -1,17 +1,17 @@
 <div class="card bg-base-100 shadow-md">
-  <div class="card-body">
+  <div class="card-body p-2 sm:p-4 md:p-6">
     
     {{--トグルボタン--}}
-    <button type="button" class="btn btn-outline btn-sm mb-2" wire:click="toggleForm">
+    <button type="button" class="btn btn-outline btn-sm md:btn-md sm:mb-4{{ $showForm ? '' : 'sm:mb-4' }}" wire:click="toggleForm">
       {{ $showForm ? 'キャンセル' : '新しい投稿を作成' }}
     </button>
     
     {{--Livewireメッセージ--}}
     @include('commons.messages')
     @if($showForm)
-      <form wire:submit.prevent="save" class="space-y-4">
+      <form wire:submit.prevent="save">
         {{-- プレビュー + 画像追加ボタン --}}
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 gap-3 mb-2 sm:mb-4 md:mb-6">
           {{-- 既存画像 --}}
           @foreach($media as $i => $file)
               <div class="relative">
@@ -51,11 +51,11 @@
           x-ref="textarea"
           x-init="$refs.textarea.style.height = $refs.textarea.scrollHeight + 'px'" 
           @input="$refs.textarea.style.height = 'auto'; $refs.textarea.style.height = $refs.textarea.scrollHeight + 'px'" 
-          rows="3" 
-          class="textarea textarea-bordered w-full mb-3 leading-tight text-base" 
+          rows="5" 
+          class="textarea textarea-bordered w-full leading-tight text-base sm:mb-2 md:mb-4" 
           placeholder="どんなことを共有したい？"></textarea>
           
-        <button class="btn btn-primary btn-sm w-full" type="submit" wire:loading.attr="disabled" wire:target="newMedia,save">
+        <button class="btn btn-primary btn-sm md:btn-md w-full" type="submit" wire:loading.attr="disabled" wire:target="newMedia,save">
             <span wire:loading wire:target="newMedia">アップロード中...</span>
             <span wire:loading wire:target="save">保存中...</span>
             <span wire:loading.remove wire:target="newMedia,save">シェア</span>

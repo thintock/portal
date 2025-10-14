@@ -46,8 +46,6 @@
         </ul>
       </div>
       @endif
-      
-      
     </div>
     {{-- 2段目：メディア（カルーセル） --}}
     @if($post->mediaFiles->isNotEmpty())
@@ -94,7 +92,7 @@
 
     
     {{-- 3段目：本文（200文字で省略表示） --}}
-    <div class="px-2 md:px-6 text-sm text-gray-800 break-words" x-data="{open:false}">
+    <div class="p-2 sm:p-4 md:p-6 text-sm text-gray-800 break-words" x-data="{open:false}">
       @php
         $body = $post->body ?? '';
         $short = mb_substr($body, 0, 200);

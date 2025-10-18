@@ -11,7 +11,7 @@
                     <div class="w-full break-words">
                         {{-- ルーム名 --}}
                         <div class=" mb-1">
-                            <span class="text-sm font-bold text-primary">[{{ $post->room->name }}]</span> <span class="text-sm">{{ Str::limit(strip_tags($post->body), 100) }}</span> <span class="badge badge-sm badge-soft text-xs">by {{ $post->user->display_name }}</span>
+                            <span class="text-sm font-bold text-primary">[{{ $post->room->name }}]</span> <span class="text-sm">{{ Str::limit(strip_tags($post->body), 100) }}</span> <span class="badge badge-sm badge-soft text-xs">by {{ $post->user->name }}</span>
                         </div>
                     </div>
                 </a>

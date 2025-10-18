@@ -84,12 +84,12 @@
                        class="w-full h-full object-cover rounded-full">
               @else
                   <span class="text-sm font-semibold text-gray-600">
-                      {{ mb_substr($comment->user->display_name ?? '？', 0, 1) }}
+                      {{ mb_substr($comment->user->name ?? '？', 0, 1) }}
                   </span>
               @endif
             </div>
             <div>
-              <span class="font-semibold">{{ $comment->user->display_name ?? 'ユーザー名未登録' }}</span>
+              <span class="font-semibold">{{ $comment->user->name ?? 'ユーザー名未登録' }}</span>
               <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
               @if($comment->updated_at->ne($comment->created_at))
               <span class="text-xs text-gray-500" title="更新: ">
@@ -117,23 +117,18 @@
 
         {{-- 本文 --}}
         <div class="text-sm mt-2 sm:mt-4 md:mt-6 break-words" x-data="{ open: false }">
-          @php
-            $body = $comment->body ?? '';
-            $short = mb_substr($body, 0, 100);
-          @endphp
-        
-          @if(mb_strlen($body) > 100)
+          @if(mb_strlen($comment->body) > 100)
             {{-- 短縮表示 --}}
-            <span x-show="!open" class="break-words">{!! \App\Helpers\TextHelper::linkify($short) !!}…</span>
+            <span x-show="!open" class="break-words">{!! $comment->short_body !!}</span>
         
             {{-- 全文表示 --}}
-            <span x-show="open" class="break-words">{!! \App\Helpers\TextHelper::linkify($body) !!}</span>
+            <span x-show="open" class="break-words">{!! $comment->formatted_body !!}</span>
         
             <button class="text-blue-600 text-xs ml-2"
                     @click="open=!open"
-                    x-text="open?'閉じる':'…つづきを表示'"></button>
+                    x-text="open ? '閉じる' : '…つづきを表示'"></button>
           @else
-            <span class="break-words">{!! \App\Helpers\TextHelper::linkify($body) !!}</span>
+            {!! $comment->formatted_body !!}
           @endif
         </div>
 
@@ -201,13 +196,13 @@
                            class="w-full h-full object-cover">
                     @else
                       <span class="text-sm font-semibold text-gray-600">
-                        {{ mb_substr($reply->user->display_name ?? '？', 0, 1) }}
+                        {{ mb_substr($reply->user->name ?? '？', 0, 1) }}
                       </span>
                     @endif
                   </div>
 
                   <div class="flex items-center space-x-2">
-                    <span class="text-sm font-semibold">{{ $reply->user->display_name ?? 'ユーザー名未登録' }}</span>
+                    <span class="text-sm font-semibold">{{ $reply->user->name ?? 'ユーザー名未登録' }}</span>
                     <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
                     @if($reply->updated_at->ne($reply->created_at))
                       <span class="text-gray-400 text-xs">
@@ -242,8 +237,20 @@
               </div>
         
               {{-- 本文 --}}
-              <div class="text-sm mt-2 sm:mt-4 break-words">
-                {!! nl2br(e($reply->body)) !!}
+              <div class="text-sm mt-2 sm:mt-4 break-words" x-data="{ open: false }">
+                @if(mb_strlen($reply->body) > 100)
+                  {{-- 短縮表示 --}}
+                  <span x-show="!open" class="break-words">{!! $reply->short_body !!}</span>
+              
+                  {{-- 全文表示 --}}
+                  <span x-show="open" class="break-words">{!! $reply->formatted_body !!}</span>
+              
+                  <button class="text-blue-600 text-xs ml-2"
+                          @click="open=!open"
+                          x-text="open ? '閉じる' : '…つづきを表示'"></button>
+                @else
+                  {!! $reply->formatted_body !!}
+                @endif
               </div>
         
               {{-- 添付 --}}

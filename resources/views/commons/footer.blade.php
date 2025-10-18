@@ -18,6 +18,6 @@
     </nav>
 
     <p class="text-gray-500">
-        © {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.
+        © {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Mills Corp.
     </p>
 </footer>

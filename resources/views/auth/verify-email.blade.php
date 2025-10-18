@@ -42,9 +42,5 @@
             </div>
         </div>
 
-        {{-- コピーライト --}}
-        <footer class="mt-8 text-center text-xs text-gray-400">
-            © {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.
-        </footer>
     </div>
 </x-guest-layout>

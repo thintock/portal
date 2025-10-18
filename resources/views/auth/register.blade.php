@@ -1,56 +1,36 @@
-<!DOCTYPE html>
-<html lang="ja" data-theme="cupcake">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ベーカリスタサークル | 仲間とつながるパンのコミュニティ</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <!-- Favicon & App Icons -->
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="bg-base-100 text-base-content font-sans antialiased">
-
+<x-guest-layout>
     {{-- ヒーローセクション --}}
     <section class="hero min-h-[90vh] bg-gradient-to-br from-primary/20 via-base-100 to-accent/10 px-6 md:px-10">
         <div class="hero-content flex flex-col lg:flex-row-reverse items-center gap-10 max-w-6xl mx-auto py-10">
             {{-- 画像 --}}
             <img src="{{ asset('images/bakerista_circle_gray.png') }}" 
-                 alt="Bakerista Circle"
+                 alt="Bakerista Portal"
                  class="w-40 md:w-52 lg:w-60 drop-shadow-lg mb-6 lg:mb-0">
 
             {{-- テキスト --}}
             <div class="text-center lg:text-left">
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-snug mb-4">
-                    パンを愛する仲間と、<br class="sm:hidden">つながろう。
+                    ベーカリスタと、<br class="sm:hidden">もっと近くに。
                 </h1>
                 <p class="text-base sm:text-lg text-gray-700 leading-relaxed mb-6">
-                    ベーカリスタサークルは、パン作りを愛する人たちが集う<br class="hidden sm:block">
-                    “学びと交流” のオンラインコミュニティ。<br>
-                    全国の職人・ホームベーカーと一緒に、<br class="hidden sm:block">
-                    あなたの「焼く」をもっと自由に。
+                    「ベーカリスタポータル」は、<br class="hidden sm:block">
+                    ベーカリスタとお客様をつなぐ、<br class="hidden sm:block">
+                    新しいコミュニケーションの中心です。<br>
+                    登録は無料。あなた専用のページから<br class="hidden sm:block">
+                    さまざまなサービスにアクセスできます。
                 </p>
 
                 <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 mb-4">
                     <a href="#register-form" class="btn btn-primary btn-sm sm:btn-md md:btn-lg shadow-lg">
-                        今すぐ有料会員になる
+                        無料で登録する
                     </a>
                     <a href="{{ route('login') }}" class="btn btn-outline btn-sm sm:btn-md md:btn-lg">
-                        すでに会員の方はこちら
+                        ログイン
                     </a>
                 </div>
 
                 <p class="text-xs sm:text-sm text-gray-500">
-                    月額 ¥3,300（税込）で始めるプレミアムメンバーシップ。<br class="hidden sm:block">
-                    いつでもキャンセル可能・オンラインで登録完結。
+                    会員登録は無料。メールアドレスだけで簡単に始められます。
                 </p>
             </div>
         </div>
@@ -60,34 +40,34 @@
     <section class="py-20 bg-base-200 px-6">
         <div class="max-w-5xl mx-auto text-center space-y-10">
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-800">
-                ベーカリスタサークルとは？
+                ベーカリスタポータルとは？
             </h2>
             <p class="text-base sm:text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
-                北海道・室蘭発のクラフト小麦粉ブランド「ベーカリスタ」が運営する、<br class="hidden sm:block">
-                パンを愛する人のための月額制コミュニティです。<br>
-                毎月の特別講座、会員限定ライブ、交流ルームなどを通して、<br>
-                “パン作りを暮らしの真ん中に” をテーマに活動しています。
+                北海道発のクラフト小麦粉ブランド「ベーカリスタ」が運営する、<br class="hidden sm:block">
+                お客様専用のオンラインサービスです。<br>
+                会員登録することで、ベーカリスタの最新情報やご案内を<br class="hidden sm:block">
+                よりスムーズに受け取ることができます。
             </p>
 
             <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 mt-10">
                 <div class="card bg-white shadow-md border hover:shadow-lg transition transform hover:-translate-y-1">
                     <div class="card-body">
-                        <h3 class="card-title text-lg sm:text-xl">🧑‍🍳 仲間とつながる</h3>
-                        <p>全国のベーカーと出会える。ルームで情報交換や作品共有ができます。</p>
+                        <h3 class="card-title text-lg sm:text-xl">💬 つながる</h3>
+                        <p>ベーカリスタからのお知らせやメッセージを、あなた専用のページで確認できます。</p>
                     </div>
                 </div>
 
                 <div class="card bg-white shadow-md border hover:shadow-lg transition transform hover:-translate-y-1">
                     <div class="card-body">
-                        <h3 class="card-title text-lg sm:text-xl">🎥 学ぶ・体験する</h3>
-                        <p>講師陣によるオンライン講座、ライブ配信イベントなどを毎月開催。</p>
+                        <h3 class="card-title text-lg sm:text-xl">🧾 管理する</h3>
+                        <p>登録情報や注文履歴をまとめて確認できる便利なマイページを順次拡充予定です。</p>
                     </div>
                 </div>
 
                 <div class="card bg-white shadow-md border hover:shadow-lg transition transform hover:-translate-y-1">
                     <div class="card-body">
-                        <h3 class="card-title text-lg sm:text-xl">📦 会員特典</h3>
-                        <p>クラフト小麦粉の限定販売・先行予約・特別割引などの特典をご用意。</p>
+                        <h3 class="card-title text-lg sm:text-xl">🎁 ひろがる</h3>
+                        <p>ベーカリスタならではの限定コンテンツや特典情報をお届けします。</p>
                     </div>
                 </div>
             </div>
@@ -101,11 +81,10 @@
 
         <div class="relative max-w-4xl mx-auto px-6 text-center">
             <h2 class="text-3xl sm:text-4xl font-bold mb-4 drop-shadow-lg">
-                今すぐ参加して、<br class="sm:hidden">仲間とつながろう。
+                無料で登録して、<br class="sm:hidden">ベーカリスタとつながろう。
             </h2>
             <p class="text-base sm:text-lg text-white/90 mb-12">
-                下記フォームから会員登録を完了すると、<br class="hidden sm:block">
-                すぐにベーカリスタサークルのすべての機能をご利用いただけます。
+                登録すると、あなた専用のマイページにログインできるようになります。
             </p>
 
             {{-- 登録フォーム --}}
@@ -113,9 +92,9 @@
                 <form method="POST" action="{{ route('register') }}" class="space-y-5 text-left text-gray-700">
                     @csrf
 
-                    {{-- 名前 --}}
+                    {{-- ニックネーム --}}
                     <div>
-                        <x-input-label for="name" :value="__('お名前')" class="text-gray-800 font-semibold" />
+                        <x-input-label for="name" :value="__('ニックネーム')" class="text-gray-800 font-semibold" />
                         <x-text-input id="name" type="text" name="name"
                             class="input input-bordered w-full mt-1 focus:ring-2 focus:ring-primary"
                             :value="old('name')" required autocomplete="name" />
@@ -152,29 +131,19 @@
                     {{-- 登録ボタン --}}
                     <div class="pt-6">
                         <button type="submit" class="btn btn-accent w-full text-white shadow-lg hover:shadow-xl transition btn-sm md:btn-lg">
-                            {{ __('ベーカリスタサークルに参加する') }}
+                            {{ __('ベーカリスタポータルに登録する（無料）') }}
                         </button>
                     </div>
 
                     {{-- ログインリンク --}}
                     <div class="text-center mt-6">
                         <a href="{{ route('login') }}" class="link link-hover text-sm text-primary">
-                            すでに会員の方はこちらからログイン
+                            すでに登録済みの方はこちらからログイン
                         </a>
                     </div>
                 </form>
             </div>
-
-            <p class="mt-10 text-sm text-white/90">
-                月額 <span class="font-bold text-white">¥3,300（税込）</span> — いつでもキャンセル可能・オンラインで登録完結。
-            </p>
         </div>
     </section>
 
-    {{-- フッター --}}
-    <footer class="footer footer-center p-6 bg-base-300 text-base-content text-xs sm:text-sm">
-        <p>© {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.</p>
-    </footer>
-
-</body>
-</html>
+</x-guest-layout>

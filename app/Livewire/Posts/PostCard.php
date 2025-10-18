@@ -3,6 +3,7 @@
 namespace App\Livewire\Posts;
 
 use App\Models\Post;
+use App\Helpers\TextHelper;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -39,6 +40,18 @@ class PostCard extends Component
     
     public function render()
     {
+        $body = $this->post->body ?? '';
+
+        // ✅ 本文リンク化（HTML生成）
+        $this->post->formatted_body = TextHelper::linkify($body);
+
+        // ✅ 短縮版（200文字）もリンク化
+        $short = mb_substr($body, 0, 200);
+        if (mb_strlen($body) > 200) {
+            $short .= '…';
+        }
+        $this->post->short_body = TextHelper::linkify($short);
+
         return view('livewire.posts.post-card');
     }
 }

@@ -19,12 +19,11 @@ class ProfileUpdateRequest extends FormRequest
             // プロフィール画像
             'avatar'        => ['nullable', 'image', 'max:10240'], // 10MBまで
             // 基本情報
-            'name'             => ['required', 'string', 'max:50'],
+            'name'             => ['nullable', 'string', 'max:50'],
             'first_name'       => ['nullable', 'string', 'max:50'],
             'last_name'        => ['nullable', 'string', 'max:50'],
             'first_name_kana'  => ['nullable', 'string', 'max:50'],
             'last_name_kana'   => ['nullable', 'string', 'max:50'],
-            'display_name'     => ['nullable', 'string', 'max:50'],
             'instagram_id'     => ['nullable', 'string', 'max:100'],
             'avatar_media_id'  => ['nullable', 'string', 'max:50'],
             'company_name'     => ['nullable', 'string', 'max:50'],

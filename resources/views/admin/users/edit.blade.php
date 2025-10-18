@@ -8,21 +8,26 @@
             {{-- 基本情報 --}}
             <div class="card bg-base-100 shadow p-4">
                 <h3 class="font-bold mb-2">基本情報</h3>
-                @if($user->avatar)
-                    <div class="avatar">
-                        <div class="w-10 rounded-full">
-                            <img src="{{ $user->avatar->url }}" alt="avatar" class="w-12 h-12 rounded-full object-cover">
-                        </div>
+                {{-- アバター表示 --}}
+                @if($avatar_url)
+                  <div class="avatar mb-4">
+                    <div class="w-24 rounded-full">
+                      <img src="{{ $avatar_url }}" alt="プロフィール画像" class="rounded-full object-cover">
                     </div>
+                  </div>
                 @else
-                    <span class="badge badge-ghost">なし</span>
+                  <div class="avatar placeholder mb-4">
+                    <div class="bg-neutral text-neutral-content rounded-full w-24">
+                      <span class="text-2xl">{{ mb_substr($user->name ?? '？', 0, 1) }}</span>
+                    </div>
+                  </div>
                 @endif
                 <div class="grid grid-cols-2 gap-4">
                     <x-input name="last_name" label="姓" :value="$user->last_name"/>
-                    <x-input name="name" label="名" :value="$user->name"/>
-                    <x-input name="last_name_kana" label="姓（カナ）" :value="$user->last_name_kana"/>
-                    <x-input name="first_name_kana" label="名（カナ）" :value="$user->first_name_kana"/>
-                    <x-input name="display_name" label="表示名" :value="$user->display_name"/>
+                    <x-input name="first_name" label="名" :value="$user->first_name"/>
+                    <x-input name="last_name_kana" label="姓（かな）" :value="$user->last_name_kana"/>
+                    <x-input name="first_name_kana" label="名（かな）" :value="$user->first_name_kana"/>
+                    <x-input name="name" label="ニックネーム" :value="$user->name"/>
                     <x-input name="instagram_id" label="Instagram ID" :value="$user->instagram_id"/>
                     <x-input name="company_name" label="会社名" :value="$user->company_name"/>
                     <x-input name="email" type="email" label="メール" :value="$user->email"/>

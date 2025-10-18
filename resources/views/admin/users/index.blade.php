@@ -29,19 +29,23 @@
                         <tbody>
                             @foreach($users as $user)
                             <tr>
-                                <td>{{ $user->id }}：<div class="badge badge-primary">{{ $user->member_number }}</div></td>
+                                <td>{{ $user->id }}：<div class="badge badge-primary">{{ $user->member_number ?? 'なし' }}</div></td>
                                 <td>
-                                    @if($user->avatar)
-                                        <div class="avatar">
-                                            <div class="w-10 rounded-full">
-                                                <img src="{{ $user->avatar->url }}" alt="avatar" class="w-12 h-12 rounded-full object-cover">
-                                            </div>
+                                    @if($user->avatar_url)
+                                      <div class="avatar">
+                                        <div class="w-10 rounded-full">
+                                          <img src="{{ $user->avatar_url }}" alt="プロフィール画像" class="w-10 h-10 rounded-full object-cover">
                                         </div>
+                                      </div>
                                     @else
-                                        <span class="badge badge-ghost">なし</span>
+                                      <div class="avatar placeholder">
+                                        <div class="bg-neutral text-neutral-content rounded-full w-10">
+                                          <span class="text-sm">{{ mb_substr($user->name ?? '？', 0, 1) }}</span>
+                                        </div>
+                                      </div>
                                     @endif
                                 </td>
-                                <td>{{ $user->display_name }}（{{ $user->last_name }} {{ $user->name }}）</td>
+                                <td>{{ $user->name }}（{{ $user->last_name }} {{ $user->first_name }}）</td>
                                 <td>{{ $user->prefecture }}{{ $user->address1 }}{{ $user->address2 }}</td>
                                 <td>{{ $user->created_at }}</td>
                                 <td>

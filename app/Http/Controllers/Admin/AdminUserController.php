@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminUserController extends Controller
 {
@@ -14,9 +15,28 @@ class AdminUserController extends Controller
      */
     public function index()
     {
-        $users = \App\Models\User::with('avatar') // アバター画像を eager load
+        $users = User::with('avatar') // アバター画像を eager load
             ->paginate(20);
     
+        // 各ユーザーごとにアバターURLを生成
+        $users->getCollection()->transform(function ($user) {
+
+        // ✅ media_files.type = 'avatar' のうち最初のものを取得
+        $avatar = $user->mediaFiles()
+            ->where('media_files.type', 'avatar')
+            ->orderBy('media_relations.sort_order', 'asc')
+            ->first();
+
+        if ($avatar && $avatar->path) {
+            $disk = $avatar->disk ?? 'public';
+            $user->avatar_url = Storage::disk($disk)->url($avatar->path);
+        } else {
+            $user->avatar_url = null;
+        }
+
+            return $user;
+        });
+        
         return view('admin.users.index', compact('users'));
     }
 
@@ -25,34 +45,26 @@ class AdminUserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        // ✅ media_files.type = 'avatar' を基準に取得
+        $avatar = $user->mediaFiles()
+            ->where('media_files.type', 'avatar')
+            ->orderBy('media_relations.sort_order', 'asc')
+            ->first();
+    
+        // ✅ StorageからURLを生成（存在しない場合はnull）
+        if ($avatar && $avatar->path) {
+            $disk = $avatar->disk ?? 'public';
+            $avatar_url = Storage::disk($disk)->url($avatar->path);
+        } else {
+            $avatar_url = null;
+        }
+        return view('admin.users.edit', compact('user', 'avatar_url'));
     }
 
-public function update(Request $request, User $user)
+    public function update(ProfileUpdateRequest $request, User $user)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'first_name' => 'nullable|string|max:50',
-            'last_name' => 'nullable|string|max:50',
-            'first_name_kana' => 'nullable|string|max:50',
-            'last_name_kana' => 'nullable|string|max:50',
-            'display_name' => 'nullable|string|max:50',
-            'instagram_id' => 'nullable|string|max:100',
-            'company_name' => 'nullable|string|max:50',
-            'postal_code' => 'nullable|string|max:10',
-            'prefecture' => 'nullable|string|max:50',
-            'address1' => 'nullable|string|max:100',
-            'address2' => 'nullable|string|max:100',
-            'address3' => 'nullable|string|max:100',
-            'country' => 'nullable|string|size:2',
-            'phone' => 'nullable|string|max:20',
-            'role' => 'nullable|string|max:20',
-            'user_type' => 'nullable|string|max:10',
-            'user_status' => 'nullable|string|max:20',
-            'email_notification' => 'boolean',
-            'remarks' => 'nullable|string',
-            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
-        ]);
+        // バリデーション済みデータを取得
+        $data = $request->validated();
     
         $user->fill($data);
         $user->save();

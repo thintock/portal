@@ -112,7 +112,13 @@ class ProfileController extends Controller
          */
         try {
             $user->createOrGetStripeCustomer();
-            $stripeName = $user->display_name ?: $user->name;
+            // 氏名が両方存在する場合は「姓＋名」を使用、どちらか欠けている場合は補完
+            if (!empty($user->last_name) || !empty($user->first_name)) {
+                $stripeName = trim(($user->last_name ?? '') . ' ' . ($user->first_name ?? ''));
+            } else {
+                // 両方nullまたは空ならニックネーム(name)を使用
+                $stripeName = $user->name;
+            }
 
             $user->updateStripeCustomer([
                 'name'    => $stripeName,

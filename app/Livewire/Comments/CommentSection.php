@@ -4,6 +4,7 @@ namespace App\Livewire\Comments;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Helpers\TextHelper;
 use App\Models\Notification;
 use App\Models\MediaFile;
 use App\Models\MediaRelation;
@@ -257,8 +258,31 @@ class CommentSection extends Component
             ->with(['user', 'replies.user'])
             ->latest()
             ->paginate($this->perPage);
-        
-        // 初期値設定：まだ存在しないキーには1をセット
+
+        // ✅ 各コメント本文をリンク化＆短縮化
+        foreach ($parents as $parent) {
+            $body = $parent->body ?? '';
+            $parent->formatted_body = TextHelper::linkify($body);
+
+            $short = mb_substr($body, 0, 100);
+            if (mb_strlen($body) > 100) {
+                $short .= '…';
+            }
+            $parent->short_body = TextHelper::linkify($short);
+
+            foreach ($parent->replies as $reply) {
+                $rbody = $reply->body ?? '';
+                $reply->formatted_body = TextHelper::linkify($rbody);
+
+                $rshort = mb_substr($rbody, 0, 100);
+                if (mb_strlen($rbody) > 100) {
+                    $rshort .= '…';
+                }
+                $reply->short_body = TextHelper::linkify($rshort);
+            }
+        }
+
+        // 初期値設定
         foreach ($parents as $parent) {
             if (!isset($this->repliesPerParent[$parent->id])) {
                 $this->repliesPerParent[$parent->id] = 1;

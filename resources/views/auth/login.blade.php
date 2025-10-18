@@ -5,7 +5,7 @@
             <div class="text-center mb-6">
                 <img src="{{ asset('images/bakerista_logo.png') }}" alt="Bakerista" class="mx-auto w-24 mb-2">
                 <h1 class="text-2xl font-bold text-primary">ログイン</h1>
-                <p class="text-gray-500 text-sm mt-1">ベーカリスタサークルへようこそ</p>
+                <p class="text-gray-500 text-sm mt-1">ベーカリスタポータルへようこそ</p>
             </div>
 
             {{-- ステータスメッセージ --}}
@@ -65,10 +65,5 @@
                 </div>
             </form>
         </div>
-
-        {{-- コピーライト --}}
-        <footer class="mt-8 text-center text-xs text-gray-400">
-            © {{ date('Y') }} ベーカリスタ株式会社 — Bakerista Inc.
-        </footer>
     </div>
 </x-guest-layout>

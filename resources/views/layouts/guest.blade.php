@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="cupcake">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="cupcake" class="scroll-smooth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,7 +19,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="font-sans antialiased overflow-x-hidden">
+    <body class="bg-base-100 text-base-content font-sans antialiased">
+        @include('commons.messages')
         {{ $slot }}
+        {{-- フッター --}}
+        @include('commons.footer')
+        guest
     </body>
 </html>

@@ -18,13 +18,13 @@
                  class="w-full h-full object-cover">
           @else
             <span class="text-sm font-semibold text-gray-600">
-              {{ mb_substr($post->user->display_name ?? '？', 0, 1) }}
+              {{ mb_substr($post->user->name ?? '？', 0, 1) }}
             </span>
           @endif
         </div>
         {{---ニックネーム表示--}}
         <div>
-          <span class="font-semibold">{{ $post->user->display_name ?? 'ユーザー名未登録' }}</span>
+          <span class="font-semibold">{{ $post->user->name ?? 'ユーザー名未登録' }}</span>
           <span class="text-xs text-gray-500">{{ $post->created_at->diffForHumans() }}
           @if($post->updated_at->ne($post->created_at))
           <span title="更新: {{ $post->updated_at->diffForHumans() }}">({{ $post->updated_at->diffForHumans() }}:編集済み)</span>
@@ -93,23 +93,18 @@
     
     {{-- 3段目：本文（200文字で省略表示） --}}
     <div class="p-2 sm:p-4 md:p-6 text-sm text-gray-800 break-words" x-data="{open:false}">
-      @php
-        $body = $post->body ?? '';
-        $short = mb_substr($body, 0, 200);
-      @endphp
+      @if(mb_strlen($post->body) > 200)
+        {{-- 短縮表示 --}}
+        <span x-show="!open" class="break-words">{!! $post->short_body !!}</span>
     
-      @if(mb_strlen($body) > 200)
-        {{-- 短縮表示（リンク化済み） --}}
-        <span x-show="!open" class="break-words">{!! \App\Helpers\TextHelper::linkify($short) !!}…</span>
-    
-        {{-- 全文表示（リンク化済み） --}}
-        <span x-show="open" class="break-words">{!! \App\Helpers\TextHelper::linkify($body) !!}</span>
+        {{-- 全文表示 --}}
+        <span x-show="open" class="break-words">{!! $post->formatted_body !!}</span>
     
         <button class="text-blue-600 text-xs ml-2"
                 @click="open=!open"
-                x-text="open?'閉じる':'…つづきを表示'"></button>
+                x-text="open ? '閉じる' : '…つづきを表示'"></button>
       @else
-        {!! \App\Helpers\TextHelper::linkify($body) !!}
+        {!! $post->formatted_body !!}
       @endif
     </div>
 

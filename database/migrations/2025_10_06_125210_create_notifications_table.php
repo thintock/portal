@@ -17,6 +17,7 @@ return new class extends Migration
             $table->morphs('notifiable'); // notifiable_id, notifiable_type
             $table->string('type', 50); // 通知タイプ（comment, reply, likeなど）
             $table->text('message');
+            $table->foreignId('sender_id')->nullable()->constrained('users')->nullOnDelete();
             // どのルームに属する通知か（投稿を特定するため）
             $table->foreignId('room_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamp('read_at')->nullable();

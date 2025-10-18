@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // 名前関連
-            $table->string('last_name', 50)->nullable()->after('name');
+            $table->string('first_name', 50)->nullable()->after('name');
+            $table->string('last_name', 50)->nullable()->after('first_name');
             $table->string('first_name_kana', 50)->nullable()->after('last_name');
             $table->string('last_name_kana', 50)->nullable()->after('first_name_kana');
-            $table->string('display_name', 50)->nullable()->after('last_name_kana');
 
             // プロフィール関連
-            $table->string('instagram_id', 100)->nullable()->after('display_name');
+            $table->string('instagram_id', 100)->nullable()->after('last_name_kana');
             $table->string('company_name', 50)->nullable()->after('instagram_id');
 
             // 住所関連

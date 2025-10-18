@@ -56,14 +56,14 @@
                     $avatar = $user->mediaFiles()->where('media_files.type', 'avatar')->first();
                 @endphp
                 <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border border-white"
-                     title="{{ $user->display_name }}">
+                     title="{{ $user->name }}">
                     @if($avatar)
                         <img src="{{ Storage::url($avatar->path) }}" 
                              alt="avatar"
                              class="w-full h-full object-cover">
                     @else
                         <span class="text-xs font-semibold text-gray-600">
-                            {{ mb_substr($user->display_name ?? '？', 0, 1) }}
+                            {{ mb_substr($user->name ?? '？', 0, 1) }}
                         </span>
                     @endif
                 </div>
@@ -110,7 +110,7 @@
                     </div>
                 @endif
                 <div>
-                    <h1 class="card-title text-2xl">{{ $room->display_name }}</h1>
+                    <h1 class="card-title text-2xl">{{ $room->name }}</h1>
                     <p class="text-gray-600">{{ $room->description }}</p>
                 </div>
             </div>
@@ -139,14 +139,14 @@
                             @endphp
                             <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 
                                         {{ $user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}"
-                                 title="{{ $user->display_name }}">
+                                 title="{{ $user->name }}">
                                 @if($avatar)
                                     <img src="{{ Storage::url($avatar->path) }}" 
                                          alt="avatar" 
                                          class="w-full h-full object-cover">
                                 @else
                                     <span class="text-sm font-semibold text-gray-600">
-                                        {{ mb_substr($user->display_name ?? '？', 0, 1) }}
+                                        {{ mb_substr($user->name ?? '？', 0, 1) }}
                                     </span>
                                 @endif
                             </div>

@@ -26,36 +26,25 @@
     {{-- プロフィール画像 --}}
     <div class="form-control">
       <x-input-label for="avatar" :value="__('プロフィール画像')" />
-
+    
       <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-3">
-        {{-- 既存画像（media_files経由） --}}
-        @php
-          $avatar = $user->mediaFiles()
-                        ->wherePivot('media_files.type', 'avatar')
-                        ->orderBy('media_relations.sort_order', 'asc')
-                        ->first();
-        @endphp
-
-        @if ($avatar)
-          <div class="avatar">
-            <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-              <img src="{{ Storage::url($avatar->path) }}" alt="プロフィール画像" class="object-cover" />
-            </div>
+        {{-- プレビュー画像 --}}
+        <div class="avatar relative">
+          <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
+            <img id="avatar-preview"
+                 src="{{ $avatar ? Storage::url($avatar->path) : asset('images/default-avatar.png') }}"
+                 alt="プロフィール画像"
+                 class="object-cover w-24 h-24 transition-all duration-300" />
           </div>
-        @else
-          <div class="avatar placeholder">
-            <div class="bg-neutral text-neutral-content rounded-full w-24">
-              <span class="text-2xl">{{ mb_substr($user->display_name ?? '？', 0, 1) }}</span>
-            </div>
-          </div>
-        @endif
-
+          
+        </div>
+    
         {{-- ファイルアップロード欄 --}}
         <div class="flex flex-col">
           <input id="avatar" name="avatar" type="file"
                  accept="image/*"
                  class="file-input file-input-bordered file-input-sm sm:file-input-md sm:w-auto" />
-
+          
           @if ($avatar)
             <label class="label text-xs mt-2 text-gray-500">
               現在の画像を置き換える場合は新しい画像を選択してください。
@@ -65,11 +54,39 @@
               プロフィール画像をアップロードしてください。
             </label>
           @endif
+          {{-- 保存前ラベル --}}
+          <div id="unsaved-label" class="badge badge-warning opacity-0 transition-opacity duration-300">
+            反映するには保存ボタンを押してください
+          </div>
         </div>
       </div>
-
+    
       <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
     </div>
+    
+    {{-- ✅ 即時プレビュー & 「保存前」表示スクリプト --}}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('avatar');
+        const preview = document.getElementById('avatar-preview');
+        const unsavedLabel = document.getElementById('unsaved-label');
+    
+        input?.addEventListener('change', function (e) {
+          const file = e.target.files[0];
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              preview.src = event.target.result;
+              // ✅ 「保存前です」表示
+              unsavedLabel.classList.remove('opacity-0');
+              unsavedLabel.classList.add('opacity-100');
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      });
+    </script>
+
 
     {{-- 氏名 --}}
     <div class="divider text-sm text-gray-500">基本情報</div>
@@ -83,11 +100,11 @@
       </div>
 
       <div>
-        <x-input-label for="name" :value="__('名')" />
-        <x-text-input id="name" name="name" type="text"
+        <x-input-label for="first_name" :value="__('名')" />
+        <x-text-input id="first_name" name="first_name" type="text"
           class="input input-bordered w-full mt-1 text-base"
-          :value="old('name', $user->name)" required />
-        <x-input-error class="mt-2" :messages="$errors->get('name')" />
+          :value="old('first_name', $user->first_name)" required />
+        <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
       </div>
     </div>
 
@@ -111,10 +128,10 @@
     <div class="divider text-sm text-gray-500">公開プロフィール</div>
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="display_name" :value="__('ニックネーム（公開されます）')" />
-        <x-text-input id="display_name" name="display_name" type="text"
+        <x-input-label for="name" :value="__('ニックネーム（公開されます）')" />
+        <x-text-input id="name" name="name" type="text"
           class="input input-bordered w-full mt-1 text-base"
-          :value="old('display_name', $user->display_name)" />
+          :value="old('name', $user->name)" />
       </div>
 
       <div>

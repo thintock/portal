@@ -70,7 +70,7 @@ class MediaFile extends Model
         // 🎥 1️⃣ 動画の場合はサムネイル生成
         $thumbnail = null;
         if (str_starts_with($mime, 'video/')) {
-            try {
+            // try {
                 $tempVideoPath = tempnam(sys_get_temp_dir(), 'video_');
                 file_put_contents($tempVideoPath, file_get_contents($file->getRealPath()));
         
@@ -105,9 +105,9 @@ class MediaFile extends Model
                 @unlink($convertedPath);
                 @unlink($tempThumbPath);
         
-            } catch (\Throwable $e) {
-                \Log::error('Video convert/thumbnail failed: ' . $e->getMessage());
-            }
+            // } catch (\Throwable $e) {
+            //     \Log::error('Video convert/thumbnail failed: ' . $e->getMessage());
+            // }
         }
 
         return self::create([

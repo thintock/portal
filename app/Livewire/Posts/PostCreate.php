@@ -90,7 +90,7 @@ class PostCreate extends Component
     {
         $this->validate();
     
-        DB::transaction(function () {
+        // DB::transaction(function () {
             // 1️⃣ 投稿本体を作成
             $post = Post::create([
                 'room_id'          => $this->room->id,
@@ -131,7 +131,7 @@ class PostCreate extends Component
             // 3️⃣ ルーム情報更新
             $this->room->increment('posts_count');
             $this->room->update(['last_posted_at' => now()]);
-        });
+        // });
     
         // 4️⃣ フォームリセット
         $this->reset(['body', 'media', 'newMedia']);

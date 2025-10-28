@@ -25,7 +25,7 @@ class ReplyForm extends Component
     {
         return [
             'body' => 'required_without:media|string|max:2000',
-            'media.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+            'media.*' => 'nullable|file|max:1048576|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
         ];
     }
 

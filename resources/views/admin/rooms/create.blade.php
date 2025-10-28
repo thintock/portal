@@ -17,7 +17,7 @@
             <div>
                 <label class="block font-semibold mb-1">説明</label>
                 <textarea name="description" rows="3" 
-                          class="textarea textarea-bordered w-full">{{ old('description') }}</textarea>
+                          class="textarea textarea-bordered w-full text-base leading-tight">{{ old('description') }}</textarea>
             </div>
 
             {{-- アイコン画像 --}}

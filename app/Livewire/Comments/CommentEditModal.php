@@ -30,7 +30,7 @@ class CommentEditModal extends Component
             'media'     => 'array|max:5',
             'media.*'   => 'nullable', // ファイル or 既存パス
             'newMedia'   => 'array',
-            'newMedia.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+            'newMedia.*' => 'file|max:1048576|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
         ];
     }
 

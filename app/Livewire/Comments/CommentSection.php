@@ -41,7 +41,7 @@ class CommentSection extends Component
     {
         return [
             'body'     => 'required_without:media|string|max:2000',
-            'media.*'  => 'nullable|file|max:10240|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+            'media.*'  => 'nullable|file|max:1048576|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
         ];
     }
 
@@ -56,7 +56,7 @@ class CommentSection extends Component
         if (!empty($this->newMedia)) {
             $this->validate([
                 'newMedia'   => 'array',
-                'newMedia.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+                'newMedia.*' => 'file|max:1048576|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
             ]);
 
             $total = count($this->media) + count($this->newMedia);

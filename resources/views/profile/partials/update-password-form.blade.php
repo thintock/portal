@@ -21,7 +21,7 @@
     <div>
       <x-input-label for="update_password_current_password" :value="__('現在のパスワード')" />
       <x-text-input id="update_password_current_password" name="current_password" type="password"
-                    class="input input-bordered w-full mt-1 text-base"
+                    class="input input-bordered w-full mt-1 text-base bg-white"
                     placeholder="現在のパスワードを入力"
                     autocomplete="current-password" />
       <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
@@ -32,7 +32,7 @@
       <div>
         <x-input-label for="update_password_password" :value="__('新しいパスワード')" />
         <x-text-input id="update_password_password" name="password" type="password"
-                      class="input input-bordered w-full mt-1 text-base"
+                      class="input input-bordered w-full mt-1 text-base bg-white"
                       placeholder="8文字以上で設定"
                       autocomplete="new-password" />
         <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
@@ -41,7 +41,7 @@
       <div>
         <x-input-label for="update_password_password_confirmation" :value="__('新しいパスワード（確認）')" />
         <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password"
-                      class="input input-bordered w-full mt-1 text-base"
+                      class="input input-bordered w-full mt-1 text-base bg-white"
                       placeholder="もう一度入力"
                       autocomplete="new-password" />
         <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />

@@ -94,7 +94,7 @@
 
                     {{-- ニックネーム --}}
                     <div>
-                        <x-input-label for="name" :value="__('ニックネーム')" class="text-gray-800 font-semibold" />
+                        <x-input-label for="name" :value="__('ニックネーム（後から変更できます）')" class="text-gray-800 font-semibold" />
                         <x-text-input id="name" type="text" name="name"
                             class="input input-bordered w-full mt-1 focus:ring-2 focus:ring-primary"
                             :value="old('name')" required autocomplete="name" />

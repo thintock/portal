@@ -21,6 +21,13 @@
                     ✅ 登録時のメールアドレス宛に新しい確認リンクを送信しました。
                 </div>
             @endif
+            @if (session('warning'))
+                <div class="alert alert-warning shadow-lg my-4">
+                    <div>
+                        <span>{{ session('warning') }}</span>
+                    </div>
+                </div>
+            @endif
 
             {{-- ボタン群 --}}
             <div class="mt-6 space-y-4">

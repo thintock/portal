@@ -26,21 +26,30 @@
     {{-- プロフィール画像 --}}
     <div class="form-control">
       <x-input-label for="avatar" :value="__('プロフィール画像')" />
-    
       <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-3">
         {{-- プレビュー画像 --}}
         <div class="avatar relative">
-          <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
-            <img id="avatar-preview"
-                 src="{{ $avatar ? Storage::url($avatar->path) : asset('images/default-avatar.png') }}"
-                 alt="プロフィール画像"
-                 class="object-cover w-24 h-24 transition-all duration-300" />
+          <div class="w-24 rounded-full bg-primary ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
+            @if ($avatar)
+              {{-- 登録済み画像 --}}
+              <img id="avatar-preview"
+                   src="{{ Storage::url($avatar->path) }}"
+                   alt="プロフィール画像"
+                   class="object-cover w-24 h-24 transition-all duration-300" />
+            @else
+              {{-- 未登録時：頭文字表示 --}}
+              <div id="avatar-initial" class="w-24 h-24 text-white text-3xl font-semibold rounded-full
+            flex items-center justify-center select-none">
+                {{ mb_substr($user->name ?? '？', 0, 1) }}
+              </div>
+            @endif
           </div>
           
         </div>
     
         {{-- ファイルアップロード欄 --}}
         <div class="flex flex-col">
+          
           <input id="avatar" name="avatar" type="file"
                  accept="image/*"
                  class="file-input file-input-bordered file-input-sm sm:file-input-md sm:w-auto" />
@@ -94,7 +103,7 @@
       <div>
         <x-input-label for="last_name" :value="__('姓')" />
         <x-text-input id="last_name" name="last_name" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('last_name', $user->last_name)" required />
         <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
       </div>
@@ -102,7 +111,7 @@
       <div>
         <x-input-label for="first_name" :value="__('名')" />
         <x-text-input id="first_name" name="first_name" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('first_name', $user->first_name)" required />
         <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
       </div>
@@ -113,13 +122,13 @@
       <div>
         <x-input-label for="last_name_kana" :value="__('せい（かな）')" />
         <x-text-input id="last_name_kana" name="last_name_kana" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('last_name_kana', $user->last_name_kana)" />
       </div>
       <div>
         <x-input-label for="first_name_kana" :value="__('めい（かな）')" />
         <x-text-input id="first_name_kana" name="first_name_kana" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('first_name_kana', $user->first_name_kana)" />
       </div>
     </div>
@@ -130,14 +139,14 @@
       <div>
         <x-input-label for="name" :value="__('ニックネーム（公開されます）')" />
         <x-text-input id="name" name="name" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('name', $user->name)" />
       </div>
 
       <div>
         <x-input-label for="instagram_id" :value="__('Instagram アカウント')" />
         <x-text-input id="instagram_id" name="instagram_id" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           placeholder="@bakerista_official"
           :value="old('instagram_id', $user->instagram_id)" />
       </div>
@@ -149,14 +158,14 @@
       <div>
         <x-input-label for="postal_code" :value="__('郵便番号')" />
         <x-text-input id="postal_code" name="postal_code" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('postal_code', $user->postal_code)" />
       </div>
 
       <div>
         <x-input-label for="prefecture" :value="__('都道府県')" />
         <x-text-input id="prefecture" name="prefecture" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('prefecture', $user->prefecture)" />
       </div>
     </div>
@@ -164,13 +173,13 @@
     <div>
       <x-input-label for="address1" :value="__('住所1')" />
       <x-text-input id="address1" name="address1" type="text"
-        class="input input-bordered w-full mt-1 text-base"
+        class="input input-bordered w-full mt-1 text-base bg-white"
         :value="old('address1', $user->address1)" />
     </div>
     <div>
       <x-input-label for="address2" :value="__('住所2（建物名など）')" />
       <x-text-input id="address2" name="address2" type="text"
-        class="input input-bordered w-full mt-1 text-base"
+        class="input input-bordered w-full mt-1 text-base bg-white"
         :value="old('address2', $user->address2)" />
     </div>
 
@@ -180,13 +189,13 @@
       <div>
         <x-input-label for="company_name" :value="__('会社名')" />
         <x-text-input id="company_name" name="company_name" type="text"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('company_name', $user->company_name)" />
       </div>
       <div>
         <x-input-label for="phone" :value="__('電話番号')" />
         <x-text-input id="phone" name="phone" type="tel"
-          class="input input-bordered w-full mt-1 text-base"
+          class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('phone', $user->phone)" />
       </div>
     </div>
@@ -205,7 +214,7 @@
     <div>
       <x-input-label for="email" :value="__('Eメールアドレス')" />
       <x-text-input id="email" name="email" type="email"
-        class="input input-bordered w-full mt-1 text-base"
+        class="input input-bordered w-full mt-1 text-base bg-white"
         :value="old('email', $user->email)" required />
       <x-input-error class="mt-2" :messages="$errors->get('email')" />
     </div>

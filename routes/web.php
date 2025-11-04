@@ -7,8 +7,10 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomMemberController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
@@ -21,6 +23,7 @@ Route::get('/', function () {
     }
     return redirect()->route('register');
 });
+Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
 
 // 無料会員（認証済み）
 Route::middleware(['auth','verified'])->group(function () {
@@ -60,6 +63,7 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::get('/events', fn() => 'イベント管理ページ')->name('admin.events');
     Route::resource('users', AdminUserController::class)->names('users');
     Route::resource('rooms', RoomController::class)->except(['index','show']);
+    Route::resource('pages', AdminPageController::class);
 });
 
 

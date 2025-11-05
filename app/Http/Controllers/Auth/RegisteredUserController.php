@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\Page;
 
 class RegisteredUserController extends Controller
 {
@@ -19,7 +20,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $user = Auth::user();
+        $page = Page::where('slug', 'register')->first();
+        return view('auth.register', compact('user', 'page'));
     }
 
     /**

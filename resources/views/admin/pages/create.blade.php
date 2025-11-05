@@ -21,21 +21,29 @@
 
             {{-- スラッグ --}}
             <div class="mb-6">
-                <label for="slug" class="block font-semibold mb-1">スラッグ（URL識別子）<span class="text-red-500">*</span></label>
+                <label for="slug" class="block font-semibold mb-1">
+                    スラッグ（URL識別子）<span class="text-red-500">*</span>
+                </label>
+            
                 <input type="text" name="slug" id="slug"
-                       value="{{ old('slug') }}"
-                       class="w-full border rounded p-2"
-                       placeholder="例: terms, privacy, about">
-                <p class="text-sm text-gray-500 mt-1">URLとして使用されます（例: https://portal.bakerista.jp/terms）</p>
+                       value="{{ old('slug', $presetSlug ?? '') }}"
+                       class="w-full border rounded p-2 {{ isset($presetSlug) ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                       placeholder="例: terms, privacy, about"
+                       {{ isset($presetSlug) ? 'readonly' : '' }}>
+            
+                <p class="text-sm text-gray-500 mt-1">
+                    URLとして使用されます（例: https://portal.bakerista.jp/terms）
+                </p>
             </div>
 
             {{-- タイトル --}}
             <div class="mb-6">
                 <label for="title" class="block font-semibold mb-1">タイトル</label>
                 <input type="text" name="title" id="title"
-                       value="{{ old('title') }}"
-                       class="w-full border rounded p-2"
-                       placeholder="ページタイトルを入力してください">
+                       value="{{ old('title', $presetTitle ?? '') }}"
+                       class="w-full border rounded p-2 {{ isset($presetTitle) && $presetTitle ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                       placeholder="ページタイトルを入力してください"
+                       {{ isset($presetTitle) && $presetTitle ? 'readonly' : '' }}>
             </div>
 
             {{-- 本文1 --}}

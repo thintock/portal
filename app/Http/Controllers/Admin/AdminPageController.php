@@ -14,18 +14,33 @@ class AdminPageController extends Controller
      */
     public function index()
     {
+        // ✅ config から取得
+        $requiredSlugs = config('pages.required');
+    
+        // 🔍 一般ページ（必須スラッグ以外）
         $pages = Page::with(['creator', 'updater'])
-            ->orderBy('id', 'asc')   // ← 明示的に並び順を指定
-            ->paginate(10);          // ← 件数が増えても対応可能
-        return view('admin.pages.index', compact('pages'));
+            ->whereNotIn('slug', array_keys($requiredSlugs))
+            ->orderBy('id', 'asc')
+            ->paginate(10);
+    
+        // 🔍 必須ページの存在確認
+        $requiredPages = collect($requiredSlugs)->mapWithKeys(function ($label, $slug) {
+            return [$slug => Page::where('slug', $slug)->first()];
+        });
+    
+        return view('admin.pages.index', compact('pages', 'requiredPages', 'requiredSlugs'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.pages.create');
+        $presetSlug  = $request->query('slug');
+        $requiredSlugs = config('pages.required');
+        $presetTitle = $requiredSlugs[$presetSlug] ?? '';
+    
+        return view('admin.pages.create', compact('presetSlug', 'presetTitle'));
     }
 
     /**

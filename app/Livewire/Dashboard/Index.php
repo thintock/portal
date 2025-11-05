@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Room;
 use App\Models\Post;
+use App\Models\Page;
 
 class Index extends Component
 {
@@ -18,6 +19,9 @@ class Index extends Component
     {
         $user = Auth::user();
 
+        // --- 固定ページを取得 ---
+        $page = Page::where('slug', 'dashboard')->first();
+        
         // --- 有料会員のみデータ取得 ---
         $rooms = collect(); // デフォルト空コレクション
         $latestPosts = collect();
@@ -60,6 +64,7 @@ class Index extends Component
 
         return view('livewire.dashboard.index', [
             'user' => $user,
+            'page' => $page,
             'rooms' => $rooms,
             'latestPosts' => $latestPosts,
         ])->layout('layouts.app');

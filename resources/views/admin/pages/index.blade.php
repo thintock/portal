@@ -77,5 +77,38 @@
                 </div>
             @endif
         </div>
+        
+        {{-- ✅ 必須ページ確認エリア --}}
+        <div class="bg-base-200 mt-10 p-6 rounded-lg shadow-inner">
+            <h2 class="text-lg font-bold mb-4">📘 必須ページの状態</h2>
+
+            <ul class="space-y-3">
+                @foreach($requiredSlugs as $slug => $label)
+                    @php $page = $requiredPages[$slug]; @endphp
+
+                    <li class="flex items-center justify-between bg-white p-4 rounded-md shadow-sm">
+                        <div>
+                            <p class="font-semibold text-gray-800">{{ $label }}</p>
+                            <p class="text-sm text-gray-500">スラッグ: <code>{{ $slug }}</code></p>
+                        </div>
+
+                        @if ($page)
+                            <div class="flex items-center space-x-3">
+                                <span class="badge badge-success">✅ 作成済み</span>
+                                <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline">編集</a>
+                            </div>
+                        @else
+                            <div class="flex items-center space-x-3">
+                                <span class="badge badge-error">⚠ 未作成</span>
+                                <a href="{{ route('admin.pages.create', ['slug' => $slug]) }}" class="btn btn-sm btn-primary">
+                                    作成する
+                                </a>
+                            </div>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+        
     </div>
 </x-app-layout>

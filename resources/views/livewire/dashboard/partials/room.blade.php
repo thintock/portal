@@ -1,27 +1,32 @@
-{{-- 新着投稿 --}}
-<div class="bg-white shadow-sm sm:rounded-lg">
+{{-- 📝 新着投稿 --}}
+<div class="bg-white shadow-sm rounded-lg mt-10 max-w-3xl mx-auto w-full px-4 sm:px-6">
     <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold p-4">📝 新着投稿</h2>
     </div>
 
     <ul class="divide-y">
-        @foreach($latestPosts as $post)
+        @forelse($latestPosts as $post)
             <li class="hover:bg-base-100 transition">
                 <a href="{{ route('posts.show', $post) }}" class="block p-3">
                     <div class="w-full break-words">
-                        {{-- ルーム名 --}}
-                        <div class=" mb-1">
-                            <span class="text-sm font-bold text-primary">[{{ $post->room->name }}]</span> <span class="text-sm">{{ Str::limit(strip_tags($post->body), 100) }}</span> <span class="badge badge-sm badge-soft text-xs">by {{ $post->user->name }}</span>
+                        {{-- ルーム名・本文 --}}
+                        <div class="mb-1">
+                            <span class="text-sm font-bold text-primary">[{{ $post->room->name }}]</span>
+                            <span class="text-sm">{{ Str::limit(strip_tags($post->body), 100) }}</span>
+                            <span class="badge badge-sm text-xs ml-2 bg-gray-100 text-gray-600 border-none">
+                                by {{ $post->user->name }}
+                            </span>
                         </div>
                     </div>
                 </a>
             </li>
-        @endforeach
+        @empty
+            <li class="p-4 text-gray-500 text-center">まだ投稿がありません。</li>
+        @endforelse
     </ul>
-
-
-
 </div>
+
+
 
 {{-- ルーム一覧 --}}
 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

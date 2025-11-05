@@ -42,21 +42,29 @@ class AdminUserController extends Controller
      */
     public function edit(User $user)
     {
-        // ✅ media_files.type = 'avatar' を基準に取得
+        // ✅ アバター画像を取得（media_files.type = 'avatar'）
         $avatar = $user->mediaFiles()
             ->where('media_files.type', 'avatar')
             ->orderBy('media_relations.sort_order', 'asc')
             ->first();
     
-        // ✅ StorageからURLを生成（存在しない場合はnull）
+        // ✅ Storage から URL を生成（存在しない場合は null）
         if ($avatar && $avatar->path) {
-            $disk = $avatar->disk ?? 'public';
-            $avatar_url = Storage::disk($disk)->url($avatar->path);
+            try {
+                // ディスク指定があれば使い、なければ config/filesystems.php の default
+                $disk = $avatar->disk ?? config('filesystems.default', 'public');
+                $avatar_url = Storage::disk($disk)->url($avatar->path);
+            } catch (\Exception $e) {
+                // 万一 Storage::url 失敗時も安全に null
+                $avatar_url = null;
+            }
         } else {
             $avatar_url = null;
         }
+    
         return view('admin.users.edit', compact('user', 'avatar_url'));
     }
+
 
     public function update(ProfileUpdateRequest $request, User $user)
     {

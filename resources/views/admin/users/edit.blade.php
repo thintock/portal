@@ -1,12 +1,17 @@
 <x-admin-layout>
-    <x-slot name="header"><h2 class="font-semibold text-xl">ユーザー編集</h2></x-slot>
-
-    <div class="p-6">
-        <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-6">
+    @section('admin-header')
+        <div>
+            <h1 class="text-lg font-bold text-gray-800">ユーザー管理</h1>
+            <p class="text-sm text-gray-500">ユーザーを確認・編集できます。</p>
+        </div>
+    @endsection
+    
+    <div class="w-full">
+        <form method="POST" action="{{ route('admin.users.update', $user) }}">
             @csrf @method('PATCH')
 
             {{-- 基本情報 --}}
-            <div class="card bg-base-100 shadow p-4">
+            <div class="card bg-white shadow p-4">
                 <h3 class="font-bold mb-2">基本情報</h3>
                 {{-- アバター表示 --}}
                 @if($avatar_url)
@@ -36,7 +41,7 @@
             </div>
 
             {{-- 住所 --}}
-            <div class="card bg-base-100 shadow p-4">
+            <div class="card bg-white shadow p-4">
                 <h3 class="font-bold mb-2">住所情報</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <x-input name="postal_code" label="郵便番号" :value="$user->postal_code"/>
@@ -49,7 +54,7 @@
             </div>
 
             {{-- 管理用 --}}
-            <div class="card bg-base-100 shadow p-4">
+            <div class="card bg-white shadow p-4">
                 <h3 class="font-bold mb-2">管理情報</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <x-select name="role" label="権限" :options="['admin'=>'管理者','guest'=>'ゲスト','user'=>'一般']" :value="$user->role"/>
@@ -67,7 +72,7 @@
             </div>
 
             {{-- Stripe --}}
-            <div class="card bg-base-100 shadow p-4">
+            <div class="card bg-white shadow p-4">
                 <h3 class="font-bold mb-2">Stripe情報</h3>
                 <ul class="text-sm">
                     <li><b>stripe_id:</b> {{ $user->stripe_id ?? '-' }}</li>

@@ -39,8 +39,10 @@
 
             {{-- メイン --}}
             <main class="flex-1 p-8 bg-base-200 overflow-y-auto">
-                @include('commons.messages')
-                {{ $slot }}
+                <div class="max-w-7xl mx-auto">
+                    @include('commons.messages')
+                    {{ $slot }}
+                </div>
             </main>
         </div>
     </div>

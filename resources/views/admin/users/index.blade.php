@@ -1,9 +1,12 @@
 <x-admin-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl">👥 ユーザー一覧</h2>
-    </x-slot>
-
-    <div class="p-6 space-y-4">
+    @section('admin-header')
+        <div>
+            <h1 class="text-lg font-bold text-gray-800">ユーザー管理</h1>
+            <p class="text-sm text-gray-500">ユーザーを確認・編集できます。</p>
+        </div>
+    @endsection
+    
+    <div class="w-full">
         {{-- 成功メッセージ --}}
         @if(session('success'))
             <div class="alert alert-success shadow-sm">
@@ -11,7 +14,7 @@
             </div>
         @endif
 
-        <div class="card bg-base-100 shadow-xl">
+        <div class="card bg-white shadow-xl">
             <div class="card-body p-4">
                 <div class="overflow-x-auto">
                     <table class="table table-zebra w-full text-sm">

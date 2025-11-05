@@ -61,7 +61,7 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     // 今後の管理ページ用のルート（未実装でもOK）
     Route::get('/posts', fn() => '投稿管理ページ')->name('admin.posts');
     Route::get('/events', fn() => 'イベント管理ページ')->name('admin.events');
-    Route::resource('users', AdminUserController::class)->names('users');
+    Route::resource('users', AdminUserController::class)->names('users')->except('show');
     Route::resource('rooms', RoomController::class)->except('show');
     Route::resource('pages', AdminPageController::class);
 });

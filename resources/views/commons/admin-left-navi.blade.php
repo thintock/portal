@@ -5,20 +5,28 @@
     {{-- ロゴエリア --}}
     <div class="flex items-center justify-center h-20 border-b border-slate-700">
         <a href="{{ route('admin.dashboard') }}">
-            <img src="{{ asset('images/bakerista_logo.png') }}" alt="Bakerista Logo" class="h-8 w-auto opacity-90">
+            <img src="{{ asset('images/bakerista_logo_rv.png') }}" alt="Bakerista Logo" class="h-8 w-auto opacity-90">
         </a>
     </div>
 
     {{-- ナビゲーション --}}
     <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1 text-sm">
-        {{-- ダッシュボード --}}
+        {{-- 管理ダッシュボード --}}
         <a href="{{ route('admin.dashboard') }}"
            class="flex items-center px-3 py-2 rounded-md transition 
                   hover:bg-primary/30 hover:text-white
                   {{ request()->routeIs('admin.dashboard') ? 'bg-primary/40 text-white font-semibold' : '' }}">
             ダッシュボード
         </a>
-
+        {{-- ユーザートップページ --}}
+        <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                {{ request()->routeIs('dashboard') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            ユーザートップ
+        </a>
+        {{-- 区切り線 --}}
+        <div class="border-t border-slate-700 my-3"></div>
+        
         {{-- ユーザー管理 --}}
         <a href="{{ route('admin.users.index') }}"
            class="flex items-center px-3 py-2 rounded-md transition 
@@ -79,6 +87,6 @@
 
     {{-- フッター --}}
     <div class="border-t border-slate-700 p-4 text-[11px] text-gray-500">
-        <p>© {{ date('Y') }} Bakerista Portal</p>
+        <p>© {{ date('Y') }} Bakerista Mills Corp.</p>
     </div>
 </aside>

@@ -2,14 +2,18 @@
         管理画面トップナビゲーション
 ================================ --}}
 <header x-data="{ open: false }" class="bg-base-100 border-b border-base-300 shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
         <div class="flex justify-between h-16">
             
-            {{-- 左側：タイトル --}}
+            {{-- 左側：タイトル／ページヘッダー --}}
             <div class="flex items-center">
-                <h1 class="text-lg font-semibold text-gray-700">
-                    @yield('title', '管理画面')
-                </h1>
+                @hasSection('admin-header')
+                    @yield('admin-header')
+                @else
+                    <h1 class="text-lg font-semibold text-gray-700">
+                        未設定
+                    </h1>
+                @endif
             </div>
 
             {{-- 右側：ユーザードロップダウン --}}

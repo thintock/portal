@@ -1,5 +1,12 @@
 <x-admin-layout>
-    <div class="max-w-5xl mx-auto py-10 px-6">
+    @section('admin-header')
+        <div>
+            <h1 class="text-lg font-bold text-gray-800">固定ページ管理</h1>
+            <p class="text-sm text-gray-500">サイト内の静的ページを作成・編集できます。</p>
+        </div>
+    @endsection
+    
+    <div class="full">
 
         {{-- ✅ ページタイトル --}}
         <h1 class="text-2xl font-bold mb-6">{{ $page->title ?? 'タイトル未設定' }}</h1>

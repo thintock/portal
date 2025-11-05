@@ -15,28 +15,25 @@ class AdminUserController extends Controller
      */
     public function index()
     {
-        $users = User::with('avatar') // アバター画像を eager load
-            ->paginate(20);
-    
-        // 各ユーザーごとにアバターURLを生成
+        // avatar リレーションも同時に読み込む
+        $users = User::with(['mediaFiles' => function ($query) {
+            $query->where('type', 'avatar')
+                  ->orderBy('media_relations.sort_order', 'asc');
+        }])->paginate(20);
+
+        // 各ユーザーのアバターURLをセット
         $users->getCollection()->transform(function ($user) {
+            $avatar = $user->mediaFiles->first();
 
-        // ✅ media_files.type = 'avatar' のうち最初のものを取得
-        $avatar = $user->mediaFiles()
-            ->where('media_files.type', 'avatar')
-            ->orderBy('media_relations.sort_order', 'asc')
-            ->first();
-
-        if ($avatar && $avatar->path) {
-            $disk = $avatar->disk ?? 'public';
-            $user->avatar_url = Storage::disk($disk)->url($avatar->path);
-        } else {
-            $user->avatar_url = null;
-        }
+            if ($avatar && $avatar->path) {
+                $user->avatar_url = Storage::url($avatar->path);
+            } else {
+                $user->avatar_url = null;
+            }
 
             return $user;
         });
-        
+
         return view('admin.users.index', compact('users'));
     }
 

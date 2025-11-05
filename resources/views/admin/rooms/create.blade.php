@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <div class="max-w-3xl mx-auto py-8">
         <h1 class="text-2xl font-bold mb-6">新しいルームを作成</h1>
 
@@ -61,4 +61,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+</x-admin-layout>

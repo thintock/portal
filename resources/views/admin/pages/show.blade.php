@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <div class="max-w-5xl mx-auto py-10 px-6">
 
         {{-- ✅ ページタイトル --}}
@@ -59,4 +59,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

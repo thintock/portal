@@ -1,21 +1,21 @@
-<x-app-layout>
+<x-admin-layout>
     <div class="max-w-6xl mx-auto py-10 px-6">
 
-        {{-- ✅ ページタイトルと新規作成 --}}
+        {{-- ページタイトルと新規作成 --}}
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h1 class="text-lg font-bold">固定ページ管理</h1>
                 <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">＋ 新規ページ作成</a>
             </div>
 
-            {{-- ✅ 成功メッセージ --}}
+            {{-- 成功メッセージ --}}
             @if (session('success'))
                 <div class="alert alert-success mb-4">
                     {{ session('success') }}
                 </div>
             @endif
 
-            {{-- ✅ 一覧テーブル --}}
+            {{-- 一覧テーブル --}}
             <table class="table w-full">
                 <thead>
                     <tr>
@@ -70,7 +70,7 @@
                 </tbody>
             </table>
 
-            {{-- ✅ ページネーション --}}
+            {{-- ページネーション --}}
             @if(method_exists($pages, 'links'))
                 <div class="mt-6">
                     {{ $pages->links() }}
@@ -78,28 +78,43 @@
             @endif
         </div>
         
-        {{-- ✅ 必須ページ確認エリア --}}
+        {{-- 必須ページ確認エリア --}}
         <div class="bg-base-200 mt-10 p-6 rounded-lg shadow-inner">
-            <h2 class="text-lg font-bold mb-4">📘 必須ページの状態</h2>
+            <h2 class="text-lg font-bold mb-4">必須ページの状態</h2>
 
             <ul class="space-y-3">
                 @foreach($requiredSlugs as $slug => $label)
                     @php $page = $requiredPages[$slug]; @endphp
-
+                
                     <li class="flex items-center justify-between bg-white p-4 rounded-md shadow-sm">
                         <div>
                             <p class="font-semibold text-gray-800">{{ $label }}</p>
                             <p class="text-sm text-gray-500">スラッグ: <code>{{ $slug }}</code></p>
+                
+                            {{-- ステータス表示（存在する場合のみ） --}}
+                            @if ($page)
+                                <p class="text-sm mt-1">
+                                    状態：
+                                    @if($page->status === 'published')
+                                        <span class="badge badge-success">公開中</span>
+                                    @elseif($page->status === 'draft')
+                                        <span class="badge badge-ghost">下書き</span>
+                                    @else
+                                        <span class="badge">不明</span>
+                                    @endif
+                                </p>
+                            @endif
                         </div>
-
+                
+                        {{-- 状態別操作ボタン --}}
                         @if ($page)
                             <div class="flex items-center space-x-3">
-                                <span class="badge badge-success">✅ 作成済み</span>
+                                <span class="badge badge-success text-base-100">作成済み</span>
                                 <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline">編集</a>
                             </div>
                         @else
                             <div class="flex items-center space-x-3">
-                                <span class="badge badge-error">⚠ 未作成</span>
+                                <span class="badge badge-error text-base-100">未作成</span>
                                 <a href="{{ route('admin.pages.create', ['slug' => $slug]) }}" class="btn btn-sm btn-primary">
                                     作成する
                                 </a>
@@ -109,6 +124,5 @@
                 @endforeach
             </ul>
         </div>
-        
     </div>
-</x-app-layout>
+</x-admin-layout>

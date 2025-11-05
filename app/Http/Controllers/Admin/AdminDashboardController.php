@@ -24,9 +24,8 @@ class AdminDashboardController extends Controller
             //'events_count'         => Event::count(),
         ];
         
-        $rooms = Room::orderBy('sort_order', 'asc')->get();
 
-        return view('admin.dashboard', compact('stats', 'rooms'));
+        return view('admin.dashboard', compact('stats'));
     }
     
 }

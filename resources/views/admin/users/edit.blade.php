@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header"><h2 class="font-semibold text-xl">ユーザー編集</h2></x-slot>
 
     <div class="p-6">
@@ -83,4 +83,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+</x-admin-layout>

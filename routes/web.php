@@ -62,7 +62,7 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::get('/posts', fn() => '投稿管理ページ')->name('admin.posts');
     Route::get('/events', fn() => 'イベント管理ページ')->name('admin.events');
     Route::resource('users', AdminUserController::class)->names('users');
-    Route::resource('rooms', RoomController::class)->except(['index','show']);
+    Route::resource('rooms', RoomController::class)->except('show');
     Route::resource('pages', AdminPageController::class);
 });
 

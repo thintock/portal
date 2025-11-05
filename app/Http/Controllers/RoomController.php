@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class RoomController extends Controller
 {
+    public function index()
+    {
+        
+        $rooms = Room::orderBy('sort_order', 'asc')->get();
+
+        return view('admin.rooms.index', compact('rooms'));
+    }
+    
     public function create()
     {
         return view('admin.rooms.create');

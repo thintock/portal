@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -74,7 +75,7 @@ class AdminUserController extends Controller
         $user->fill($data);
         $user->save();
     
-        return redirect()->route('admin.users.index')->with('success', 'ユーザーを更新しました');
+        return redirect()->route('admin.users.edit', $user->id)->with('success', 'ユーザーを更新しました');
     }
 
 

@@ -70,7 +70,11 @@
         <div class="flex justify-between items-center border-base-300 border-b pb-2 md:pb-4">
           <div class="flex items-center space-x-3">
             {{-- アイコン --}}
-            <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 {{ $comment->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+            <div 
+              class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 cursor-pointer transition transform hover:scale-105 hover:border-primary"
+              wire:click="$dispatch('show-membership-card', { userId: {{ $comment->user->id }} })"
+              title="{{ $comment->user->name ?? 'ユーザー名未登録' }} の会員証を表示"
+            >
               @php
                   $avatar = $comment->user->mediaFiles()
                       ->where('media_files.type', 'avatar')
@@ -188,8 +192,11 @@
                           ->first();
                   @endphp
                   
-                  <div class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 
-                              {{ $reply->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+                  <div 
+                    class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 cursor-pointer transition transform hover:scale-105 hover:border-primary"
+                    wire:click="$dispatch('show-membership-card', { userId: {{ $reply->user->id }} })"
+                    title="{{ $reply->user->name ?? 'ユーザー名未登録' }} の会員証を表示"
+                  >
                     @if($avatar)
                       <img src="{{ Storage::url($avatar->path) }}" 
                            alt="avatar" 

@@ -8,13 +8,15 @@ use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+    
     public function rules(): array
     {
+        // 編集対象ユーザーのIDをルートから取得
+        $userId = $this->route('user')?->id ?? $this->user()?->id;
         return [
             // プロフィール画像
             'avatar'        => ['nullable', 'image', 'max:10240'], // 10MBまで
@@ -51,7 +53,7 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:100',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique(User::class)->ignore($userId),
             ],
         ];
     }

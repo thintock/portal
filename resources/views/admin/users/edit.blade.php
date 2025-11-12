@@ -11,7 +11,7 @@
             @csrf @method('PATCH')
 
             {{-- 基本情報 --}}
-            <div class="card bg-white shadow p-4">
+            <div class="card bg-white shadow p-4 mb-4">
                 <h3 class="font-bold mb-2">基本情報</h3>
                 {{-- アバター表示 --}}
                 @if($avatar_url)
@@ -41,7 +41,7 @@
             </div>
 
             {{-- 住所 --}}
-            <div class="card bg-white shadow p-4">
+            <div class="card bg-white shadow p-4 mb-4">
                 <h3 class="font-bold mb-2">住所情報</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <x-input name="postal_code" label="郵便番号" :value="$user->postal_code"/>
@@ -54,13 +54,44 @@
             </div>
 
             {{-- 管理用 --}}
-            <div class="card bg-white shadow p-4">
+            <div class="card bg-white shadow p-4 mb-4">
                 <h3 class="font-bold mb-2">管理情報</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <x-select name="role" label="権限" :options="['admin'=>'管理者','guest'=>'ゲスト','user'=>'一般']" :value="$user->role"/>
-                    <x-input name="user_type" label="ユーザー種別" :value="$user->user_type"/>
-                    <x-input name="user_status" label="ステータス" :value="$user->user_status"/>
+                    {{-- 権限 --}}
+                    <x-select 
+                        name="role" 
+                        label="権限" 
+                        :options="[
+                            'admin' => '管理者',
+                            'user' => '一般',
+                            'guest' => 'ゲスト',
+                        ]" 
+                        :value="$user->role ?? ''" />
+            
+                    {{-- ユーザー種別 --}}
+                    <x-select 
+                        name="user_type" 
+                        label="ユーザー種別"
+                        :options="[
+                            'home' => '一般会員',
+                            'bakery' => 'ベーカリー事業者',
+                            'admin' => '管理者',
+                            'partner' => 'パートナー（専用コンソール利用可）',
+                        ]"
+                        :value="$user->user_type ?? 'home'" />
+            
+                    {{-- ステータス --}}
+                    <x-select 
+                        name="user_status" 
+                        label="ユーザーステータス"
+                        :options="[
+                            'active' => '有効',
+                            'withdrawn' => '退会済み',
+                        ]"
+                        :value="$user->user_status ?? 'active'" />
+                    
                     <label class="flex items-center space-x-2">
+                        <input type="hidden" name="email_notification" value="0">
                         <input type="checkbox" name="email_notification" value="1" @checked($user->email_notification) class="checkbox" />
                         <span>メール通知を有効化</span>
                     </label>
@@ -72,7 +103,7 @@
             </div>
 
             {{-- Stripe --}}
-            <div class="card bg-white shadow p-4">
+            <div class="card bg-white shadow p-4 mb-4">
                 <h3 class="font-bold mb-2">Stripe情報</h3>
                 <ul class="text-sm">
                     <li><b>stripe_id:</b> {{ $user->stripe_id ?? '-' }}</li>

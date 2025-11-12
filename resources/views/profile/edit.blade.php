@@ -9,7 +9,8 @@
                     <div class="flex justify-between">
                         <h3 class="text-lg font-bold mb-4 text-primary">会員情報</h3>
                         {{-- 会員証ボタン --}}
-                        <button onclick="membershipCard.showModal()" class="btn btn-outline btn-sm sm:btn-md">
+                        <button type="button" class="btn btn-sm sm:btn-md btn-outline btn-secondary" 
+                        onclick="window.dispatchEvent(new CustomEvent('show-membership-card', { detail: { userId: {{ auth()->id() }} } }))">
                           会員証を表示
                         </button>
                     </div>
@@ -17,7 +18,6 @@
                     @include('profile.partials.update-profile-information-form')
                 </div>
             </div>
-            @include('profile.partials.membership-card')
             {{-- パスワード更新 --}}
             <div class="card bg-white shadow-xl border border-base-300">
                 <div class="card-body p-3 sm:p-6">

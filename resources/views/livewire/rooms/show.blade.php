@@ -36,9 +36,7 @@
         ============================ --}}
         <div class="absolute left-4 bottom-[-36px] sm:hidden">
             @if($room->icon_media)
-                <img src="{{ Storage::url($room->icon_media->path) }}" 
-                     alt="icon"
-                     class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
+                <img src="{{ Storage::url($room->icon_media->path) }}" alt="icon" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
             @else
                 <div class="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-xl text-gray-600 border-4 border-white shadow-md">
                     {{ mb_substr($room->name, 0, 1) }}
@@ -117,8 +115,7 @@
             {{-- プロフ写真 + ルーム情報 --}}
             <div class="flex items-center space-x-4 mb-4">
                 @if($room->icon_media)
-                    <img src="{{ Storage::url($room->icon_media->path) }}" 
-                         alt="icon" class="w-16 h-16 rounded-full object-cover border">
+                    <img src="{{ Storage::url($room->icon_media->path) }}" alt="icon" class="w-16 h-16 rounded-full object-cover border">
                 @else
                     <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-lg text-gray-600">
                         {{ mb_substr($room->name, 0, 1) }}

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -104,6 +105,8 @@ class ProfileController extends Controller
         }
 
         $user->save();
+        // メール認証リンクを再送
+        $user->sendEmailVerificationNotification();
 
         /**
          * ================================

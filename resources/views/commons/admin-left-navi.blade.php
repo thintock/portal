@@ -50,6 +50,14 @@
                   {{ request()->routeIs('admin.rooms.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
             ルーム管理
         </a>
+        
+        {{-- イベント管理 --}}
+        <a href="{{ route('admin.events.index') }}"
+           class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                  {{ request()->routeIs('admin.events.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            イベント管理
+        </a>
 
         {{-- 区切り線 --}}
         <div class="border-t border-slate-700 my-3"></div>
@@ -61,7 +69,7 @@
             $devMenus = [
                 '受注管理', '出荷管理', '発注管理', '製粉管理',
                 '在庫管理', '商品管理', '資材消耗品管理',
-                '受注データ変換', '顧客管理', 'メールテンプレート管理'
+                '受注データ変換', '顧客管理', 'メール管理'
             ];
         @endphp
 

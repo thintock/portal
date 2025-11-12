@@ -10,8 +10,12 @@
                 ->first();
         @endphp
         
-        <div class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 
-                    {{ $post->user->role === 'guest' ? 'border-secondary' : 'border-base-100' }}">
+        {{-- アバター枠（クリックで会員証モーダルを開く） --}}
+        <div 
+            class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 cursor-pointer transition transform hover:scale-105 hover:border-primary"
+            wire:click="$dispatch('show-membership-card', { userId: {{ $post->user->id }} })"
+            title="{{ $post->user->name ?? 'ユーザー名未登録' }} の会員証を表示"
+          >
           @if($avatar)
             <img src="{{ Storage::url($avatar->path) }}"
                  alt="avatar"
@@ -22,13 +26,18 @@
             </span>
           @endif
         </div>
-        {{---ニックネーム表示--}}
+      
+        {{-- ニックネーム・日付表示 --}}
         <div>
           <span class="font-semibold">{{ $post->user->name ?? 'ユーザー名未登録' }}</span>
-          <span class="text-xs text-gray-500">{{ $post->created_at->diffForHumans() }}
-          @if($post->updated_at->ne($post->created_at))
-          <span title="更新: {{ $post->updated_at->diffForHumans() }}">({{ $post->updated_at->diffForHumans() }}:編集済み)</span>
-          @endif</span>
+          <span class="text-xs text-gray-500">
+            {{ $post->created_at->diffForHumans() }}
+            @if($post->updated_at->ne($post->created_at))
+              <span title="更新: {{ $post->updated_at->diffForHumans() }}">
+                （{{ $post->updated_at->diffForHumans() }}:編集済み）
+              </span>
+            @endif
+          </span>
         </div>
       </div>
 
@@ -49,46 +58,64 @@
     </div>
     {{-- 2段目：メディア（カルーセル） --}}
     @if($post->mediaFiles->isNotEmpty())
-      <div class="relative">
-        <div class="carousel w-full">
+      <div 
+        x-data="{ active: 0, total: {{ $post->mediaFiles->count() }} }" 
+        class="relative overflow-hidden rounded-lg"
+      >
+        {{-- スライド一覧 --}}
+        <div class="flex transition-transform duration-500 ease-in-out"
+             :style="'transform: translateX(-' + (active * 100) + '%)'">
           @foreach($post->mediaFiles as $i => $media)
             @php
               $ext = strtolower(pathinfo($media->path, PATHINFO_EXTENSION));
               $url = Storage::url($media->path);
             @endphp
     
-            <div id="slide-{{ $post->id }}-{{ $i }}" class="carousel-item relative w-full">
-              {{-- 画像表示 --}}
+            <div class="flex-shrink-0 w-full">
+              {{-- 画像 --}}
               @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
                 <img 
                   src="{{ $url }}" 
                   class="w-full max-h-96 object-contain cursor-pointer"
                   @click="$dispatch('open-modal', 'image-viewer'); $dispatch('set-image', { src: '{{ $url }}' })"
                 >
-              
-              {{-- 動画表示 --}}
+              {{-- 動画 --}}
               @elseif(in_array($ext, ['mp4','webm','mov','avi']))
                 <video controls class="rounded border max-h-60 w-full">
                   <source src="{{ $url }}" type="video/{{ $ext === 'mov' ? 'quicktime' : $ext }}">
                 </video>
-              
-              {{-- その他ファイル --}}
+              {{-- その他 --}}
               @else
                 <a class="link link-primary" href="{{ $url }}" target="_blank">添付を開く</a>
-              @endif
-    
-              {{-- カルーセル矢印 --}}
-              @if($i > 0)
-                <a href="#slide-{{ $post->id }}-{{ $i-1 }}" class="absolute left-2 top-1/2 btn btn-circle btn-sm">❮</a>
-              @endif
-              @if($i < $post->mediaFiles->count() - 1)
-                <a href="#slide-{{ $post->id }}-{{ $i+1 }}" class="absolute right-2 top-1/2 btn btn-circle btn-sm">❯</a>
               @endif
             </div>
           @endforeach
         </div>
+    
+        {{-- 左右ナビゲーション --}}
+        <button 
+          class="absolute left-2 top-1/2 transform -translate-y-1/2 btn btn-circle btn-sm bg-white/70 hover:bg-white"
+          @click="active = (active === 0) ? total - 1 : active - 1"
+        >❮</button>
+    
+        <button 
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 btn btn-circle btn-sm bg-white/70 hover:bg-white"
+          @click="active = (active === total - 1) ? 0 : active + 1"
+        >❯</button>
+    
+        {{-- インジケーター（小丸） --}}
+        <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+          <template x-for="i in total" :key="i">
+            <button
+              class="w-2.5 h-2.5 rounded-full"
+              :class="i - 1 === active ? 'bg-gray-800' : 'bg-gray-400/60'"
+              @click="active = i - 1"
+            ></button>
+          </template>
+        </div>
       </div>
     @endif
+
 
     
     {{-- 3段目：本文（200文字で省略表示） --}}

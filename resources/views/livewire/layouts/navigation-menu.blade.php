@@ -7,7 +7,7 @@
                 {{-- ロゴ --}}
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <img src="{{ asset('images/bakerista_circle_gray.png') }}" alt="Bakerista Logo" class="h-8 w-auto">
+                        <img src="{{ asset('images/bakerista_logo.png') }}" alt="ベーカリスタ" class="w-24 sm:w-32">
                     </a>
                 </div>
 
@@ -133,7 +133,7 @@
         {{-- ユーザー情報 --}}
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->display_name ?? 'ユーザー名未登録'}}<span class="text-xs">さん</span></div>
+                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name ?? 'ユーザー名未登録'}}<span class="text-xs">さん</span></div>
             </div>
 
             {{-- メニュー下部 --}}

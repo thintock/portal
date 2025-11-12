@@ -12,7 +12,7 @@
 
   {{-- フォーム表示 --}}
   @if($isOpen)
-    <form wire:submit.prevent="save" class="mt-2 space-y-3">
+    <form wire:submit.prevent="save" class="mt-2 space-y-3 bg-base-100 p-2 sm:p-4 md:p-6 rounded-lg w-full relative">
 
       {{-- プレビュー + 画像追加 --}}
       <div class="grid grid-cols-3 gap-3">

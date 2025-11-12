@@ -8,12 +8,16 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomMemberController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventParticipantController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminPageController;
+use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
+use App\Livewire\Events\Show;
 use App\Livewire\Dashboard\Index as DashboardIndex;
 
 // 誰でもOK
@@ -48,9 +52,12 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
     Route::post('rooms/{room}/join', [RoomMemberController::class, 'join'])->name('rooms.join');
     Route::delete('rooms/{room}/leave', [RoomMemberController::class, 'leave'])->name('rooms.leave');
     Route::patch('room-members/{member}/role', [RoomMemberController::class, 'updateRole'])->name('room_members.update_role');
-    
     Route::get('/rooms/{room}', Room::class)->name('rooms.show');
     Route::get('/posts/{post}', PostShow::class)->name('posts.show');
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{slug}', Show::class)->name('events.show');
+    Route::post('/events/{event}/join', [EventParticipantController::class, 'store'])->name('events.join');
+    Route::delete('/events/{event}/cancel', [EventParticipantController::class, 'destroy'])->name('events.cancel');
 });
 
 // 管理者専用
@@ -64,6 +71,7 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::resource('users', AdminUserController::class)->names('users')->except('show');
     Route::resource('rooms', RoomController::class)->except('show');
     Route::resource('pages', AdminPageController::class);
+    Route::resource('events', AdminEventController::class);
 });
 
 

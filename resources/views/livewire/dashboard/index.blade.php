@@ -11,12 +11,15 @@
         @if($user->role === 'admin')
           @include('livewire.dashboard.partials.admin')
           @include('livewire.dashboard.partials.room')
+          <livewire:events.section />
         @elseif($user->role === 'guest')
           @include('livewire.dashboard.partials.guest')
           @include('livewire.dashboard.partials.room')
+          <livewire:events.section />
         @elseif($user->subscribed('default'))
           @include('livewire.dashboard.partials.paid')
           @include('livewire.dashboard.partials.room')
+          <livewire:events.section />
         @else
           @include('livewire.dashboard.partials.free')
         @endif

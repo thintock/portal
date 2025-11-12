@@ -2,7 +2,7 @@
         管理画面トップナビゲーション
 ================================ --}}
 <header x-data="{ open: false }" class="bg-base-100 border-b border-base-300 shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto px-8">
         <div class="flex justify-between h-16">
             
             {{-- 左側：タイトル／ページヘッダー --}}

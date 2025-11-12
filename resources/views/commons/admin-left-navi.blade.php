@@ -11,18 +11,18 @@
 
     {{-- ナビゲーション --}}
     <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1 text-sm">
+        {{-- ユーザートップページ --}}
+        <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                {{ request()->routeIs('dashboard') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            ユーザートップ
+        </a>
         {{-- 管理ダッシュボード --}}
         <a href="{{ route('admin.dashboard') }}"
            class="flex items-center px-3 py-2 rounded-md transition 
                   hover:bg-primary/30 hover:text-white
                   {{ request()->routeIs('admin.dashboard') ? 'bg-primary/40 text-white font-semibold' : '' }}">
             ダッシュボード
-        </a>
-        {{-- ユーザートップページ --}}
-        <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 rounded-md transition 
-                  hover:bg-primary/30 hover:text-white
-                {{ request()->routeIs('dashboard') ? 'bg-primary/40 text-white font-semibold' : '' }}">
-            ユーザートップ
         </a>
         {{-- 区切り線 --}}
         <div class="border-t border-slate-700 my-3"></div>

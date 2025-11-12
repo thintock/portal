@@ -1,5 +1,5 @@
 {{-- 📝 新着投稿 --}}
-<div class="bg-white shadow-sm rounded-lg mt-10 max-w-3xl mx-auto w-full px-4 sm:px-6">
+<div class="bg-white shadow-sm rounded-lg max-w-3xl mx-auto w-full px-4 sm:px-6">
     <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold p-4">📝 新着投稿</h2>
     </div>

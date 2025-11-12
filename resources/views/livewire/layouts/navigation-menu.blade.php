@@ -17,6 +17,11 @@
                         ホーム
                     </x-nav-link>
                 </div>
+                @if(Auth::user()->role === 'admin')
+                <div class="hidden sm:flex sm:space-x-8 sm:ml-10 text-gray-700 font-medium">
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-xs btn-secondary">管理画面</a>
+                </div>
+                @endif
             </div>
             
             {{-- ✅ 中央：ルームタイトル（スマホのみ表示） --}}

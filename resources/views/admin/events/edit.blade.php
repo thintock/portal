@@ -8,7 +8,7 @@
 
     <div class="w-full">
 
-        <div class="card bg-white shadow p-4 sm:p-6 lg:p-8">
+        <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-4">
             <h1 class="text-2xl font-bold mb-6">イベント編集</h1>
 
             <form method="POST" action="{{ route('admin.events.update', $event) }}" enctype="multipart/form-data" class="space-y-6">
@@ -90,9 +90,14 @@
 
                 {{-- 会場／URL --}}
                 <div>
-                    <label class="block font-semibold mb-1">会場名またはオンラインURL</label>
-                    <input type="text" name="location" value="{{ old('location', $event->location) }}"
-                           class="input input-bordered w-full">
+                  <label class="block font-semibold mb-1">会場区分</label>
+                  <select name="event_type" class="select select-bordered w-full">
+                      <option value="">選択してください</option>
+                      <option value="online" @selected(old('event_type', $event->event_type)==='online')>オンラインイベント</option>
+                      <option value="sns" @selected(old('event_type', $event->event_type)==='sns')>SNSイベント</option>
+                      <option value="real" @selected(old('event_type', $event->event_type)==='real')>リアルイベント</option>
+                      <option value="distribution" @selected(old('event_type', $event->event_type)==='distribution')>配布型イベント</option>
+                  </select>
                 </div>
 
                 <div>
@@ -138,17 +143,17 @@
                     </div>
                 </div>
 
-                {{-- カバー・ギャラリー画像（Livewireコンポーネント） --}}
-                <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-8">
-                    <livewire:admin.event-images :event="$event" />
-                </div>
-
                 {{-- ボタン --}}
                 <div class="flex justify-between items-center pt-4">
                     <a href="{{ route('admin.events.index') }}" class="link text-gray-500">← 一覧へ戻る</a>
                     <button type="submit" class="btn btn-primary">更新</button>
                 </div>
             </form>
+        </div>
+
+        {{-- カバー・ギャラリー画像（Livewireコンポーネント） --}}
+        <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-8">
+            <livewire:admin.event-images :event="$event" />
         </div>
 
         {{-- TinyMCE --}}

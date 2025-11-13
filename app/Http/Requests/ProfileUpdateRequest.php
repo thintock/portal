@@ -12,15 +12,35 @@ class ProfileUpdateRequest extends FormRequest
     {
         return true;
     }
-    
+
+    /**
+     * バリデーション前に値を整形
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            // 郵便番号と電話番号のハイフンを削除
+            'postal_code' => $this->postal_code
+                ? str_replace(['-', 'ー', '−'], '', $this->postal_code)
+                : null,
+
+            'phone' => $this->phone
+                ? str_replace(['-', 'ー', '−', ' '], '', $this->phone)
+                : null,
+
+            // Instagram IDの@を削除
+            'instagram_id' => $this->instagram_id
+                ? ltrim($this->instagram_id, '@')
+                : null,
+        ]);
+    }
+
     public function rules(): array
     {
-        // 編集対象ユーザーのIDをルートから取得
         $userId = $this->route('user')?->id ?? $this->user()?->id;
+
         return [
-            // プロフィール画像
-            'avatar'        => ['nullable', 'image', 'max:10240'], // 10MBまで
-            // 基本情報
+            'avatar'           => ['nullable', 'image', 'max:10240'], // 10MBまで
             'name'             => ['nullable', 'string', 'max:50'],
             'first_name'       => ['nullable', 'string', 'max:50'],
             'last_name'        => ['nullable', 'string', 'max:50'],
@@ -30,23 +50,20 @@ class ProfileUpdateRequest extends FormRequest
             'avatar_media_id'  => ['nullable', 'string', 'max:50'],
             'company_name'     => ['nullable', 'string', 'max:50'],
 
-            // 住所・連絡先
             'postal_code'      => ['nullable', 'string', 'max:10'],
             'prefecture'       => ['nullable', 'string', 'max:50'],
             'address1'         => ['nullable', 'string', 'max:100'],
             'address2'         => ['nullable', 'string', 'max:100'],
             'address3'         => ['nullable', 'string', 'max:100'],
-            'country'          => ['nullable', 'string', 'size:2'], // ISO 2文字コード (JP, US)
+            'country'          => ['nullable', 'string', 'size:2'],
             'phone'            => ['nullable', 'string', 'max:20'],
 
-            // 管理系
             'role'             => ['nullable', 'string', 'max:20'],
             'user_type'        => ['nullable', 'string', 'max:10'],
             'user_status'      => ['nullable', 'string', 'max:20'],
             'email_notification' => ['nullable', 'boolean'],
             'remarks'          => ['nullable', 'string'],
 
-            // メール（ユニーク制約・自分は除外）
             'email' => [
                 'required',
                 'string',

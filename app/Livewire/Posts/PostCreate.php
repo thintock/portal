@@ -28,7 +28,7 @@ class PostCreate extends Component
             // 画像だけでも投稿できるように
             'body'      => 'required_without:media|string|max:5000',
             'media'     => 'array|max:10',
-            'media.*'   => 'file|max:1048576|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+            'media.*'   => 'file|max:1524000|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
             // ※ newMedia は save() では検証しない（updatedNewMedia で個別検証）
         ];
     }
@@ -46,7 +46,7 @@ class PostCreate extends Component
         if (!empty($this->newMedia)) {
             $this->validate([
                 'newMedia'   => 'array',
-                'newMedia.*' => 'file|max:1048576|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+                'newMedia.*' => 'file|max:1524000|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
             ]);
 
             // 合計枚数の上限チェック（任意）

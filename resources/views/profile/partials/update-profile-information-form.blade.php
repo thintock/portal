@@ -7,9 +7,6 @@
       </div>
       <span>あなたのプロフィール</span>
     </h2>
-    <p class="mt-2 text-sm text-gray-600">
-      <span class="text-primary font-semibold">※</span> 印のついた項目は他のメンバーに公開されます。
-    </p>
   </header>
 
   {{-- メール再送フォーム --}}
@@ -137,26 +134,38 @@
     <div class="divider text-sm text-gray-500">公開プロフィール</div>
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="name" :value="__('ニックネーム（公開されます）')" />
+        <x-input-label for="name" :value="__('ニックネーム ※')" />
         <x-text-input id="name" name="name" type="text"
           class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('name', $user->name)" />
       </div>
 
       <div>
-        <x-input-label for="instagram_id" :value="__('Instagram アカウント')" />
-        <x-text-input id="instagram_id" name="instagram_id" type="text"
-          class="input input-bordered w-full mt-1 text-base bg-white"
-          placeholder="@bakerista_official"
-          :value="old('instagram_id', $user->instagram_id)" />
+        <x-input-label for="instagram_id" :value="__('Instagram アカウント ※')" />
+      
+        <div class="relative mt-1">
+          {{-- 左の @ --}}
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">@</span>
+      
+          {{-- 入力フィールド --}}
+          <x-text-input
+            id="instagram_id"
+            name="instagram_id"
+            type="text"
+            class="pl-7 w-full text-base bg-white border-gray-300 focus:border-primary focus:ring-primary rounded-md"
+            placeholder="bakerista_official"
+            :value="old('instagram_id', $user->instagram_id)"
+          />
+        </div>
       </div>
     </div>
+
 
     {{-- 住所 --}}
     <div class="divider text-sm text-gray-500">住所情報</div>
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="postal_code" :value="__('郵便番号')" />
+        <x-input-label for="postal_code" :value="__('郵便番号（ハイフンなし）')" />
         <x-text-input id="postal_code" name="postal_code" type="text"
           class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('postal_code', $user->postal_code)" />
@@ -184,16 +193,15 @@
     </div>
 
     {{-- 会社・電話 --}}
-    <div class="divider text-sm text-gray-500">勤務先・連絡先</div>
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="company_name" :value="__('会社名')" />
+        <x-input-label for="company_name" :value="__('会社名（会社の場合）')" />
         <x-text-input id="company_name" name="company_name" type="text"
           class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('company_name', $user->company_name)" />
       </div>
       <div>
-        <x-input-label for="phone" :value="__('電話番号')" />
+        <x-input-label for="phone" :value="__('電話番号（ハイフンなし）')" />
         <x-text-input id="phone" name="phone" type="tel"
           class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('phone', $user->phone)" />

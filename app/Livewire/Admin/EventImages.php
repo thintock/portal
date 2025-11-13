@@ -15,30 +15,48 @@ class EventImages extends Component
     use WithFileUploads;
 
     public $eventId;
-    public $cover = null;       // カバー画像（単一）
-    public $gallery = [];       // 既存＋新規を混在で管理
-    public $newGallery = [];    // 新規アップロード用のバッファ
+    public $cover = null;          // カバー画像（既存または新規）
+    public $gallery = [];          // 既存・新規の混在配列
+    public $newGallery = [];       // 一時アップロード用
+    public $hasChanges = false;    // 保存促進メッセージ表示用
 
+    protected $listeners = ['refreshEventImages' => '$refresh'];
+
+    /**
+     * バリデーションルール
+     */
     protected function rules()
     {
         return [
-            'cover'           => 'nullable', // string(既存) or UploadedFile(新規)
-            'gallery'         => 'array|max:30',
-            'gallery.*'       => 'nullable',
-            'newGallery'      => 'array',
-            'newGallery.*'    => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif',
+            'cover'        => 'nullable',
+            'gallery'      => 'array|max:30',
+            'gallery.*'    => 'nullable',
+            'newGallery'   => 'array',
+            'newGallery.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif',
         ];
     }
 
+    /**
+     * 初期ロード
+     */
     public function mount(Event $event)
     {
         $this->eventId = $event->id;
+        $this->reloadImages();
+    }
 
-        // カバー画像
+    /**
+     * イベントの画像を再読込
+     */
+    public function reloadImages()
+    {
+        $event = Event::find($this->eventId);
+
+        // カバー画像の取得
         $cover = $event->mediaFiles()->where('type', 'event_cover')->first();
         $this->cover = $cover ? ['id' => $cover->id, 'path' => $cover->path] : null;
 
-        // ギャラリー画像
+        // ギャラリー画像の取得
         $this->gallery = $event->mediaFiles()
             ->where('type', 'event_gallery')
             ->orderBy('media_relations.sort_order')
@@ -47,10 +65,11 @@ class EventImages extends Component
             ->toArray();
 
         $this->newGallery = [];
+        $this->hasChanges = false;
     }
 
     /**
-     * 新規ギャラリー画像が追加されたとき
+     * ギャラリー追加時
      */
     public function updatedNewGallery()
     {
@@ -64,45 +83,94 @@ class EventImages extends Component
                 return;
             }
 
-            // 新規を末尾にマージ
+            // 新規アップロード分を末尾に追加
             $this->gallery = array_merge($this->gallery, $this->newGallery);
             $this->newGallery = [];
+            $this->hasChanges = true;
         }
     }
 
     /**
-     * ギャラリー削除
+     * カバー削除処理
+     */
+    public function removeCover()
+    {
+        if ($this->cover && isset($this->cover['id'])) {
+            $mediaId = $this->cover['id'];
+    
+            // メディア関係削除
+            MediaRelation::where('media_file_id', $mediaId)->delete();
+    
+            // ファイル削除（物理削除）
+            $media = MediaFile::find($mediaId);
+            if ($media) {
+                Storage::disk('public')->delete($media->path);
+                $media->delete();
+            }
+        }
+    
+        // フロント側だけリフレッシュ
+        $this->cover = null;
+        $this->hasChanges = false;
+        $this->reloadImages(); // ✅ ページ全体をリロードせず再描画
+    }
+
+    /**
+     * ギャラリー削除処理
      */
     public function removeGallery($index)
     {
-        if (isset($this->gallery[$index])) {
-            unset($this->gallery[$index]);
-            $this->gallery = array_values($this->gallery);
+        if (!isset($this->gallery[$index])) return;
+    
+        $item = $this->gallery[$index];
+    
+        if (is_array($item) && isset($item['id'])) {
+            $mediaId = $item['id'];
+    
+            // DB削除
+            MediaRelation::where('media_file_id', $mediaId)->delete();
+    
+            // ファイル削除
+            $media = MediaFile::find($mediaId);
+            if ($media) {
+                Storage::disk('public')->delete($media->path);
+                $media->delete();
+            }
         }
+    
+        // 配列更新（即時UI反映）
+        unset($this->gallery[$index]);
+        $this->gallery = array_values($this->gallery);
+        $this->hasChanges = false;
+    
+        // ✅ Livewire内で再描画（リロード不要）
+        $this->reloadImages();
     }
 
     /**
-     * 並べ替え（上）
+     * ギャラリー並べ替え（上）
      */
-    public function moveUp($index)
+    public function moveUp($i)
     {
-        if ($index > 0) {
-            [$this->gallery[$index - 1], $this->gallery[$index]] = [$this->gallery[$index], $this->gallery[$index - 1]];
+        if ($i > 0) {
+            [$this->gallery[$i - 1], $this->gallery[$i]] = [$this->gallery[$i], $this->gallery[$i - 1]];
+            $this->hasChanges = true;
         }
     }
 
     /**
-     * 並べ替え（下）
+     * ギャラリー並べ替え（下）
      */
-    public function moveDown($index)
+    public function moveDown($i)
     {
-        if ($index < count($this->gallery) - 1) {
-            [$this->gallery[$index + 1], $this->gallery[$index]] = [$this->gallery[$index], $this->gallery[$index + 1]];
+        if ($i < count($this->gallery) - 1) {
+            [$this->gallery[$i + 1], $this->gallery[$i]] = [$this->gallery[$i], $this->gallery[$i + 1]];
+            $this->hasChanges = true;
         }
     }
 
     /**
-     * 保存
+     * 保存処理
      */
     public function save()
     {
@@ -112,11 +180,7 @@ class EventImages extends Component
         $disk = config('filesystems.default', 'public');
 
         DB::transaction(function () use ($event, $disk) {
-
-            /**
-             * 1️⃣ カバー更新処理
-             */
-            // 既存レコード削除（MediaFileは残す）
+            // 1️⃣ カバー処理
             MediaRelation::where('mediable_type', Event::class)
                 ->where('mediable_id', $event->id)
                 ->whereHas('mediaFile', fn($q) => $q->where('type', 'event_cover'))
@@ -124,7 +188,7 @@ class EventImages extends Component
 
             if ($this->cover) {
                 if (is_array($this->cover) && isset($this->cover['id'])) {
-                    // ✅ 既存の再リンク
+                    // 既存再リンク
                     MediaRelation::create([
                         'mediable_type' => Event::class,
                         'mediable_id'   => $event->id,
@@ -132,7 +196,7 @@ class EventImages extends Component
                         'sort_order'    => 0,
                     ]);
                 } elseif (is_object($this->cover)) {
-                    // ✅ 新規アップロード
+                    // 新規アップロード
                     $media = MediaFile::uploadAndCreate(
                         $this->cover,
                         $event,
@@ -140,6 +204,7 @@ class EventImages extends Component
                         $disk,
                         'events/covers'
                     );
+
                     MediaRelation::create([
                         'mediable_type' => Event::class,
                         'mediable_id'   => $event->id,
@@ -149,25 +214,21 @@ class EventImages extends Component
                 }
             }
 
-            /**
-             * 2️⃣ ギャラリー更新処理
-             */
+            // 2️⃣ ギャラリー処理
             MediaRelation::where('mediable_type', Event::class)
                 ->where('mediable_id', $event->id)
                 ->whereHas('mediaFile', fn($q) => $q->where('type', 'event_gallery'))
                 ->delete();
 
-            foreach ($this->gallery as $index => $item) {
+            foreach ($this->gallery as $i => $item) {
                 if (is_array($item) && isset($item['id'])) {
-                    // ✅ 既存MediaFile
                     MediaRelation::create([
                         'mediable_type' => Event::class,
                         'mediable_id'   => $event->id,
                         'media_file_id' => $item['id'],
-                        'sort_order'    => $index,
+                        'sort_order'    => $i,
                     ]);
                 } elseif (is_object($item)) {
-                    // ✅ 新規アップロード
                     $media = MediaFile::uploadAndCreate(
                         $item,
                         $event,
@@ -180,17 +241,26 @@ class EventImages extends Component
                         'mediable_type' => Event::class,
                         'mediable_id'   => $event->id,
                         'media_file_id' => $media->id,
-                        'sort_order'    => $index,
+                        'sort_order'    => $i,
                     ]);
                 }
             }
         });
 
-        $this->dispatch('event-images-updated', eventId: $this->eventId);
-        $this->reset('newGallery');
-        session()->flash('success', '画像を更新しました。');
+        session()->flash('success', '画像を保存しました。');
+        $this->hasChanges = false;
+
+        // 🔄 保存完了後にリフレッシュ
+        session()->flash('success', '画像を保存しました。');
+        $this->hasChanges = false;
+        
+        // ✅ Livewireコンポーネントのみ再描画（ページリロードしない）
+        $this->reloadImages();
     }
 
+    /**
+     * レンダリング
+     */
     public function render()
     {
         return view('livewire.admin.event-images');

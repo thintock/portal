@@ -30,7 +30,7 @@ class PostEditModal extends Component
             'media'      => 'array|max:10',
             'media.*'    => 'nullable', // string(既存) or UploadedFile(新規)
             'newMedia'   => 'array',
-            'newMedia.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
+            'newMedia.*' => 'file|max:1524000|mimes:jpg,jpeg,png,webp,gif,mp4,mov,avi,webm',
         ];
     }
 

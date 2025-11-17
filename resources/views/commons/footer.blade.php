@@ -1,6 +1,6 @@
 <footer class="footer footer-center p-10 bg-base-300 text-base-content text-xs sm:text-sm border-t border-base-200">
     <nav class="flex flex-wrap justify-center gap-6 sm:gap-10 mb-4">
-        <a href="{{ url('/pages/about') }}" class="link link-hover hover:text-primary transition">
+        <a href="https://bakerista.jp/about-us" class="link link-hover hover:text-primary transition" target="_blank">
             会社概要
         </a>
         <a href="{{ url('/pages/legal') }}" class="link link-hover hover:text-primary transition">
@@ -12,8 +12,8 @@
         <a href="{{ url('/pages/terms') }}" class="link link-hover hover:text-primary transition">
             ご利用規約
         </a>
-        <a href="{{ url('/pages/privacy') }}" class="link link-hover hover:text-primary transition">
-            個人情報の取り扱いについて
+        <a href="https://bakerista.jp/privacy" class="link link-hover hover:text-primary transition" target="_blank">
+            プライバシーポリシー
         </a>
     </nav>
 

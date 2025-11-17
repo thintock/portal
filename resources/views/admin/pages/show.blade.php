@@ -23,8 +23,8 @@
         {{-- ✅ スラッグ・作成者情報 --}}
         <div class="text-sm text-gray-600 mb-8 space-y-1">
             <p><strong>スラッグ：</strong> {{ $page->slug }}</p>
-            <p><strong>作成者：</strong> {{ optional($page->creator)->name ?? '不明' }}</p>
-            <p><strong>更新者：</strong> {{ optional($page->updater)->name ?? '不明' }}</p>
+            <p><strong>作成者：</strong> {{ optional($page->creator)->last_name ?? '未登録' }} {{ optional($page->creator)->first_name ?? '未登録' }}</p>
+            <p><strong>更新者：</strong> {{ optional($page->updater)->last_name ?? '未登録' }} {{ optional($page->creator)->first_name ?? '未登録' }}</p>
             <p><strong>最終更新：</strong> {{ $page->updated_at?->format('Y-m-d H:i') }}</p>
         </div>
 

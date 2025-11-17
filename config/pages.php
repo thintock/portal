@@ -16,11 +16,9 @@ return [
     'required' => [
         'register'  => '会員登録ページ',
         'dashboard' => 'ダッシュボードページ',
-        'about'     => '会社概要',
         'legal'     => '特定商取引法に基づく表記',
         'guide'     => 'ユーザーガイド',
         'terms'     => 'ご利用規約',
-        'privacy'   => '個人情報の取り扱いについて',
     ],
 
 ];

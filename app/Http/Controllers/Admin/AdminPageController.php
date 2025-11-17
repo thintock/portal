@@ -100,9 +100,12 @@ class AdminPageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Page $page)
     {
         $page->delete();
-        return redirect()->route('admin.pages.index')->with('success', 'ページを削除しました。');
+    
+        return redirect()
+            ->route('admin.pages.index')
+            ->with('success', 'ページを削除しました。');
     }
 }

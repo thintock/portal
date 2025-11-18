@@ -31,8 +31,8 @@
                         <th>スラッグ</th>
                         <th>作成者</th>
                         <th>更新者</th>
-                        <th>状態</th>
-                        <th>操作</th>
+                        <th>ステータス</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,17 +54,19 @@
                                     <span class="badge badge-ghost">下書き</span>
                                 @endif
                             </td>
-                            <td class="flex space-x-2">
-                                <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline">編集</a>
-                                <a href="{{ route('admin.pages.show', $page) }}" class="btn btn-sm btn-info">表示</a>
-
-                                <form method="POST"
-                                      action="{{ route('admin.pages.destroy', $page) }}"
-                                      onsubmit="return confirm('本当に削除しますか？');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-error">削除</button>
-                                </form>
+                            <td class="text-right">
+                                <div class="flex justify-end space-x-2">
+                                    <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline">編集</a>
+                                    <a href="{{ route('admin.pages.show', $page) }}" class="btn btn-sm btn-info">表示</a>
+                            
+                                    <form method="POST"
+                                          action="{{ route('admin.pages.destroy', $page) }}"
+                                          onsubmit="return confirm('本当に削除しますか？');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-error">削除</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

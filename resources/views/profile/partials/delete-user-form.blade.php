@@ -1,33 +1,56 @@
 <section class="space-y-6">
+    <div class="w-full" x-data="{ open: false }">
 
-    {{-- アコーディオン全体 --}}
-    <div tabindex="0" class="collapse collapse-arrow border border-error/40 bg-base-100 rounded-xl">
+        {{-- ▼ トリガー部分 --}}
+        <div>
+            <button
+                @click="open = !open"
+                class="flex justify-between items-center w-full px-4 py-3 bg-base-100 border border-error/40 rounded-xl cursor-pointer"
+            >
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-error text-white">アカウント削除手続き</span>
+                </div>
 
-        {{-- ▼ アコーディオンタイトル --}}
-        <div class="collapse-title text-lg font-semibold text-gray-800 flex items-center gap-2 py-4">
-            <div class="badge badge-error text-white">
-                アカウント削除手続き
-            </div>
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-4 h-4 transition-transform duration-300"
+                     :class="open ? 'rotate-180' : 'rotate-0'"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
         </div>
 
-        {{-- ▼ アコーディオン内容（ここに全文） --}}
-        <div class="collapse-content space-y-6">
+        {{-- ▼ コンテンツ --}}
+        <div
+            x-show="open"
+            x-transition
+            x-cloak
+            class="mt-3 bg-base-100 border border-error/30 rounded-xl p-4 space-y-6"
+        >
 
             {{-- 説明文 --}}
-            <p class="mt-2 text-sm text-gray-600 leading-relaxed">
-                アカウントを削除すると、これまでの投稿・コメント・プロフィール情報などがすべて失われます。
+            <p class="text-sm text-gray-600 leading-relaxed">
+                アカウントを削除すると、これまでの投稿・コメント・プロフィール情報などがすべて消去されます。
                 <br class="hidden sm:block">
-                <strong class="text-error">削除後は元に戻すことができません。</strong>
+                <strong class="text-error">削除後に復元することはできません。</strong>
             </p>
 
             {{-- 注意・アドバイス --}}
             <div class="alert alert-warning bg-warning/20 border border-warning/40 text-sm leading-relaxed">
                 <div>
-                    <h3 class="font-semibold text-warning text-base mb-1">⚠️ 削除の前にご確認ください</h3>
+                    <h3 class="font-semibold text-warning text-base mb-1">⚠️ 削除前に必ずご確認ください</h3>
                     <ul class="list-disc list-inside space-y-1 text-gray-700">
-                        <li>必ず <strong>サブスクリプションがキャンセル（中止）されている</strong> ことを確認してください。</li>
-                        <li>サブスクリプションが中止されていれば、<strong>会員情報を残しても費用は発生しません。</strong></li>
-                        <li>将来的に再入会の可能性がある場合は、<strong>削除せず保留</strong> しておくことをおすすめします。</li>
+                        <li>
+                            <strong>サブスクリプションが中止されている</strong> ことを確認してください。
+                        </li>
+                        <li>
+                            サブスク中止後は、<strong>会員情報を残しても費用は一切発生しません。</strong>
+                        </li>
+                        <li>
+                            将来的に再入会の可能性がある場合は、
+                            <strong>アカウント削除を行わず保留</strong> にしておくことをお勧めします。
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -35,7 +58,7 @@
             {{-- 操作ボタン --}}
             <div class="flex flex-col sm:flex-row items-center sm:justify-between gap-3">
                 <p class="text-sm text-gray-500">
-                    アカウント削除をご希望の方は、以下のボタンをクリックしてください。
+                    アカウント削除をご希望の場合、以下のボタンを押してください。
                 </p>
 
                 <x-danger-button
@@ -47,7 +70,7 @@
                 </x-danger-button>
             </div>
 
-            {{-- 確認モーダル --}}
+            {{-- ▼ 確認モーダル --}}
             <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
                 <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
                     @csrf
@@ -58,12 +81,12 @@
                     </h2>
 
                     <p class="text-sm text-gray-600 leading-relaxed mb-4">
-                        アカウント削除後は、データを復元することはできません。
+                        削除後はアカウントやデータを復元することはできません。
                         <br class="hidden sm:block">
                         続行する場合は、確認のためにパスワードを入力してください。
                     </p>
 
-                    {{-- パスワード入力 --}}
+                    {{-- パスワード --}}
                     <div class="form-control">
                         <x-input-label for="password" value="{{ __('パスワードの入力') }}" />
                         <x-text-input

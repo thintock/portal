@@ -26,10 +26,20 @@
             <form method="POST" action="{{ route('admin.pages.store') }}" class="space-y-6">
                 @csrf
 
+                {{-- タイトル --}}
+                <div>
+                    <label for="title" class="block font-semibold mb-1">タイトル</label>
+                    <input type="text" name="title" id="title"
+                           value="{{ old('title', $presetTitle ?? '') }}"
+                           placeholder="ページタイトルを入力してください"
+                           {{ isset($presetTitle) && $presetTitle ? 'readonly' : '' }}
+                           class="input input-bordered w-full {{ isset($presetTitle) && $presetTitle ? 'bg-gray-100 cursor-not-allowed' : '' }}">
+                </div>
+
                 {{-- スラッグ --}}
                 <div>
                     <label for="slug" class="block font-semibold mb-1">
-                        スラッグ（URL識別子） <span class="text-red-500">*</span>
+                        URL <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="slug" id="slug"
                            value="{{ old('slug', $presetSlug ?? '') }}"
@@ -39,16 +49,6 @@
                     <p class="text-sm text-gray-500 mt-1">
                         URLとして使用されます（例: https://portal.bakerista.jp/terms）
                     </p>
-                </div>
-
-                {{-- タイトル --}}
-                <div>
-                    <label for="title" class="block font-semibold mb-1">タイトル</label>
-                    <input type="text" name="title" id="title"
-                           value="{{ old('title', $presetTitle ?? '') }}"
-                           placeholder="ページタイトルを入力してください"
-                           {{ isset($presetTitle) && $presetTitle ? 'readonly' : '' }}
-                           class="input input-bordered w-full {{ isset($presetTitle) && $presetTitle ? 'bg-gray-100 cursor-not-allowed' : '' }}">
                 </div>
 
                 {{-- 本文1〜3 --}}
@@ -90,5 +90,6 @@
                 content_css: false,
             });
         </script>
+
     </div>
 </x-admin-layout>

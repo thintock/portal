@@ -34,20 +34,6 @@
                 @csrf
                 @method('PUT')
 
-                {{-- スラッグ --}}
-                <div>
-                    <label for="slug" class="block font-semibold mb-1">
-                        スラッグ（URL識別子） <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="slug" id="slug"
-                           value="{{ old('slug', $page->slug) }}"
-                           placeholder="例: terms, privacy, about"
-                           class="input input-bordered w-full">
-                    <p class="text-sm text-gray-500 mt-1">
-                        URLとして使用されます（例: https://portal.bakerista.jp/terms）
-                    </p>
-                </div>
-
                 {{-- タイトル --}}
                 <div>
                     <label for="title" class="block font-semibold mb-1">タイトル</label>
@@ -56,6 +42,40 @@
                            placeholder="ページタイトルを入力してください"
                            class="input input-bordered w-full">
                 </div>
+
+                {{-- スラッグ --}}
+                <div x-data="{ editingSlug: false }">
+                    <label for="slug" class="block font-semibold mb-1">
+                        URL <span class="text-red-500">*</span>
+                    </label>
+                
+                    {{-- スラッグ入力 --}}
+                    <input
+                        type="text"
+                        name="slug"
+                        id="slug"
+                        value="{{ old('slug', $page->slug) }}"
+                        :readonly="!editingSlug"
+                        class="input input-bordered w-full"
+                        :class="editingSlug ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'"
+                    >
+                
+                    {{-- 説明文 --}}
+                    <p class="text-sm text-gray-500 mt-1">
+                        URL として使用されます（例: https://portal.bakerista.jp/terms）
+                    </p>
+                
+                    {{-- 編集可否トグル --}}
+                    <label class="mt-3 flex items-center gap-2 cursor-pointer select-none text-sm">
+                        <input type="checkbox" x-model="editingSlug" class="checkbox checkbox-sm checkbox-primary">
+                        <span class="text-gray-700">URL（スラッグ）を編集する</span>
+                    </label>
+                
+                    <p class="text-xs text-gray-500 mt-1" x-show="editingSlug">
+                        ※ スラッグを変更すると既存のURLが無効になる可能性があります。慎重に行ってください。
+                    </p>
+                </div>
+
 
                 {{-- 本文1〜3 --}}
                 @foreach (['body1' => '本文1（HTML可）', 'body2' => '本文2（HTML可）', 'body3' => '本文3（HTML可）'] as $field => $label)

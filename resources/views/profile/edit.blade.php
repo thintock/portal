@@ -21,14 +21,14 @@
             {{-- パスワード更新 --}}
             <div class="card bg-white shadow-xl border border-base-300">
                 <div class="card-body p-3 sm:p-6">
-                    <h3 class="text-lg font-bold mb-4 text-primary">パスワードの変更</h3>
+                    <h3 class="text-lg font-bold mb-4 text-primary">パスワード</h3>
                     @include('profile.partials.update-password-form')
                 </div>
             </div>
 
             {{-- 退会 --}}
             <div class="card bg-white shadow-xl border border-error/30">
-                <div class="card-body">
+                <div class="card-body p-3 sm:p-6">
                     <h3 class="text-lg font-bold mb-4 text-error">アカウント削除</h3>
                     <p class="text-sm text-gray-600 mb-4">
                         アカウントを削除すると、全ての投稿・データが失われます。この操作は取り消せません。

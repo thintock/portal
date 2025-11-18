@@ -36,7 +36,7 @@
                 {{-- ログイン状態保持 --}}
                 <div class="flex items-center mt-2">
                     <label for="remember_me" class="label cursor-pointer justify-start gap-2">
-                        <input id="remember_me" type="checkbox" name="remember" class="checkbox checkbox-sm checkbox-primary" />
+                        <input id="remember_me" type="checkbox" name="remember" class="checkbox checkbox-sm checkbox-primary" checked/>
                         <span class="label-text text-sm text-gray-600">ログイン状態を保持する</span>
                     </label>
                 </div>

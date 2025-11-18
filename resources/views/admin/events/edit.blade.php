@@ -22,14 +22,34 @@
                            class="input input-bordered w-full" required>
                 </div>
 
-                {{-- スラッグ（変更不可） --}}
-                <div>
-                    <label class="block font-semibold mb-1">スラッグ（変更できません）</label>
-                    <input type="text" name="slug" value="{{ old('slug', $event->slug) }}"
-                           class="input input-bordered w-full bg-gray-100 cursor-not-allowed"
-                           readonly tabindex="-1">
+                {{-- スラッグ（通常は編集不可 / 必要なときのみ編集） --}}
+                <div x-data="{ editingSlug: false }">
+                    <label class="block font-semibold mb-1">URL</label>
+
+                    <input type="text"
+                        name="slug"
+                        id="slug"
+                        value="{{ old('slug', $event->slug) }}"
+                        class="input input-bordered w-full"
+                        :readonly="!editingSlug"
+                        :class="editingSlug ? 'bg-white' : 'bg-gray-100 cursor-not-allowed'"
+                    >
+
                     <p class="text-sm text-gray-500 mt-1">
-                        URLとして使用されます（例: https://portal.bakerista.jp/events/<span class="text-gray-600 italic">{{ $event->slug }}</span>）
+                        URL 例： https://portal.bakerista.jp/events/XXX
+                        <span class="italic text-gray-600">{{ $event->slug }}</span>
+                    </p>
+
+                    {{-- 編集スイッチ --}}
+                    <label class="mt-3 flex items-center gap-2 cursor-pointer select-none text-sm">
+                        <input type="checkbox"
+                            x-model="editingSlug"
+                            class="checkbox checkbox-sm checkbox-primary">
+                        <span class="text-gray-700">URL（スラッグ）を編集する</span>
+                    </label>
+
+                    <p class="text-xs text-gray-500 mt-1" x-show="editingSlug">
+                        ※ スラッグを変更すると既存リンクが無効になる可能性があります。
                     </p>
                 </div>
 

@@ -153,20 +153,27 @@
         });
         </script>
 
-        {{-- slug自動生成（ランダム英数字） --}}
+        {{-- slug自動生成（初回のみ） --}}
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const title = document.querySelector('#title');
-                const slug = document.querySelector('#slug');
-                function generateRandomSlug() {
-                    return 'e-' + Math.random().toString(36).substring(2, 8);
-                }
-                if (!slug.value) slug.value = generateRandomSlug();
-                title.addEventListener('input', () => {
-                    if (!slug.dataset.edited) slug.value = generateRandomSlug();
-                });
-                slug.addEventListener('input', () => slug.dataset.edited = true);
+        document.addEventListener('DOMContentLoaded', () => {
+            const slug = document.querySelector('#slug');
+        
+            // ランダム slug 生成
+            function generateRandomSlug() {
+                return 'e-' + Math.random().toString(36).substring(2, 8);
+            }
+        
+            // old() や バリデーション失敗で slug が戻ってきている場合は生成しない
+            if (!slug.value) {
+                slug.value = generateRandomSlug();
+                slug.dataset.generated = "true"; // 生成済みフラグ
+            }
+        
+            // 手動編集されたらフラグを消す
+            slug.addEventListener('input', () => {
+                slug.dataset.generated = "manual";
             });
+        });
         </script>
     </div>
 </x-admin-layout>

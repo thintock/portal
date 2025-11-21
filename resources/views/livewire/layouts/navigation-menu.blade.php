@@ -13,9 +13,15 @@
 
                 {{-- メインメニュー（PC） --}}
                 <div class="hidden sm:flex sm:space-x-8 sm:ml-10 text-gray-700 font-medium">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        ホーム
-                    </x-nav-link>
+                    @if(Auth::check())
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            ホーム
+                        </x-nav-link>
+                    @else
+                        <a href="{{ url('/') }}" class="text-gray-700 hover:text-gray-900">
+                            ホーム
+                        </a>
+                    @endif
                 </div>
                 @if(Auth::check() && Auth::user()->role === 'admin')
                     <div class="hidden sm:flex sm:space-x-8 sm:ml-10 text-gray-700 font-medium">

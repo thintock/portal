@@ -10,7 +10,7 @@ class Show extends Component
 {
     public $user;
     public bool $showModal = false;
-
+    public bool $isCircleMember = false;
     protected $listeners = ['show-membership-card' => 'open'];
 
     /**
@@ -24,6 +24,9 @@ class Show extends Component
         }])->find($userId);
 
         if ($this->user) {
+            // Stripeのサブスク判定を事前に計算しておく
+            $this->isCircleMember = $this->user->subscribed('default');
+    
             $this->showModal = true;
         }
     }

@@ -39,10 +39,19 @@ class BillingController extends Controller
         }
     
         $priceId = $request->input('price');
-    
+        
+        // 姓名結合
+        $fullName = trim(
+            ($user->last_name ?? '') . ' ' . ($user->first_name ?? '')
+        );
+        // null の場合は name カラム fallback
+        if (empty($fullName)) {
+            $fullName = $user->name;
+        }
+        
         // 事前にStripe顧客情報を更新
         $user->updateStripeCustomer([
-            'name'    => $user->display_name ?? $user->name,
+            'name'    => $fullName,
             'email'   => $user->email,
             'address' => [
                 'line1'       => $user->address2,   // 町名番地
@@ -59,6 +68,8 @@ class BillingController extends Controller
             ->checkout([
                 'success_url' => route('billing.success').'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url'  => route('billing.cancel'),
+                // Stripe Tax を有効化
+                'automatic_tax' => ['enabled' => true],
                 'allow_promotion_codes' => true,
             ]);
     }

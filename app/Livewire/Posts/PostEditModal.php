@@ -166,6 +166,7 @@ class PostEditModal extends Component
     
         // 5️⃣ モーダルを閉じて状態リセット
         $this->dispatch('post-updated', postId: $this->postId);
+        $this->dispatch('post-updated-global');
         $this->reset(['newMedia']);
         $this->showModal = false;
     

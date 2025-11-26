@@ -92,27 +92,32 @@
           @endforeach
         </div>
     
-        {{-- 左右ナビゲーション --}}
-        <button 
-          class="absolute left-2 top-1/2 transform -translate-y-1/2 btn btn-circle btn-sm bg-white/70 hover:bg-white"
-          @click="active = (active === 0) ? total - 1 : active - 1"
-        >❮</button>
+        {{-- 左右ナビゲーション（画像2枚以上の時のみ表示） --}}
+        @if($post->mediaFiles->count() > 1)
+            <button 
+              class="absolute left-2 top-1/2 transform -translate-y-1/2 btn btn-circle btn-sm bg-white/70 hover:bg-white"
+              @click="active = (active === 0) ? total - 1 : active - 1"
+            >❮</button>
+        
+            <button 
+              class="absolute right-2 top-1/2 transform -translate-y-1/2 btn btn-circle btn-sm bg-white/70 hover:bg-white"
+              @click="active = (active === total - 1) ? 0 : active + 1"
+            >❯</button>
+        @endif
     
-        <button 
-          class="absolute right-2 top-1/2 transform -translate-y-1/2 btn btn-circle btn-sm bg-white/70 hover:bg-white"
-          @click="active = (active === total - 1) ? 0 : active + 1"
-        >❯</button>
-    
-        {{-- インジケーター（小丸） --}}
-        <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-          <template x-for="i in total" :key="i">
-            <button
-              class="w-2.5 h-2.5 rounded-full"
-              :class="i - 1 === active ? 'bg-gray-800' : 'bg-gray-400/60'"
-              @click="active = i - 1"
-            ></button>
-          </template>
-        </div>
+        {{-- インジケーター（2枚以上の時だけ表示） --}}
+        @if($post->mediaFiles->count() > 1)
+            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+              <template x-for="i in total" :key="i">
+                <button
+                  class="w-2.5 h-2.5 rounded-full"
+                  :class="i - 1 === active ? 'bg-gray-800' : 'bg-gray-400/60'"
+                  @click="active = i - 1"
+                ></button>
+              </template>
+            </div>
+        @endif
+
       </div>
     @endif
 

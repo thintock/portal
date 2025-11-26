@@ -17,6 +17,7 @@ class PostFeed extends Component
     protected $listeners = [
         'post-created' => 'refreshList',
         'post-deleted' => 'refreshList',
+        'post-updated-global' => 'refreshList',
         'load-more-posts' => 'loadMore',
     ];
 

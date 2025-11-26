@@ -41,8 +41,8 @@
             ベーカリスタサークルとは？
         </h2>
         <p class="text-base sm:text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
-            北海道・室蘭発のクラフト小麦粉ブランド「ベーカリスタ」が運営する、<br class="hidden sm:block">
-            パンを愛する人のための月額制コミュニティです。<br>
+            北海道発のクラフト小麦粉ブランド「ベーカリスタ」が運営する、<br class="hidden sm:block">
+            パンづくりを愛する人のための月額制コミュニティです。<br>
             毎月の特別講座、会員限定ライブ、交流ルームなどを通して、<br>
             “パン作りを暮らしの真ん中に” をテーマに活動しています。
         </p>
@@ -50,21 +50,21 @@
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 mt-10">
             <div class="card bg-white shadow-md border hover:shadow-lg transition transform hover:-translate-y-1">
                 <div class="card-body">
-                    <h3 class="card-title text-lg sm:text-xl">🧑‍🍳 仲間とつながる</h3>
+                    <h3 class="card-title text-lg sm:text-xl">仲間とつながる</h3>
                     <p>全国のベーカーと出会える。ルームで情報交換や作品共有ができます。</p>
                 </div>
             </div>
 
             <div class="card bg-white shadow-md border hover:shadow-lg transition transform hover:-translate-y-1">
                 <div class="card-body">
-                    <h3 class="card-title text-lg sm:text-xl">🎥 学ぶ・体験する</h3>
+                    <h3 class="card-title text-lg sm:text-xl">学ぶ・体験する</h3>
                     <p>講師陣によるオンライン講座、ライブ配信イベントなどを毎月開催。</p>
                 </div>
             </div>
 
             <div class="card bg-white shadow-md border hover:shadow-lg transition transform hover:-translate-y-1">
                 <div class="card-body">
-                    <h3 class="card-title text-lg sm:text-xl">📦 会員特典</h3>
+                    <h3 class="card-title text-lg sm:text-xl">会員特典</h3>
                     <p>クラフト小麦粉の限定販売・先行予約・特別割引などの特典をご用意。</p>
                 </div>
             </div>

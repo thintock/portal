@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Livewire\Members;
+
+use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
+class MemberIndex extends Component
+{
+    use WithPagination;
+
+    public string $sort = 'newest';   // デフォルト
+    public string $search = '';
+
+    protected $listeners = [
+        'membercard-closed' => '$refresh',
+    ];
+    
+    /** 検索や並び替えが更新されたときページを戻す */
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSort()
+    {
+        $this->resetPage();
+    }
+
+    /** ベースクエリ */
+    protected function baseQuery()
+    {
+        // サブスク契約者
+        $subscribed = DB::table('users')
+            ->join('subscriptions', function ($q) {
+                $q->on('subscriptions.user_id', '=', 'users.id')
+                  ->where('subscriptions.type', 'default')
+                  ->whereNull('subscriptions.ends_at');
+            })
+            ->leftJoin('member_number_histories', 'member_number_histories.user_id', '=', 'users.id')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.role',
+                'subscriptions.created_at as joined_at',
+                'member_number_histories.number as member_no'
+            );
+
+        // admin + guest
+        $adminsGuests = DB::table('users')
+            ->whereIn('role', ['admin', 'guest'])
+            ->leftJoin('member_number_histories', 'member_number_histories.user_id', '=', 'users.id')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.role',
+                DB::raw('NULL as joined_at'),
+                'member_number_histories.number as member_no'
+            );
+
+        return $adminsGuests->union($subscribed);
+    }
+
+
+    /**
+     * 検索 + 並べ替え
+     */
+    public function getMembersQuery()
+    {
+        $query = $this->baseQuery();
+
+        // --- 検索 ---
+        if ($this->search !== '') {
+            $terms = collect(explode(' ', mb_convert_kana($this->search, 's')))
+                ->filter()
+                ->values();
+
+            foreach ($terms as $term) {
+                $query->where('name', 'like', "%{$term}%");
+            }
+        }
+
+        // --- 並び替え ---
+        $query = match ($this->sort) {
+            'member_no' => $query->orderBy('member_no', 'asc'),
+            'oldest'    => $query->orderBy('joined_at', 'asc'),
+            'newest'    => $query->orderBy('joined_at', 'desc'),
+            'name'      => $query->orderBy('name', 'asc'),
+            default     => $query->orderBy('joined_at', 'desc'),
+        };
+
+        return $query;
+    }
+
+
+    /**
+     * 描画直前で User モデルに復元
+     */
+    public function render()
+    {
+        // UNION → paginate
+        $raw = $this->getMembersQuery()->paginate(60);
+
+        // User モデルに復元
+        $members = User::whereIn('id', $raw->pluck('id'))->get()
+            ->keyBy('id');
+
+        // ページネーション順に並べ替え
+        $ordered = $raw->getCollection()->map(function ($row) use ($members) {
+            $user = $members[$row->id];
+            $user->joined_at = $row->joined_at;
+            $user->member_no = $row->member_no;
+            return $user;
+        });
+
+        // ページネーションオブジェクトに差し替え
+        $raw->setCollection($ordered);
+
+        return view('livewire.members.member-index', [
+            'members' => $raw,
+        ])->layout('layouts.app', [
+            'title' => '会員一覧'
+        ]);
+    }
+}

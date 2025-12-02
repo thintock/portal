@@ -185,6 +185,7 @@ class CommentSection extends Component
         $this->formKey++;
         $this->showForm = false;
     
+        session()->flash('success', '投稿しました');
         session()->flash('success', $parentId ? '返信を投稿しました' : 'コメントを投稿しました');
     }
 

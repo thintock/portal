@@ -51,7 +51,6 @@ class RsvpButton extends Component
         // 最新状態に更新
         $this->isFull = $this->event->fresh()->is_full;
     
-        // 👇 Sectionコンポーネントに再描画を要求
         $this->dispatch('rsvpUpdated');
     }
 

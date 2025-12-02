@@ -17,7 +17,7 @@
 
                 {{-- メールアドレス --}}
                 <div>
-                    <x-input-label for="email" :value="__('Eメール')" />
+                    <x-input-label for="email" :value="__('Eメール')" class="text-gray-800 font-semibold" />
                     <x-text-input id="email" type="email" name="email"
                         class="input input-bordered w-full mt-1"
                         :value="old('email')" required autofocus autocomplete="username" />
@@ -25,12 +25,34 @@
                 </div>
 
                 {{-- パスワード --}}
-                <div>
-                    <x-input-label for="password" :value="__('パスワード')" />
-                    <x-text-input id="password" type="password" name="password"
-                        class="input input-bordered w-full mt-1"
-                        required autocomplete="current-password" />
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <div x-data="{ showPassword: false }">
+                    <x-input-label for="password" :value="__('パスワード')" class="text-gray-800 font-semibold" />
+                
+                    <div class="relative mt-1">
+                        <x-text-input id="password" x-bind:type="showPassword ? 'text' : 'password'" name="password"
+                            class="input input-bordered w-full focus:ring-2 focus:ring-primary pr-10"
+                            required autocomplete="current-password" />
+                
+                        <button type="button" @click="showPassword = !showPassword"
+                            :aria-label="showPassword ? 'パスワードを隠す' : 'パスワードを表示する'"
+                            class="absolute inset-y-0 right-0 p-3 flex items-center text-gray-500 hover:text-gray-800">
+                            
+                            {{-- 非表示アイコン --}}
+                            <svg x-show="!showPassword" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M1.5 1.5l21 21"/>
+                            </svg>
+                
+                            {{-- 表示アイコン --}}
+                            <svg x-show="showPassword" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                
+                    <x-input-error :messages="$errors->get('password')" class="mt-2 text-error text-sm" />
                 </div>
 
                 {{-- ログイン状態保持 --}}

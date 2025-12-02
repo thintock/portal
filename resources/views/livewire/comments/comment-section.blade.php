@@ -1,6 +1,4 @@
 <div class="p-2 sm:p-4 md:p-6">
-  {{-- Livewireメッセージ --}}
-  @include('commons.messages')
   {{-- トグルボタン --}}
 <div class="pb-2 sm:pb-4 md:pb-6">
   <button type="button" class="btn btn-outline btn-xs sm:btn-sm md:btn-md w-full"
@@ -113,7 +111,7 @@
               </button>
               <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-28">
                 <li><button type="button" wire:click="$dispatch('open-comment-edit', { commentId: {{ $comment->id }} })" class="w-full text-left">編集</button></li>
-                <li><a wire:click="delete({{ $comment->id }})" onclick="return confirm('削除しますか？')">削除</a></li>
+                <li><button class="w-full text-left" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $comment->id }}) }">削除</button></li>
               </ul>
             </div>
           @endif
@@ -228,16 +226,8 @@
                       </svg>
                     </button>
                     <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-28">
-                      <li>
-                        <button type="button"
-                                wire:click="$dispatch('open-comment-edit', { commentId: {{ $reply->id }} })"
-                                class="w-full text-left">
-                          編集
-                        </button>
-                      </li>
-                      <li>
-                        <a wire:click="delete({{ $reply->id }})" onclick="return confirm('削除しますか？')">削除</a>
-                      </li>
+                      <li><button type="button" wire:click="$dispatch('open-comment-edit', { commentId: {{ $reply->id }} })" class="w-full text-left">編集</button></li>
+                      <li><button class="w-full text-left" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $reply->id }}) }">削除</button></li>
                     </ul>
                   </div>
                 @endif

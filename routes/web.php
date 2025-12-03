@@ -18,7 +18,6 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
 use App\Livewire\Events\Show;
-use App\Livewire\Members\MemberIndex;
 use App\Livewire\Dashboard\Index as DashboardIndex;
 
 // 誰でもOK
@@ -59,7 +58,6 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
     Route::get('/events/{slug}', Show::class)->name('events.show');
     Route::post('/events/{event}/join', [EventParticipantController::class, 'store'])->name('events.join');
     Route::delete('/events/{event}/cancel', [EventParticipantController::class, 'destroy'])->name('events.cancel');
-    Route::get('/members', MemberIndex::class)->name('members.member_index');
 });
 
 // 管理者専用

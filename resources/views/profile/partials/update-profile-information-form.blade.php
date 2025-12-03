@@ -8,10 +8,7 @@
       <span>あなたのプロフィール</span>
     </h2>
   </header>
-  
-  {{-- 郵便番号公式データ --}}
-  <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" async></script>
-  
+
   {{-- メール再送フォーム --}}
   <form id="send-verification" method="post" action="{{ route('verification.send') }}">
     @csrf
@@ -166,47 +163,34 @@
 
     {{-- 住所 --}}
     <div class="divider text-sm text-gray-500">住所情報</div>
-    
-    {{-- h-adr にすると Yubinbango が機能する --}}
-    <div class="h-adr space-y-4">
-      <span class="p-country-name" style="display:none;">Japan</span>
-    
-      {{-- 郵便番号 --}}
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div>
-          <x-input-label for="postal_code" :value="__('郵便番号（ハイフンなし）')" />
-          <x-text-input id="postal_code" name="postal_code" type="text"
-            class="p-postal-code input input-bordered w-full mt-1 text-base bg-white"
-            maxlength="7"
-            :value="old('postal_code', $user->postal_code)" />
-        </div>
-    
-        {{-- 都道府県 --}}
-        <div>
-          <x-input-label for="prefecture" :value="__('都道府県')" />
-          <x-text-input id="prefecture" name="prefecture" type="text"
-            class="p-region input input-bordered w-full mt-1 text-base bg-white"
-            :value="old('prefecture', $user->prefecture)" />
-        </div>
-      </div>
-    
-      {{-- 市区町村（自動入力） --}}
+    <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <x-input-label for="address1" :value="__('住所1（市町村名・町名・番地まで）')" />
-        <x-text-input id="address1" name="address1" type="text"
-          class="p-locality p-street-address p-extended-address input input-bordered w-full mt-1 text-base bg-white"
-          :value="old('address1', $user->address1)" />
-      </div>
-    
-      {{-- 建物名など --}}
-      <div>
-        <x-input-label for="address2" :value="__('住所2（建物名・部屋番号）')" />
-        <x-text-input id="address2" name="address2" type="text"
+        <x-input-label for="postal_code" :value="__('郵便番号（ハイフンなし）')" />
+        <x-text-input id="postal_code" name="postal_code" type="text"
           class="input input-bordered w-full mt-1 text-base bg-white"
-          :value="old('address2', $user->address2)" />
+          :value="old('postal_code', $user->postal_code)" />
+      </div>
+
+      <div>
+        <x-input-label for="prefecture" :value="__('都道府県')" />
+        <x-text-input id="prefecture" name="prefecture" type="text"
+          class="input input-bordered w-full mt-1 text-base bg-white"
+          :value="old('prefecture', $user->prefecture)" />
       </div>
     </div>
 
+    <div>
+      <x-input-label for="address1" :value="__('住所1')" />
+      <x-text-input id="address1" name="address1" type="text"
+        class="input input-bordered w-full mt-1 text-base bg-white"
+        :value="old('address1', $user->address1)" />
+    </div>
+    <div>
+      <x-input-label for="address2" :value="__('住所2（建物名など）')" />
+      <x-text-input id="address2" name="address2" type="text"
+        class="input input-bordered w-full mt-1 text-base bg-white"
+        :value="old('address2', $user->address2)" />
+    </div>
 
     {{-- 会社・電話 --}}
     <div class="grid sm:grid-cols-2 gap-4">

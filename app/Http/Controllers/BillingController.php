@@ -85,15 +85,7 @@ class BillingController extends Controller
     /** キャンセル画面 */
     public function cancel()
     {
-        $user = Auth::user();
-    
-        // 現在のsubscriptionを取得
-        $subscription = Subscription::where('user_id', $user->id)
-            ->where('type', 'default')
-            ->latest()
-            ->first();
-    
-        return view('billing.cancel', compact('subscription'));
+        return view('billing.cancel');
     }
 
     /** Stripe Billing Portal（解約/支払方法変更など） */

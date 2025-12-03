@@ -11,8 +11,6 @@ class Show extends Component
     public Event $event;
     public $cover;
     public $gallery;
-    
-    protected $listeners = ['rsvpUpdated' => 'refreshEvent'];
 
     public function mount($slug)
     {

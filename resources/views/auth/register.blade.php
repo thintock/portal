@@ -44,54 +44,20 @@
                     </div>
 
                     {{-- パスワード --}}
-                    <div x-data="{ showPassword: false }">
+                    <div>
                         <x-input-label for="password" :value="__('パスワード')" class="text-gray-800 font-semibold" />
-                        
-                        {{-- inputとボタンを相対的なコンテナで囲む --}}
-                        <div class="relative mt-1">
-                            <x-text-input id="password" x-bind:type="showPassword ? 'text' : 'password'" name="password" class="input input-bordered w-full focus:ring-2 focus:ring-primary pr-10" required autocomplete="new-password" />
-                            
-                            {{-- トグルボタン (絶対位置) --}}
-                            <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? 'パスワードを隠す' : 'パスワードを表示する'" class="absolute inset-y-0 right-0 p-3 flex items-center text-gray-500 hover:text-gray-800 focus:outline-none">
-                                {{-- 目を閉じたアイコン (デフォルト) --}}
-                                <svg x-show="!showPassword" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-                                    <path d="M1.5 1.5l21 21"/>
-                                </svg>
-                                {{-- 目を開けたアイコン --}}
-                                <svg x-show="showPassword" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-                                </svg>
-                            </button>
-                        </div>
+                        <x-text-input id="password" type="password" name="password"
+                            class="input input-bordered w-full mt-1 focus:ring-2 focus:ring-primary"
+                            required autocomplete="new-password" />
                         <x-input-error :messages="$errors->get('password')" class="mt-2 text-error text-sm" />
                     </div>
 
                     {{-- パスワード確認 --}}
-                    <div x-data="{ showPassword: false }">
+                    <div>
                         <x-input-label for="password_confirmation" :value="__('パスワード（確認）')" class="text-gray-800 font-semibold" />
-                        
-                        {{-- inputとボタンを相対的なコンテナで囲む --}}
-                        <div class="relative mt-1">
-                            <x-text-input id="password_confirmation" x-bind:type="showPassword ? 'text' : 'password'" name="password_confirmation" class="input input-bordered w-full focus:ring-2 focus:ring-primary pr-10" required autocomplete="new-password" />
-                            
-                            {{-- トグルボタン (絶対位置) --}}
-                            <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? 'パスワードを隠す' : 'パスワードを表示する'" class="absolute inset-y-0 right-0 p-3 flex items-center text-gray-500 hover:text-gray-800 focus:outline-none">
-                                {{-- 目を閉じたアイコン (デフォルト) --}}
-                                <svg x-show="!showPassword" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-                                    <path d="M1.5 1.5l21 21"/>
-                                </svg>
-                                {{-- 目を開けたアイコン --}}
-                                <svg x-show="showPassword" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-                                </svg>
-                            </button>
-                        </div>
+                        <x-text-input id="password_confirmation" type="password" name="password_confirmation"
+                            class="input input-bordered w-full mt-1 focus:ring-2 focus:ring-primary"
+                            required autocomplete="new-password" />
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-error text-sm" />
                     </div>
 

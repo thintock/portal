@@ -46,42 +46,6 @@
                         ログアウト
                     </button>
                 </form>
-                {{-- 現在のメールアドレス表示 --}}
-                <div class="mt-6 bg-gray-100 rounded-lg p-4">
-                    <p class="text-gray-700 text-sm mb-2">
-                        現在登録されているメールアドレス：
-                    </p>
-                    <p class="font-semibold text-gray-900 text-center">{{ Auth::user()->email }}</p>
-                </div>
-                
-                {{-- メールアドレス変更フォーム --}}
-                <div class="mt-6">
-                    <form method="POST" action="{{ route('verification.change-email') }}">
-                        @csrf
-                
-                        <label class="label text-sm font-semibold text-gray-700">
-                            メールアドレスを修正する
-                        </label>
-                
-                        <input
-                            type="email"
-                            name="email"
-                            required
-                            value="{{ old('email', Auth::user()->email) }}"
-                            class="input input-bordered w-full mb-3"
-                            placeholder="新しいメールアドレス"
-                        >
-                
-                        @error('email')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                
-                        <button class="btn btn-secondary w-full">
-                            メールアドレスを更新する
-                        </button>
-                    </form>
-                </div>
-
             </div>
         </div>
 

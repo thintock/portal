@@ -79,9 +79,11 @@
                         </x-slot>
     
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('members.member_index')">
-                                会員一覧
-                            </x-dropdown-link>
+                            @if(auth()->user()->subscribed('default') || auth()->user()->role === 'admin')
+                                <x-dropdown-link :href="route('members.member_index')">
+                                    会員一覧
+                                </x-dropdown-link>
+                            @endif
                             <x-dropdown-link :href="route('profile.edit')">
                                 会員情報
                             </x-dropdown-link>

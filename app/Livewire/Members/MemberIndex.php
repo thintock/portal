@@ -18,6 +18,21 @@ class MemberIndex extends Component
         'membercard-closed' => '$refresh',
     ];
     
+    public function mount()
+    {
+        $user = auth()->user();
+    
+        // 管理者は許可
+        if ($user->role === 'admin') {
+            return;
+        }
+    
+        // ゲストユーザーは不可
+        if ($user->role === 'guest' || !$user->subscribed('default')) {
+            abort(403, 'このページにアクセスする権限がありません。');
+        }
+    }
+
     /** 検索や並び替えが更新されたときページを戻す */
     public function updatingSearch()
     {

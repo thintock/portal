@@ -45,6 +45,7 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::get('/billing/success', [BillingController::class, 'success'])->name('billing.success');
     Route::get('/billing/cancel',  [BillingController::class, 'cancel'])->name('billing.cancel');
     Route::get('/billing/portal',  [BillingController::class, 'portal'])->name('billing.portal');
+    Route::get('/members', MemberIndex::class)->name('members.member_index');
 });
 
 // 有料会員専用
@@ -59,7 +60,6 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
     Route::get('/events/{slug}', Show::class)->name('events.show');
     Route::post('/events/{event}/join', [EventParticipantController::class, 'store'])->name('events.join');
     Route::delete('/events/{event}/cancel', [EventParticipantController::class, 'destroy'])->name('events.cancel');
-    Route::get('/members', MemberIndex::class)->name('members.member_index');
 });
 
 // 管理者専用

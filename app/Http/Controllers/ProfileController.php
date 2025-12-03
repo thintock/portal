@@ -97,16 +97,25 @@ class ProfileController extends Controller
          * ✅ 基本情報の更新
          * ================================
          */
+        // ▼ 現在のメールアドレスを控えておく
+        $oldEmail = $user->email;
+        
         $user->fill($data);
 
-        // メール変更時は再認証
-        if ($user->isDirty('email')) {
+        // ▼ メールアドレスが変更されたか？
+        $emailChanged = $user->email !== $oldEmail;
+    
+        if ($emailChanged) {
+            // 認証状態をリセット
             $user->email_verified_at = null;
         }
-
+    
         $user->save();
-        // メール認証リンクを再送
-        $user->sendEmailVerificationNotification();
+        
+        // ▼ メール変更があった場合のみ認証メールを送る
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         /**
          * ================================

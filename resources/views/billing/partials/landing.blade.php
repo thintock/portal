@@ -92,7 +92,7 @@
                     <x-input-label for="price" :value="__('プランを選択')" class="text-gray-800 font-semibold" />
                     <select name="price" id="price" class="select select-bordered w-full mt-1 focus:ring-2 focus:ring-primary bg-white text-gray-800">
                         @if ($prices['basic'] ?? false)
-                            <option value="{{ $prices['basic'] }}">サークル会員（月額 ¥3,300）</option>
+                            <option value="{{ $prices['basic'] }}">サークル会員（月額 ¥2,980）</option>
                         @endif
                     </select>
                 </div>
@@ -104,7 +104,7 @@
             </form>
         </div>
         <p class="mt-10 text-sm text-white/90">
-            月額 <span class="font-bold text-white">¥3,300（税込）</span> — いつでもキャンセル可能。
+            月額 <span class="font-bold text-white">¥2,980（税込）</span> — いつでもキャンセルできます。再入会も簡単。
         </p>
     </div>
 </section>

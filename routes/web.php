@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BillingController;
-use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomMemberController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PageController;
@@ -12,6 +11,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventParticipantController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminRoomController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\StripeWebhookController;
@@ -70,8 +70,9 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     // 今後の管理ページ用のルート（未実装でもOK）
     Route::get('/posts', fn() => '投稿管理ページ')->name('admin.posts');
     Route::get('/events', fn() => 'イベント管理ページ')->name('admin.events');
+    Route::post('/rooms/sort', [AdminRoomController::class, 'updateSortOrder'])->name('rooms.sort');
     Route::resource('users', AdminUserController::class)->names('users')->except('show');
-    Route::resource('rooms', RoomController::class)->except('show');
+    Route::resource('rooms', AdminRoomController::class)->except('show');
     Route::resource('pages', AdminPageController::class);
     Route::resource('events', AdminEventController::class);
 });

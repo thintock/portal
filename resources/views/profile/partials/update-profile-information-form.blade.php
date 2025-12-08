@@ -161,6 +161,48 @@
           />
         </div>
       </div>
+      {{-- 🎂 誕生日（月・日） --}}
+      <div class="mb-4">
+          <x-input-label value="お誕生日" />
+          <div class="flex gap-3 mt-1">
+              {{-- 月 --}}
+              <div class="flex-1">
+                  <select name="birthday_month"
+                      class="select select-bordered rounded-md w-full bg-white">
+                      
+                      {{-- ← プレースホルダー --}}
+                      <option value="" @selected(old('birthday_month', $user->birthday_month) === null)>
+                          月を選択
+                      </option>
+      
+                      @foreach(range(1,12) as $m)
+                          <option value="{{ $m }}"
+                              @selected(old('birthday_month', $user->birthday_month) == $m)>
+                              {{ $m }} 月
+                          </option>
+                      @endforeach
+                  </select>
+              </div>
+              {{-- 日 --}}
+              <div class="flex-1">
+                  <select name="birthday_day"
+                      class="select select-bordered rounded-md w-full bg-white">
+      
+                      {{-- ← プレースホルダー --}}
+                      <option value="" @selected(old('birthday_day', $user->birthday_day) === null)>
+                          日を選択
+                      </option>
+      
+                      @foreach(range(1,31) as $d)
+                          <option value="{{ $d }}"
+                              @selected(old('birthday_day', $user->birthday_day) == $d)>
+                              {{ $d }} 日
+                          </option>
+                      @endforeach
+                  </select>
+              </div>
+          </div>
+      </div>
     </div>
 
 

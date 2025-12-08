@@ -8,24 +8,35 @@
             $avatar = $post->user->mediaFiles()
                 ->where('media_files.type', 'avatar')
                 ->first();
+            $isBirthday = $post->user->birthday_month == now()->month
+              && $post->user->birthday_day == now()->day;
         @endphp
         
-        {{-- アバター枠（クリックで会員証モーダルを開く） --}}
-        <div 
-            class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 cursor-pointer transition transform hover:scale-105 hover:border-primary"
-            wire:click="$dispatch('show-membership-card', { userId: {{ $post->user->id }} })"
-            title="{{ $post->user->name ?? 'ユーザー名未登録' }} の会員証を表示"
-          >
-          @if($avatar)
-            <img src="{{ Storage::url($avatar->path) }}"
-                 alt="avatar"
-                 class="w-full h-full object-cover">
-          @else
-            <span class="text-sm font-semibold text-gray-600">
-              {{ mb_substr($post->user->name ?? '？', 0, 1) }}
-            </span>
+        {{-- アバター全体（← overflow-hidden なし） --}}
+      <div class="relative w-8 h-8 cursor-pointer flex items-center justify-center"
+           wire:click="$dispatch('show-membership-card', { userId: {{ $post->user->id }} })"
+           title="{{ $post->user->name ?? 'ユーザー名未登録' }}">
+          
+          {{-- 丸いアバター枠（ここで overflow-hidden） --}}
+          <div class="w-full h-full rounded-full overflow-hidden bg-base-200 border-2 flex items-center justify-center transition hover:scale-105 hover:border-primary">
+              @if($avatar)
+                  <img src="{{ Storage::url($avatar->path) }}"
+                       alt="avatar"
+                       class="w-full h-full object-cover">
+              @else
+                  <span class="text-sm font-semibold text-gray-600">
+                      {{ mb_substr($post->user->name ?? '？', 0, 1) }}
+                  </span>
+              @endif
+          </div>
+      
+          {{-- 誕生日アイコン（枠の外に飛び出す） --}}
+          @if($isBirthday)
+              <div class="absolute -top-2.5 -right-2.5 text-white text-[16px] rounded-full px-1.5 py-[1px] transform rotate-[40deg]">
+                  👑
+              </div>
           @endif
-        </div>
+      </div>
       
         {{-- ニックネーム・日付表示 --}}
         <div>

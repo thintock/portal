@@ -1,5 +1,5 @@
 {{-- 📝 新着投稿 --}}
-<div class="bg-white shadow-sm rounded-lg max-w-3xl mx-auto w-full px-4 sm:px-6">
+<div class="bg-white shadow-sm rounded-lg max-w-3xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-6">
     <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold p-4">📝 新着投稿</h2>
     </div>
@@ -14,7 +14,7 @@
                             <span class="text-sm font-bold text-primary">[{{ $post->room->name }}]</span>
                             <span class="text-sm">{{ Str::limit(strip_tags($post->body), 100) }}</span>
                             <span class="badge badge-sm text-xs ml-2 bg-gray-100 text-gray-600 border-none">
-                                by {{ $post->user->name }}
+                                by {{ $post->user->name }}・{{ $post->created_at->diffForHumans() }}
                             </span>
                         </div>
                     </div>

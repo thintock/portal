@@ -37,6 +37,41 @@
                     <x-input name="company_name" label="会社名" :value="$user->company_name"/>
                     <x-input name="email" type="email" label="メール" :value="$user->email"/>
                     <x-input name="phone" label="電話番号" :value="$user->phone"/>
+                    {{-- 🎂 誕生日（月・日） --}}
+                    <div class="col-span-2">
+                        <label class="block font-bold mb-1">誕生日</label>
+                    
+                        <div class="flex gap-3">
+                            {{-- 月 --}}
+                            <div class="flex-1">
+                                <select name="birthday_month"
+                                    class="select select-bordered w-full bg-white rounded-md">
+                                    <option value="">月を選択</option>
+                                    @foreach(range(1,12) as $m)
+                                        <option value="{{ $m }}"
+                                            @selected(old('birthday_month', $user->birthday_month) == $m)>
+                                            {{ $m }} 月
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                    
+                            {{-- 日 --}}
+                            <div class="flex-1">
+                                <select name="birthday_day"
+                                    class="select select-bordered w-full bg-white rounded-md">
+                                    <option value="">日を選択</option>
+                                    @foreach(range(1,31) as $d)
+                                        <option value="{{ $d }}"
+                                            @selected(old('birthday_day', $user->birthday_day) == $d)>
+                                            {{ $d }} 日
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

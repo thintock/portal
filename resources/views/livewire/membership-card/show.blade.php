@@ -37,25 +37,41 @@
                     {{-- ▼ アバター --}}
                     @php
                         $avatar = $user?->mediaFiles->first();
+                        $isBirthday = $user?->birthday_month == now()->month
+                            && $user?->birthday_day == now()->day;
                     @endphp
-                    <div class="avatar mb-4 relative z-10">
-                        <div
-                            class="w-24 h-24 rounded-full
-                            @if($isMember)
-                                ring-2 ring-white/60 ring-offset-4 ring-offset-gray-900 shadow-lg shadow-primary/20
-                            @else
-                                bg-gray-100 ring-1 ring-gray-300
-                            @endif">
-                            @if($avatar)
-                                <img src="{{ Storage::url($avatar->path) }}" class="object-cover rounded-full">
-                            @else
-                                <div class="flex items-center justify-center w-full h-full text-4xl font-semibold
-                                    @if($isMember) text-gray-200 @else text-gray-500 @endif">
-                                    {{ mb_substr($user?->display_name ?? $user?->name ?? '？', 0, 1) }}
-                                </div>
-                            @endif
-                        </div>
+                    <div class="relative mb-4 z-10 w-28 h-28 mx-auto cursor-pointer">
+
+                    {{-- アバター枠（overflow-hidden） --}}
+                    <div
+                        class="w-full h-full rounded-full overflow-hidden flex items-center justify-center
+                        @if($isMember)
+                            ring-2 ring-white/60 ring-offset-4 ring-offset-gray-900 shadow-lg shadow-primary/20
+                        @else
+                            bg-gray-100 ring-1 ring-gray-300
+                        @endif"
+                    >
+                        @if($avatar)
+                            <img src="{{ Storage::url($avatar->path) }}"
+                                alt="avatar"
+                                class="w-full h-full object-cover">
+                        @else
+                            <div class="flex items-center justify-center w-full h-full text-4xl font-semibold
+                                @if($isMember) text-gray-200 @else text-gray-500 @endif">
+                                {{ mb_substr($user?->display_name ?? $user?->name ?? '？', 0, 1) }}
+                            </div>
+                        @endif
                     </div>
+                
+                    {{-- 🎉 誕生日アイコン（カード用に大型化 & 飛び出し・40° 回転） --}}
+                    @if($isBirthday)
+                        <div
+                            class="absolute -top-8 -right-6 text-[54px] transform rotate-[45deg] select-none"
+                        >
+                            👑
+                        </div>
+                    @endif
+                </div>
 
                     {{-- 名前 --}}
                     <h3 class="text-xl font-semibold tracking-wide mb-1 relative z-10

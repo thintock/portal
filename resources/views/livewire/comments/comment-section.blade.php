@@ -67,29 +67,43 @@
         {{-- ヘッダー --}}
         <div class="flex justify-between items-center border-base-300 border-b pb-2 md:pb-4">
           <div class="flex items-center space-x-3">
-            {{-- アイコン --}}
-            <div 
-              class="w-8 h-8 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 cursor-pointer transition transform hover:scale-105 hover:border-primary"
-              wire:click="$dispatch('show-membership-card', { userId: {{ $comment->user->id }} })"
-              title="{{ $comment->user->name ?? 'ユーザー名未登録' }} の会員証を表示"
-            >
-              @php
-                  $avatar = $comment->user->mediaFiles()
-                      ->where('media_files.type', 'avatar')
-                      ->orderBy('media_relations.sort_order', 'asc')
-                      ->first();
-              @endphp
-              
-              @if($avatar)
-                  <img src="{{ Storage::url($avatar->path) }}"
-                       alt="avatar"
-                       class="w-full h-full object-cover rounded-full">
-              @else
-                  <span class="text-sm font-semibold text-gray-600">
-                      {{ mb_substr($comment->user->name ?? '？', 0, 1) }}
-                  </span>
+            {{-- コメントのアバター --}}
+          @php
+              $avatar = $comment->user->mediaFiles()
+                  ->where('media_files.type', 'avatar')
+                  ->orderBy('media_relations.sort_order', 'asc')
+                  ->first();
+          
+              $isBirthday = $comment->user->birthday_month == now()->month
+                  && $comment->user->birthday_day == now()->day;
+          @endphp
+          
+          <div class="relative w-8 h-8 cursor-pointer flex items-center justify-center"
+               wire:click="$dispatch('show-membership-card', { userId: {{ $comment->user->id }} })"
+               title="{{ $comment->user->name ?? 'ユーザー名未登録' }} の会員証を表示">
+          
+              {{-- 丸いアバター枠（overflow-hidden はここだけ） --}}
+              <div class="w-full h-full rounded-full overflow-hidden bg-base-200 border-2 flex items-center justify-center
+                          transition hover:scale-105 hover:border-primary">
+                  @if($avatar)
+                      <img src="{{ Storage::url($avatar->path) }}"
+                           alt="avatar"
+                           class="w-full h-full object-cover">
+                  @else
+                      <span class="text-sm font-semibold text-gray-600">
+                          {{ mb_substr($comment->user->name ?? '？', 0, 1) }}
+                      </span>
+                  @endif
+              </div>
+          
+              {{-- 🎉 誕生日アイコン（飛び出し + 傾き 40°） --}}
+              @if($isBirthday)
+                  <div class="absolute -top-2.5 -right-2.5 text-white text-[16px] rounded-full px-1.5 py-[1px] 
+                              transform rotate-[40deg]">
+                      👑
+                  </div>
               @endif
-            </div>
+          </div>
             <div>
               <span class="font-semibold">{{ $comment->user->name ?? 'ユーザー名未登録' }}</span>
               <span class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
@@ -183,38 +197,54 @@
               {{-- ヘッダー --}}
               <div class="flex justify-between items-center pb-2 md:pb-4 border-b border-base-200">
                 <div class="flex items-center space-x-3">
-                  {{-- アイコン --}}
+                  {{-- 返信のアバター --}}
                   @php
                       $avatar = $reply->user->mediaFiles()
                           ->where('media_files.type', 'avatar')
                           ->first();
+                  
+                      $isBirthday = $reply->user->birthday_month == now()->month
+                          && $reply->user->birthday_day == now()->day;
                   @endphp
                   
-                  <div 
-                    class="w-8 h-8 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 cursor-pointer transition transform hover:scale-105 hover:border-primary"
-                    wire:click="$dispatch('show-membership-card', { userId: {{ $reply->user->id }} })"
-                    title="{{ $reply->user->name ?? 'ユーザー名未登録' }} の会員証を表示"
-                  >
-                    @if($avatar)
-                      <img src="{{ Storage::url($avatar->path) }}" 
-                           alt="avatar" 
-                           class="w-full h-full object-cover">
-                    @else
-                      <span class="text-sm font-semibold text-gray-600">
-                        {{ mb_substr($reply->user->name ?? '？', 0, 1) }}
-                      </span>
-                    @endif
+                  <div class="relative w-8 h-8 cursor-pointer flex items-center justify-center"
+                       wire:click="$dispatch('show-membership-card', { userId: {{ $reply->user->id }} })"
+                       title="{{ $reply->user->name ?? 'ユーザー名未登録' }} の会員証を表示">
+                  
+                      {{-- アバター枠（overflow-hidden） --}}
+                      <div class="w-full h-full rounded-full overflow-hidden bg-base-100 border-2 flex items-center justify-center
+                                  transition hover:scale-105 hover:border-primary">
+                          @if($avatar)
+                              <img src="{{ Storage::url($avatar->path) }}"
+                                   alt="avatar"
+                                   class="w-full h-full object-cover">
+                          @else
+                              <span class="text-sm font-semibold text-gray-600">
+                                  {{ mb_substr($reply->user->name ?? '？', 0, 1) }}
+                              </span>
+                          @endif
+                      </div>
+                  
+                      {{-- 🎉 誕生日アイコン（飛び出し・40度回転） --}}
+                      @if($isBirthday)
+                          <div class="absolute -top-2.5 -right-2.5 text-white text-[16px] rounded-full px-1.5 py-[1px] 
+                                      transform rotate-[40deg]">
+                              👑
+                          </div>
+                      @endif
+                  </div>
+                  
+                  <div class="flex items-center space-x-2">
+                      <span class="text-sm font-semibold">{{ $reply->user->name ?? 'ユーザー名未登録' }}</span>
+                      <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+                  
+                      @if($reply->updated_at->ne($reply->created_at))
+                          <span class="text-gray-400 text-xs">
+                              ({{ $reply->updated_at->diffForHumans() }}:編集済み)
+                          </span>
+                      @endif
                   </div>
 
-                  <div class="flex items-center space-x-2">
-                    <span class="text-sm font-semibold">{{ $reply->user->name ?? 'ユーザー名未登録' }}</span>
-                    <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
-                    @if($reply->updated_at->ne($reply->created_at))
-                      <span class="text-gray-400 text-xs">
-                        ({{ $reply->updated_at->diffForHumans() }}:編集済み)
-                      </span>
-                    @endif
-                  </div>
                 </div>
                 
                 @if($reply->user_id === auth()->id())

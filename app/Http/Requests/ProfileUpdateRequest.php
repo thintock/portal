@@ -63,7 +63,8 @@ class ProfileUpdateRequest extends FormRequest
             'user_status'      => ['nullable', 'string', 'max:20'],
             'email_notification' => ['nullable', 'boolean'],
             'remarks'          => ['nullable', 'string'],
-
+            'birthday_month' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'birthday_day'   => ['nullable', 'integer', 'min:1', 'max:31'],
             'email' => [
                 'required',
                 'string',

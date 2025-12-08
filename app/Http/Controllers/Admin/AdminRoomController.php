@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\MediaFile;
 use App\Models\MediaRelation;
@@ -9,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
-class RoomController extends Controller
+class AdminRoomController extends Controller
 {
     public function index()
     {
@@ -171,6 +172,26 @@ class RoomController extends Controller
             ->route('admin.dashboard')
             ->with('success', 'ルームを更新しました');
     }
+    
+    // ソート
+    public function updateSortOrder(Request $request)
+    {
+        $request->validate([
+            'orders' => 'required|array',
+            'orders.*' => 'integer'
+        ]);
+    
+        DB::transaction(function () use ($request) {
+            foreach ($request->orders as $index => $roomId) {
+                Room::where('id', $roomId)->update([
+                    'sort_order' => $index + 1
+                ]);
+            }
+        });
+    
+        return response()->json(['success' => true]);
+    }
+
 
     public function destroy(Room $room)
     {

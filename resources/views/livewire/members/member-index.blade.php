@@ -75,8 +75,8 @@
         </div>
     @endif
 
-    {{-- 一覧 --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {{-- PC用一覧 --}}
+    <div class="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
         @foreach($members as $member)
             <div class="card bg-base-100 shadow hover:shadow-md transition p-4 flex items-center gap-4">
@@ -119,7 +119,7 @@
                         @if($member->role === 'admin')
                             <span class="badge badge-primary badge-sm">Official</span>
                         @elseif($member->role === 'guest')
-                            <span class="badge badge-neutral badge-sm">ゲスト</span>
+                            <span class="badge badge-secondary badge-sm">ゲスト</span>
                         @endif
                     </div>
 
@@ -129,7 +129,7 @@
                             入会日：{{ \Carbon\Carbon::parse($member->joined_at)->format('Y/m/d') }}
                         </p>
                     @else
-                        <p class="text-sm text-base-content/60">入会日：---</p>
+                        <p class="text-sm text-base-content/60">運営です</p>
                     @endif
 
                     {{-- 会員番号 --}}
@@ -142,12 +142,75 @@
                 </div>
             </div>
         @endforeach
-
     </div>
+    
+    {{--　モバイル用一覧 --}}
+    {{-- モバイル --}}
+    <div class="sm:hidden divide-y divide-base-200">
+    
+        @foreach($members as $member)
+            @php
+                $avatar = $member->mediaFiles()
+                    ->where('media_files.type', 'avatar')
+                    ->first();
+            @endphp
+            
+            <div class="flex items-center gap-3 px-3 py-3 active:bg-base-200 transition bg-base-100"
+                wire:click="$dispatch('show-membership-card', { userId: {{ $member->id }} })">
+            
+                {{-- アバター --}}
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex items-center justify-center flex-shrink-0">
+                    @if($avatar)
+                        <img src="{{ Storage::url($avatar->path) }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-sm font-semibold">
+                            {{ mb_substr($member->name ?? '？', 0, 1) }}
+                        </span>
+                    @endif
+                </div>
+            
+                {{-- 名前・補足 --}}
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <p class="font-medium truncate">{{ $member->name }}</p>
+                        @if($member->role === 'admin')
+                            <span class="badge badge-primary badge-xs">Official</span>
+                        @elseif($member->role === 'guest')
+                            <span class="badge badge-secondary badge-xs">Guest</span>
+                        @endif
+                    </div>
+            
+                    <div class="text-xs text-base-content/60">
+                        @if($member->role === 'admin')
+                            運営です
+                        @elseif($member->role === 'guest')
+                            ゲストさん
+                        @elseif($member->member_no)
+                            会員番号:No.{{ $member->member_no }}
+                            &nbsp;入会日：{{ \Carbon\Carbon::parse($member->joined_at)->format('Y/m/d') }}
+                        @endif
+                    </div>
+                </div>
+            
+            </div>
+        @endforeach
+    
+    </div>
+    
 
     {{-- ページネーション --}}
-    <div>
-        {{ $members->links('pagination::tailwind') }}
+    <div x-data="{
+        observe() {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        @this.call('loadMore')
+                    }
+                })
+            })
+            observer.observe(this.$el)
+        }
+    }"
+    x-init="observe" class="h-10">
     </div>
-
 </div>

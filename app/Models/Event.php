@@ -135,7 +135,11 @@ class Event extends Model
     /** 定員に達しているか */
     public function getIsFullAttribute(): bool
     {
-        if (is_null($this->capacity)) return false;
+        // null または 0 は「無制限」
+        if (is_null($this->capacity) || $this->capacity === 0) {
+            return false;
+        }
+    
         return $this->activeParticipants()->count() >= $this->capacity;
     }
     

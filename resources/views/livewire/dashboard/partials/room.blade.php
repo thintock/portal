@@ -46,9 +46,7 @@
                     @if($room->icon_media)
                         <img src="{{ Storage::url($room->icon_media->path) }}" alt="icon" class="w-8 h-8 rounded-full object-cover">
                     @else
-                        <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
-                            {{ mb_substr($room->name, 0, 1) }}
-                        </div>
+                        <img src="{{ asset('images/bakele_logo.png') }}" alt="icon"class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
                     @endif
 
                     <h2 class="card-title text-lg m-0">
@@ -58,7 +56,10 @@
                     </h2>
                 </div>
 
-                <p class="text-sm text-gray-600 mt-2">{{ $room->description }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                    {!! \Illuminate\Support\Str::limit(strip_tags($room->description), 140) !!}
+                </p>
+
 
                 <div class="flex justify-between items-center text-sm mt-3">
                     @if($room->visibility === 'public')

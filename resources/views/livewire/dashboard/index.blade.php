@@ -9,6 +9,7 @@
     
     @auth
         @if($user->role === 'admin')
+          @include('livewire.dashboard.partials.paid')
           @include('livewire.dashboard.partials.room')
           <livewire:events.section />
         @elseif($user->role === 'guest')

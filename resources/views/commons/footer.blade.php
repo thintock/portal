@@ -9,6 +9,14 @@
         <a href="{{ url('/pages/guide') }}" class="link link-hover hover:text-primary transition">
             ユーザーガイド
         </a>
+        {{-- ▼ サブスク会員のみ表示 --}}
+        @auth
+            @if(auth()->user()->subscribed('default'))
+                <a href="{{ url('/pages/guideline') }}" class="link link-hover hover:text-primary transition">
+                    コミュニティガイドライン
+                </a>
+            @endif
+        @endauth
         <a href="{{ url('/pages/terms') }}" class="link link-hover hover:text-primary transition">
             ご利用規約
         </a>

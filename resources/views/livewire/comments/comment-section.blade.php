@@ -116,19 +116,21 @@
           
           </div>
           @if($comment->user_id === auth()->id())
-            {{-- ハンバーガーメニュー --}}
-            <div class="dropdown dropdown-end z-50">
-              <button tabindex="0" class="btn btn-ghost btn-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h.01M12 12h.01M18 12h.01"/>
-                </svg>
-              </button>
-              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-28">
-                <li><button type="button" wire:click="$dispatch('open-comment-edit', { commentId: {{ $comment->id }} })" class="w-full text-left">編集</button></li>
-                <li><button class="w-full text-left" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $comment->id }}) }">削除</button></li>
-              </ul>
-            </div>
+              <div class="dropdown dropdown-end z-10">
+                  <label tabindex="0" class="btn btn-xs bg-base-100 text-gray-800 hover:bg-gray-900 hover:text-white border shadow-sm transition-all" title="コメントを編集・削除">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h.01M12 12h.01M18 12h.01"/></svg>
+                  </label>
+                  <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-white rounded-box w-32 border border-gray-300">
+                      <li>
+                          <button type="button" class="w-full text-left text-gray-800 hover:bg-gray-100" wire:click="$dispatch('open-comment-edit', { commentId: {{ $comment->id }} })">✏️ 編集</button>
+                      </li>
+                      <li>
+                          <button class="w-full text-left text-gray-800 hover:bg-gray-100" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $comment->id }}) }">🗑 削除</button>
+                      </li>
+                  </ul>
+              </div>
           @endif
+
         </div>
 
         {{-- 本文 --}}
@@ -248,19 +250,21 @@
                 </div>
                 
                 @if($reply->user_id === auth()->id())
-                  {{-- ハンバーガーメニュー --}}
-                  <div class="dropdown dropdown-end z-50">
-                    <button tabindex="0" class="btn btn-ghost btn-xs">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h.01M12 12h.01M18 12h.01"/>
-                      </svg>
-                    </button>
-                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-28">
-                      <li><button type="button" wire:click="$dispatch('open-comment-edit', { commentId: {{ $reply->id }} })" class="w-full text-left">編集</button></li>
-                      <li><button class="w-full text-left" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $reply->id }}) }">削除</button></li>
-                    </ul>
-                  </div>
+                    <div class="dropdown dropdown-end z-10">
+                        <label tabindex="0" class="btn btn-xs bg-base-200 text-gray-800 hover:bg-gray-900 hover:text-white border shadow-sm transition-all" title="返信を編集・削除">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h.01M12 12h.01M18 12h.01"/></svg>
+                        </label>
+                        <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-white rounded-box w-32 border border-gray-300">
+                            <li>
+                                <button type="button" class="w-full text-left text-gray-800 hover:bg-gray-100" wire:click="$dispatch('open-reply-edit', { replyId: {{ $reply->id }} })">✏️ 編集</button>
+                            </li>
+                            <li>
+                                <button class="w-full text-left text-gray-800 hover:bg-gray-100" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.deleteReply({{ $reply->id }}) }">🗑 削除</button>
+                            </li>
+                        </ul>
+                    </div>
                 @endif
+
               </div>
         
               {{-- 本文 --}}

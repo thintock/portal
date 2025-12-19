@@ -22,6 +22,17 @@ class Index extends Component
         // --- 固定ページを取得 ---
         $page = Page::where('slug', 'dashboard')->first();
         
+        // --- サブスク初月判定 ---
+        $showPaidIntroBanners = false;
+
+        if ($user && $user->subscribed('default')) {
+            $subscription = $user->subscription('default');
+
+            if ($subscription && $subscription->created_at) {
+                $showPaidIntroBanners = $subscription->created_at->diffInDays(now()) < 30;
+            }
+        }
+        
         // --- 有料会員のみデータ取得 ---
         $rooms = collect(); // デフォルト空コレクション
         $latestPosts = collect();
@@ -67,6 +78,7 @@ class Index extends Component
             'page' => $page,
             'rooms' => $rooms,
             'latestPosts' => $latestPosts,
+            'showPaidIntroBanners' => $showPaidIntroBanners,
         ])->layout('layouts.app');
     }
 }

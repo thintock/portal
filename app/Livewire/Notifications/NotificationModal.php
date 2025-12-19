@@ -32,7 +32,7 @@ class NotificationModal extends Component
      */
     public function getNotificationsProperty()
     {
-        $query = Notification::with('sender')
+        $query = Notification::with(['sender.mediaFiles']) // ✅ eager load
             ->where('user_id', Auth::id())
             ->whereNotNull('notifiable_type')
             ->latest()
@@ -50,7 +50,7 @@ class NotificationModal extends Component
     /**
      * 通知を整形
      */
-    protected function formatNotification($n)
+    protected function formatNotification($n): array
     {
         $map = [
             'comment'  => ['icon' => '💬', 'title' => 'コメントが届きました'],
@@ -58,23 +58,25 @@ class NotificationModal extends Component
             'reaction' => ['icon' => '❤️', 'title' => 'リアクションがありました'],
             'message'  => ['icon' => '✉️', 'title' => 'メッセージが届きました'],
         ];
+
         $meta = $map[$n->type] ?? ['icon' => '🔔', 'title' => 'お知らせ'];
 
-        $avatar = optional($n->sender)
-            ->mediaFiles()
-            ->where('media_files.type', 'avatar')
-            ->first();
+        // ✅ sender が null の場合も安全
+        $avatar = $n->sender?->mediaFiles
+            ->firstWhere('type', 'avatar');
 
         return [
-            'id'        => $n->id,
-            'icon'      => $meta['icon'],
-            'title'     => $meta['title'],
-            'sender'    => $n->sender?->name ?? 'ユーザー名未登録',
-            'avatar'    => $avatar?->path,
-            'message'   => $n->message ? Str::limit(strip_tags($n->message), 100) : null,
-            'read_at'   => $n->read_at,
-            'created_at'=> $n->created_at?->diffForHumans(),
-            'type'      => $n->type,
+            'id'              => $n->id,
+            'icon'            => $meta['icon'],
+            'title'           => $meta['title'],
+            'sender'          => $n->sender?->name ?? 'ユーザー名未登録',
+            'avatar'          => $avatar?->path,
+            'message'         => $n->message
+                                    ? Str::limit(strip_tags($n->message), 100)
+                                    : null,
+            'read_at'         => $n->read_at,
+            'created_at'      => $n->created_at?->diffForHumans(),
+            'type'            => $n->type,
             'notifiable_type' => $n->notifiable_type,
             'notifiable_id'   => $n->notifiable_id,
         ];
@@ -95,6 +97,7 @@ class NotificationModal extends Component
         }
 
         $count = $query->count();
+
         if ($count > 0) {
             $query->update(['read_at' => now()]);
             session()->flash('success', "{$count}件の通知を既読にしました。");

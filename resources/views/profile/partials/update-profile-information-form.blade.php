@@ -10,7 +10,7 @@
   </header>
   
   {{-- 郵便番号公式データ --}}
-  <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" async></script>
+  <script src="https://yubinbango.github.io/yubinbango/yubinbango.js"></script>
   
   {{-- メール再送フォーム --}}
   <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -219,7 +219,7 @@
           <x-input-label for="postal_code" :value="__('郵便番号（ハイフンなし）')" />
           <x-text-input id="postal_code" name="postal_code" type="text"
             class="p-postal-code input input-bordered w-full mt-1 text-base bg-white"
-            maxlength="7"
+            maxlength="8"
             :value="old('postal_code', $user->postal_code)" />
         </div>
     
@@ -234,18 +234,26 @@
     
       {{-- 市区町村（自動入力） --}}
       <div>
-        <x-input-label for="address1" :value="__('住所1（市町村名・町名・番地まで）')" />
+        <x-input-label for="address1" :value="__('住所1（市町村名・町名）')" />
         <x-text-input id="address1" name="address1" type="text"
           class="p-locality p-street-address p-extended-address input input-bordered w-full mt-1 text-base bg-white"
           :value="old('address1', $user->address1)" />
       </div>
     
-      {{-- 建物名など --}}
+      {{-- 番地 --}}
       <div>
-        <x-input-label for="address2" :value="__('住所2（建物名・部屋番号）')" />
+        <x-input-label for="address2" :value="__('住所2（番地）')" />
         <x-text-input id="address2" name="address2" type="text"
           class="input input-bordered w-full mt-1 text-base bg-white"
           :value="old('address2', $user->address2)" />
+      </div>
+      
+      {{-- 建物名など --}}
+      <div>
+        <x-input-label for="address3" :value="__('住所3（建物名・部屋番号）')" />
+        <x-text-input id="address3" name="address3" type="text"
+          class="input input-bordered w-full mt-1 text-base bg-white"
+          :value="old('address3', $user->address3)" />
       </div>
     </div>
 

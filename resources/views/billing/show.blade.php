@@ -3,7 +3,11 @@
         {{-- ===========================
              サブスク未契約
         ============================ --}}
-        @include('billing.partials.landing')
+        @include('billing.partials.landing', [
+            'prices' => $prices,
+            'isRecruiting' => $isRecruiting,
+            'nextRecruitingAt' => $nextRecruitingAt,
+        ])
         
     @elseif($subscription->stripe_status === 'active' && is_null($subscription->ends_at))
         {{-- ===========================

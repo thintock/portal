@@ -38,9 +38,7 @@
             @if($room->icon_media)
                 <img src="{{ Storage::url($room->icon_media->path) }}" alt="icon" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
             @else
-                <div class="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-xl text-gray-600 border-4 border-white shadow-md">
-                    {{ mb_substr($room->name, 0, 1) }}
-                </div>
+                <img src="{{ asset('images/bakele_logo.png') }}" alt="icon"class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
             @endif
         </div>
     </div>
@@ -48,14 +46,19 @@
     {{-- ===========================
          スマホ専用：ルーム情報 + メンバー + 参加ボタン
     =========================== --}}
+    <div class="sm:hidden ml-24 pl-4">
+        <h1 class="text-base font-semibold text-gray-800 leading-tight">{{ $room->name }}</h1>
+    </div>
+    
     <div class="sm:hidden mt-10 px-4 flex flex-col space-y-3">
     
         {{-- 上段：ルーム名・説明 --}}
         <div class="flex justify-between">
-            <div class="ml-24 flex-1">
-                <h1 class="text-base font-semibold text-gray-800 leading-tight">{{ $room->name }}</h1>
+            <div class="flex-1">
                 @if($room->description)
-                    <p class="text-sm text-gray-600 mt-0.5">{{ $room->description }}</p>
+                    <p class="text-sm text-gray-600 mt-0.5 whitespace-pre-line">
+                        {!! $room->description !!}
+                    </p>
                 @endif
             </div>
         </div>
@@ -117,13 +120,11 @@
                 @if($room->icon_media)
                     <img src="{{ Storage::url($room->icon_media->path) }}" alt="icon" class="w-16 h-16 rounded-full object-cover border">
                 @else
-                    <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-lg text-gray-600">
-                        {{ mb_substr($room->name, 0, 1) }}
-                    </div>
+                    <img src="{{ asset('images/bakele_logo.png') }}" alt="icon"class="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md">
                 @endif
                 <div>
                     <h1 class="card-title text-2xl">{{ $room->name }}</h1>
-                    <p class="text-gray-600">{{ $room->description }}</p>
+                    <p class="text-gray-600 whitespace-pre-line">{!! $room->description !!}</p>
                 </div>
             </div>
 

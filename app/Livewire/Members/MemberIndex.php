@@ -10,10 +10,16 @@ use Illuminate\Support\Facades\DB;
 class MemberIndex extends Component
 {
     use WithPagination;
-
-    public string $sort = 'newest';   // デフォルト
+    protected $paginationTheme = 'tailwind';
+    public int $perPage = 30;
+    public string $sort = 'newest';
     public string $search = '';
-
+    
+    public function loadMore()
+    {
+        $this->perPage += 30;
+    }
+    
     protected $listeners = [
         'membercard-closed' => '$refresh',
     ];
@@ -78,7 +84,6 @@ class MemberIndex extends Component
         return $adminsGuests->union($subscribed);
     }
 
-
     /**
      * 検索 + 並べ替え
      */
@@ -96,7 +101,7 @@ class MemberIndex extends Component
                 $query->where('name', 'like', "%{$term}%");
             }
         }
-
+        
         // --- 並び替え ---
         $query = match ($this->sort) {
             'member_no' => $query->orderBy('member_no', 'asc'),
@@ -115,8 +120,7 @@ class MemberIndex extends Component
      */
     public function render()
     {
-        // UNION → paginate
-        $raw = $this->getMembersQuery()->paginate(60);
+        $raw = $this->getMembersQuery()->paginate($this->perPage);
 
         // User モデルに復元
         $members = User::whereIn('id', $raw->pluck('id'))->get()

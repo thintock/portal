@@ -50,7 +50,7 @@ class ProfileUpdateRequest extends FormRequest
             'avatar_media_id'  => ['nullable', 'string', 'max:50'],
             'company_name'     => ['nullable', 'string', 'max:50'],
 
-            'postal_code'      => ['nullable', 'string', 'max:10'],
+            'postal_code'      => ['nullable', 'string', 'max:7'],
             'prefecture'       => ['nullable', 'string', 'max:50'],
             'address1'         => ['nullable', 'string', 'max:100'],
             'address2'         => ['nullable', 'string', 'max:100'],

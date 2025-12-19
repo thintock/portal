@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Cashier\Subscription;
+use Carbon\Carbon;
 
 class BillingController extends Controller
 {
@@ -12,7 +13,6 @@ class BillingController extends Controller
     public function show()
     {
         $user = Auth::user();
-        
         $prices = config('services.stripe.prices');
         
         // 現在のユーザーのsubscriptionを取得（type = 'default'）
@@ -20,8 +20,34 @@ class BillingController extends Controller
             ->where('type', 'default')
             ->latest()
             ->first();
-        
-        return view('billing.show', compact('prices', 'subscription'));
+        // ===== 募集期間判定 =====
+        $now = Carbon::now('Asia/Tokyo');
+
+        // 今月25日12:00
+        $start = $now->copy()->day(25)->setTime(12, 0, 0);
+
+        // 今月末22:59:59
+        $end = $now->copy()->endOfMonth()->setTime(22, 59, 59);
+
+        // 月末を過ぎていたら次回は翌月
+        if ($now->gt($end)) {
+            $start = $start->addMonth();
+            $end   = $end->addMonth()->endOfMonth()->setTime(22, 59, 59);
+        }
+
+        $isRecruiting = $now->between($start, $end);
+
+        // 次回募集開始（カウントダウン用）
+        $nextRecruitingAt = $isRecruiting
+            ? null
+            : $start;
+
+        return view('billing.show', compact(
+            'prices',
+            'subscription',
+            'isRecruiting',
+            'nextRecruitingAt'
+        ));
     }
 
     /** Checkout に遷移してサブスク開始 */

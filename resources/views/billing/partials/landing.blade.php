@@ -4,7 +4,7 @@
 <section class="hero min-h-[90vh] bg-gradient-to-br from-primary/20 via-base-100 to-accent/10 px-6 md:px-10">
     <div class="hero-content flex flex-col lg:flex-row-reverse items-center gap-10 max-w-6xl mx-auto py-10">
         {{-- 画像 --}}
-        <div class="w-20 h-20  bg-base-200 flex items-center justify-center">
+        <div class="w-20 h-20 flex items-center justify-center">
             <img src="{{ asset('images/bakele_logo_rv.svg') }}" alt="ベイクル ロゴ" class="w-full h-full">
         </div>
         {{-- テキスト --}}

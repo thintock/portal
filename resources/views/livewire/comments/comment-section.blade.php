@@ -256,10 +256,10 @@
                         </label>
                         <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-white rounded-box w-32 border border-gray-300">
                             <li>
-                                <button type="button" class="w-full text-left text-gray-800 hover:bg-gray-100" wire:click="$dispatch('open-reply-edit', { replyId: {{ $reply->id }} })">✏️ 編集</button>
+                                <button type="button" class="w-full text-left text-gray-800 hover:bg-gray-100" wire:click="$dispatch('open-comment-edit', { commentId: {{ $reply->id }} })">✏️ 編集</button>
                             </li>
                             <li>
-                                <button class="w-full text-left text-gray-800 hover:bg-gray-100" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.deleteReply({{ $reply->id }}) }">🗑 削除</button>
+                                <button class="w-full text-left text-gray-800 hover:bg-gray-100" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $reply->id }}) }">🗑 削除</button>
                             </li>
                         </ul>
                     </div>

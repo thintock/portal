@@ -59,7 +59,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 12h.01M12 12h.01M18 12h.01"/></svg>
         </label>
         <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-white rounded-box w-32 border border-gray-300">
-          <li><button class="w-full text-left text-gray-800 hover:bg-gray-100">✏️ 編集</button></li>
+          <li><button class="w-full text-left text-gray-800 hover:bg-gray-100" wire:click="$dispatch('open-post-edit', { postId: {{ $post->id }} })">✏️ 編集</button></li>
           <li><button class="w-full text-left text-gray-800 hover:bg-gray-100" x-on:click.prevent="if (confirm('削除しますか？')) { $wire.delete({{ $post->id }}) }">🗑 削除</button></li>
         </ul>
       </div>

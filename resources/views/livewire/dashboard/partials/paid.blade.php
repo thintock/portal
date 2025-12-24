@@ -21,7 +21,6 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <a href="{{ route('pages.show', 'omoi') }}" class="btn btn-secondary w-full">ごあいさつ</a>
       <a href="{{ route('pages.show', 'guideline') }}" class="btn btn-accent w-full">コミュニティガイドライン</a>
-
     </div>
   </div>
 

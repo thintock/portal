@@ -51,7 +51,7 @@
           x-ref="textarea"
           x-init="$refs.textarea.style.height = $refs.textarea.scrollHeight + 'px'" 
           @input="$refs.textarea.style.height = 'auto'; $refs.textarea.style.height = $refs.textarea.scrollHeight + 'px'" 
-          rows="5" 
+          rows="10" 
           class="textarea textarea-bordered w-full leading-tight text-base sm:mb-2 md:mb-4" 
           placeholder="どんなことを共有したい？"></textarea>
           

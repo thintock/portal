@@ -43,6 +43,7 @@ class BillingController extends Controller
             : $start;
 
         return view('billing.show', compact(
+            'user',
             'prices',
             'subscription',
             'isRecruiting',

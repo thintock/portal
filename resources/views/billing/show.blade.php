@@ -1,25 +1,33 @@
 <x-app-layout>
-    @if(!$subscription)
-        {{-- ===========================
-             サブスク未契約
-        ============================ --}}
+
+    {{-- ===========================
+         現在サブスクしていない（未契約 or 解約済み）
+    ============================ --}}
+    @if(!$user->subscribed('default'))
         @include('billing.partials.landing', [
             'prices' => $prices,
             'isRecruiting' => $isRecruiting,
             'nextRecruitingAt' => $nextRecruitingAt,
         ])
-        
-    @elseif($subscription->stripe_status === 'active' && is_null($subscription->ends_at))
-        {{-- ===========================
-             サブスク契約中
-        ============================ --}}
-        @include('billing.partials.active', ['subscription' => $subscription, 'prices' => $prices])
-        
-    @elseif($subscription->stripe_status === 'active' && !is_null($subscription->ends_at))
-        {{-- ===========================
-             サブスク解約予定
-        ============================ --}}
-        @include('billing.partials.canceling', ['subscription' => $subscription, 'prices' => $prices])
-        
+
+    {{-- ===========================
+         契約中（解約予定なし）
+    ============================ --}}
+    @elseif($subscription && $subscription->stripe_status === 'active' && is_null($subscription->ends_at))
+        @include('billing.partials.active', [
+            'subscription' => $subscription,
+            'prices' => $prices
+        ])
+
+    {{-- ===========================
+         契約中（解約予定あり）
+    ============================ --}}
+    @elseif($subscription && $subscription->stripe_status === 'active' && !is_null($subscription->ends_at))
+        @include('billing.partials.canceling', [
+            'subscription' => $subscription,
+            'prices' => $prices
+        ])
+
     @endif
+
 </x-app-layout>

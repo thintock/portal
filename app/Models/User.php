@@ -86,4 +86,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new CustomVerifyEmail);
     }
+    
+    // 現在の会員番号
+    public function currentMemberNumber(): ?int
+    {
+        return MemberNumberHistory::where('user_id', $this->id)
+            ->orderByDesc('assigned_at') // 明示的に最新
+            ->value('number');
+    }
+    
+    // User.php
+    public function latestMemberNumberHistory()
+    {
+        return $this->hasOne(MemberNumberHistory::class)
+            ->latestOfMany('assigned_at');
+    }
+
 }

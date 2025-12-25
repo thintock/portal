@@ -27,7 +27,8 @@ class Show extends Component
             'mediaFiles' => function ($q) {
                 $q->where('media_files.type', 'avatar')
                   ->orderBy('media_relations.sort_order', 'asc');
-            }
+            },
+            'latestMemberNumberHistory',
         ])->find($userId);
 
         if (! $this->user) return;
@@ -63,8 +64,8 @@ class Show extends Component
         }
 
         // 会員番号がある
-        if (!empty($user->member_number)) {
-            return true;
+        if ($user->latestMemberNumberHistory) {
+            return 'No. ' . $user->latestMemberNumberHistory->number;
         }
 
         return false;
@@ -81,8 +82,8 @@ class Show extends Component
         if ($user->role === 'guest') {
             return 'Guest';
         }
-        if ($user->member_number) {
-            return 'No. ' . $user->member_number;
+        if ($user->latestMemberNumberHistory) {
+            return 'No. ' . $user->latestMemberNumberHistory->number;
         }
 
         return 'Free Member'; // 会員以外

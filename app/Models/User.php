@@ -102,4 +102,11 @@ class User extends Authenticatable implements MustVerifyEmail
             ->latestOfMany('assigned_at');
     }
 
+    public function hasActiveSubscription(): bool
+    {
+        $subscription = $this->subscription('default');
+    
+        return $subscription && $subscription->stripe_status === 'active';
+    }
+
 }

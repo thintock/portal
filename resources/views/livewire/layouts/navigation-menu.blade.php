@@ -79,11 +79,12 @@
                         </x-slot>
     
                         <x-slot name="content">
-                            @if(auth()->user()->subscribed('default') || auth()->user()->role === 'admin')
+                            @if(auth()->user()?->role === 'admin' || auth()->user()?->hasActiveSubscription())
                                 <x-dropdown-link :href="route('members.member_index')">
                                     会員一覧
                                 </x-dropdown-link>
                             @endif
+
                             <x-dropdown-link :href="route('profile.edit')">
                                 会員情報
                             </x-dropdown-link>
@@ -159,6 +160,11 @@
 
             {{-- メニュー下部 --}}
             <div class="mt-3 space-y-1">
+                @if(auth()->user()?->role === 'admin' || auth()->user()?->hasActiveSubscription())
+                    <x-responsive-nav-link :href="route('members.member_index')">
+                        会員一覧
+                    </x-responsive-nav-link>
+                @endif
                 <x-responsive-nav-link :href="route('profile.edit')">
                     会員情報
                 </x-responsive-nav-link>

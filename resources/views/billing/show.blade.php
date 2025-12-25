@@ -3,7 +3,7 @@
     {{-- ===========================
          現在サブスクしていない（未契約 or 解約済み）
     ============================ --}}
-    @if(!$user->subscribed('default'))
+    @if(!$subscription || $subscription->stripe_status !== 'active')
         @include('billing.partials.landing', [
             'prices' => $prices,
             'isRecruiting' => $isRecruiting,

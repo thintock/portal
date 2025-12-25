@@ -53,12 +53,22 @@ class MemberIndex extends Component
     /** ベースクエリ */
     protected function baseQuery()
     {
-        // サブスク契約者
+        // サブスク最新1件だけを JOIN
+        $latestSubscriptions = DB::table('subscriptions as s1')
+            ->select('s1.*')
+            ->where('s1.type', 'default')
+            ->whereRaw('s1.id = (
+                SELECT MAX(s2.id)
+                FROM subscriptions s2
+                WHERE s2.user_id = s1.user_id
+                  AND s2.type = "default"
+            )');
+    
+        // サブスク会員
         $subscribed = DB::table('users')
-            ->join('subscriptions', function ($q) {
+            ->joinSub($latestSubscriptions, 'subscriptions', function ($q) {
                 $q->on('subscriptions.user_id', '=', 'users.id')
-                  ->where('subscriptions.type', 'default')
-                  ->whereNull('subscriptions.ends_at');
+                  ->where('subscriptions.stripe_status', 'active');
             })
             ->leftJoin('member_number_histories', 'member_number_histories.user_id', '=', 'users.id')
             ->select(
@@ -68,7 +78,7 @@ class MemberIndex extends Component
                 'subscriptions.created_at as joined_at',
                 'member_number_histories.number as member_no'
             );
-
+    
         // admin + guest
         $adminsGuests = DB::table('users')
             ->whereIn('role', ['admin', 'guest'])
@@ -80,9 +90,10 @@ class MemberIndex extends Component
                 DB::raw('NULL as joined_at'),
                 'member_number_histories.number as member_no'
             );
-
+    
         return $adminsGuests->union($subscribed);
     }
+
 
     /**
      * 検索 + 並べ替え

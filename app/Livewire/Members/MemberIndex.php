@@ -12,7 +12,6 @@ class MemberIndex extends Component
     use WithPagination;
     protected $paginationTheme = 'tailwind';
     public int $perPage = 30;
-    public string $sort = 'newest';
     public string $search = '';
     
     public function loadMore()
@@ -45,17 +44,16 @@ class MemberIndex extends Component
         $this->resetPage();
     }
 
-    public function updatingSort()
-    {
-        $this->resetPage();
-    }
-
     /** ベースクエリ */
     protected function baseQuery()
     {
-        // サブスク最新1件だけを JOIN
+        // user_id ごとに「最新の default subscription」を1件だけ取得
         $latestSubscriptions = DB::table('subscriptions as s1')
-            ->select('s1.*')
+            ->select(
+                's1.user_id',
+                's1.stripe_status',
+                's1.created_at'
+            )
             ->where('s1.type', 'default')
             ->whereRaw('s1.id = (
                 SELECT MAX(s2.id)
@@ -64,35 +62,29 @@ class MemberIndex extends Component
                   AND s2.type = "default"
             )');
     
-        // サブスク会員
-        $subscribed = DB::table('users')
-            ->joinSub($latestSubscriptions, 'subscriptions', function ($q) {
-                $q->on('subscriptions.user_id', '=', 'users.id')
-                  ->where('subscriptions.stripe_status', 'active');
+        return DB::table('users')
+            ->leftJoinSub($latestSubscriptions, 'subscriptions', function ($q) {
+                $q->on('subscriptions.user_id', '=', 'users.id');
             })
-            ->leftJoin('member_number_histories', 'member_number_histories.user_id', '=', 'users.id')
+            ->where(function ($q) {
+                $q
+                    // admin / guest は常に含める
+                    ->whereIn('users.role', ['admin', 'guest'])
+    
+                    // それ以外は active subscription のみ
+                    ->orWhere(function ($q2) {
+                        $q2->where('subscriptions.stripe_status', 'active');
+                    });
+            })
             ->select(
                 'users.id',
                 'users.name',
                 'users.role',
-                'subscriptions.created_at as joined_at',
-                'member_number_histories.number as member_no'
+                'users.member_number as member_no',
+                'subscriptions.created_at as joined_at'
             );
-    
-        // admin + guest
-        $adminsGuests = DB::table('users')
-            ->whereIn('role', ['admin', 'guest'])
-            ->leftJoin('member_number_histories', 'member_number_histories.user_id', '=', 'users.id')
-            ->select(
-                'users.id',
-                'users.name',
-                'users.role',
-                DB::raw('NULL as joined_at'),
-                'member_number_histories.number as member_no'
-            );
-    
-        return $adminsGuests->union($subscribed);
     }
+
 
 
     /**
@@ -113,14 +105,7 @@ class MemberIndex extends Component
             }
         }
         
-        // --- 並び替え ---
-        $query = match ($this->sort) {
-            'member_no' => $query->orderBy('member_no', 'asc'),
-            'oldest'    => $query->orderBy('joined_at', 'asc'),
-            'newest'    => $query->orderBy('joined_at', 'desc'),
-            'name'      => $query->orderBy('name', 'asc'),
-            default     => $query->orderBy('joined_at', 'desc'),
-        };
+        $query->orderBy('joined_at', 'desc');
 
         return $query;
     }

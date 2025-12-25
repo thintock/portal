@@ -11,59 +11,6 @@
                 wire:model.live="search" />
         </div>
     
-        {{-- ▼ 2〜3行目：スマホ（2×2 カラム） --}}
-        <div class="grid grid-cols-2 gap-2 sm:hidden">
-    
-            {{-- 新しい順 --}}
-            <button wire:click="$set('sort','newest')"
-                class="btn btn-sm w-full {{ $sort === 'newest' ? 'btn-primary' : 'btn-outline' }}">
-                入会日 新しい順
-            </button>
-    
-            {{-- 古い順 --}}
-            <button wire:click="$set('sort','oldest')"
-                class="btn btn-sm w-full {{ $sort === 'oldest' ? 'btn-primary' : 'btn-outline' }}">
-                入会日 古い順
-            </button>
-    
-            {{-- 会員番号順 --}}
-            <button wire:click="$set('sort','member_no')"
-                class="btn btn-sm w-full {{ $sort === 'member_no' ? 'btn-primary' : 'btn-outline' }}">
-                会員番号順
-            </button>
-    
-            {{-- 名前順 --}}
-            <button wire:click="$set('sort','name')"
-                class="btn btn-sm w-full {{ $sort === 'name' ? 'btn-primary' : 'btn-outline' }}">
-                名前順
-            </button>
-    
-        </div>
-    
-        {{-- ▼ PC：横並び --}}
-        <div class="hidden sm:flex gap-2">
-    
-            <button wire:click="$set('sort','newest')"
-                class="btn btn-sm {{ $sort === 'newest' ? 'btn-primary' : 'btn-outline' }}">
-                新しい順
-            </button>
-    
-            <button wire:click="$set('sort','oldest')"
-                class="btn btn-sm {{ $sort === 'oldest' ? 'btn-primary' : 'btn-outline' }}">
-                古い順
-            </button>
-    
-            <button wire:click="$set('sort','member_no')"
-                class="btn btn-sm {{ $sort === 'member_no' ? 'btn-primary' : 'btn-outline' }}">
-                会員番号順
-            </button>
-    
-            <button wire:click="$set('sort','name')"
-                class="btn btn-sm {{ $sort === 'name' ? 'btn-primary' : 'btn-outline' }}">
-                名前順
-            </button>
-    
-        </div>
     
     </div>
 

@@ -35,6 +35,14 @@
             ユーザー管理
         </a>
 
+        {{-- お知らせページ --}}
+        <a href="{{ route('admin.announcements.index') }}"
+           class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                  {{ request()->routeIs('admin.announcements.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            お知らせ管理
+        </a>
+        
         {{-- 固定ページ --}}
         <a href="{{ route('admin.pages.index') }}"
            class="flex items-center px-3 py-2 rounded-md transition 

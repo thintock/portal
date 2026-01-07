@@ -17,7 +17,67 @@ class AdminEventController extends Controller
      */
     public function index()
     {
-        $events = Event::latest()->paginate(20);
+        $events = Event::query()
+            ->withCount([
+                // 申込数（going のみを申込扱い）
+                'activeParticipants as applications_count',
+            ])
+            ->latest()
+            ->paginate(30);
+        $now = now();
+
+        // 開催状況を付与（Blade 側は表示するだけ）
+        $events->getCollection()->transform(function ($event) use ($now) {
+            // 運用ステータスが中止なら、開催状況より中止を優先したい場合はここで上書き可能
+            if ($event->status === 'cancelled') {
+                $event->timing_label = '中止';
+                $event->timing_class = 'badge-warning';
+                return $event;
+            }
+    
+            $start = $event->start_at;
+            $end   = $event->end_at;
+    
+            $label = '未設定';
+            $class = 'badge-ghost';
+    
+            // start/end の有無で分岐
+            if ($start && $end) {
+                if ($now->lt($start)) {
+                    $label = '開催前';
+                    $class = 'badge-info';
+                } elseif ($now->gte($start) && $now->lt($end)) {
+                    $label = '開催中';
+                    $class = 'badge-success';
+                } else {
+                    $label = '終了';
+                    $class = 'badge-ghost';
+                }
+            } elseif ($start && !$end) {
+                // end 未設定：start 以前は開催前、以後は開催中扱い
+                if ($now->lt($start)) {
+                    $label = '開催前';
+                    $class = 'badge-info';
+                } else {
+                    $label = '開催中';
+                    $class = 'badge-success';
+                }
+            } elseif (!$start && $end) {
+                // start 未設定：end 以前は開催中扱い、以後は終了
+                if ($now->lt($end)) {
+                    $label = '開催中';
+                    $class = 'badge-success';
+                } else {
+                    $label = '終了';
+                    $class = 'badge-ghost';
+                }
+            }
+    
+            $event->timing_label = $label;
+            $event->timing_class = $class;
+    
+            return $event;
+        });
         return view('admin.events.index', compact('events'));
     }
 
@@ -111,8 +171,13 @@ class AdminEventController extends Controller
         $gallery = $event->mediaFiles()->where('type', 'event_gallery')
                         ->orderBy('media_relations.sort_order')
                         ->get();
-                        
-        return view('admin.events.edit', compact('event', 'cover', 'gallery'));
+        $participants = $event->participants()
+            ->where('status', 'going')
+            ->with(['user']) // 管理画面では user 情報が必要
+            ->latest()
+            ->get();
+
+    return view('admin.events.edit', compact('event', 'cover', 'gallery', 'participants'));
     }
 
     /**

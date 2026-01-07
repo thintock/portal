@@ -99,13 +99,22 @@ class Event extends Model
     /** 近日開催（終了していない） */
     public function scopeUpcoming(Builder $q): Builder
     {
-        return $q->where('start_at', '>=', now())->where('status', 'published');
+        return $q->where('end_at', '>', now())
+             ->where('status', 'published');
     }
 
     /** 終了済み */
     public function scopePast(Builder $q): Builder
     {
         return $q->where('end_at', '<', now())->where('status', 'published');
+    }
+    
+    /** 開催中か（start_at <= now < end_at） */
+    public function getIsOngoingAttribute(): bool
+    {
+        if (!$this->start_at || !$this->end_at) return false;
+    
+        return $this->start_at->lte(now()) && $this->end_at->gt(now());
     }
 
     /** ユーザーのタイムゾーンで表示用に */

@@ -14,10 +14,12 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminRoomController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminEventController;
+use App\Http\Controllers\Admin\AdminAnnouncementController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
 use App\Livewire\Events\Show;
+use App\Livewire\Announcements\Show as AnnouncementShow;
 use App\Livewire\Members\MemberIndex;
 use App\Livewire\Dashboard\Index as DashboardIndex;
 
@@ -39,6 +41,8 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // お知らせ（ユーザー側）
+    Route::get('/announcements/{slug}', AnnouncementShow::class)->name('announcements.show');
     // 課金
     Route::get('/billing', [BillingController::class, 'show'])->name('billing.show');
     Route::post('/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
@@ -75,6 +79,7 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::resource('rooms', AdminRoomController::class)->except('show');
     Route::resource('pages', AdminPageController::class);
     Route::resource('events', AdminEventController::class);
+    Route::resource('announcements', AdminAnnouncementController::class);
 });
 
 

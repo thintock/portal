@@ -110,16 +110,14 @@
                         <label class="block font-semibold mb-1">ステータス</label>
                         <select name="status" class="select select-bordered w-full">
                             <option value="draft" {{ old('status')==='draft'?'selected':'' }}>下書き</option>
-                            <option value="published" {{ old('status')==='published'?'selected':'' }}>公開中</option>
-                            <option value="ongoing" {{ old('status')==='ongoing'?'selected':'' }}>開催中</option>
-                            <option value="finished" {{ old('status')==='finished'?'selected':'' }}>終了</option>
+                            <option value="published" {{ old('status')==='published'?'selected':'' }}>公開</option>
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold mb-1">公開範囲</label>
                         <select name="visibility" class="select select-bordered w-full">
-                            <option value="public" {{ old('visibility')==='public'?'selected':'' }}>一般公開</option>
                             <option value="membership" {{ old('visibility')==='membership'?'selected':'' }}>サークル向け</option>
+                            <option value="public" {{ old('visibility')==='public'?'selected':'' }}>一般公開</option>
                             <option value="hidden" {{ old('visibility')==='hidden'?'selected':'' }}>非公開</option>
                         </select>
                     </div>

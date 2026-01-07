@@ -31,8 +31,8 @@
                             <th>ID</th>
                             <th>タイトル</th>
                             <th>開催期間</th>
-                            <th>定員</th>
-                            <th>受付</th>
+                            <th>申込数（定員）</th>
+                            <th>開催状況</th>
                             <th>ステータス</th>
                             <th>操作</th>
                         </tr>
@@ -42,7 +42,9 @@
                             <tr>
                                 <td>{{ $event->id }}</td>
                                 <td class="font-semibold">
-                                    <a href="{{ route('admin.events.edit', $event) }}" class="link link-primary">
+                                    <a href="{{ route('events.show', $event->slug) }}"
+                                       class="link link-primary"
+                                       target="_blank" rel="noopener">
                                         {{ $event->title }}
                                     </a>
                                 </td>
@@ -50,20 +52,22 @@
                                     {{ $event->start_at ? $event->start_at->format('Y/m/d H:i') : '未設定' }}<br>
                                     〜 {{ $event->end_at ? $event->end_at->format('Y/m/d H:i') : '未設定' }}
                                 </td>
-                                <td>{{ $event->capacity ?? '—' }}</td>
                                 <td>
-                                    @if($event->recept)
-                                        <span class="badge badge-success">受付中</span>
+                                    @if(is_null($event->capacity) || (int)$event->capacity === 0)
+                                      {{ $event->applications_count ?? 0 }}名（なし）
                                     @else
-                                        <span class="badge badge-ghost">停止</span>
+                                    　{{ $event->applications_count ?? 0 }}名（{{ $event->capacity }}名）
                                     @endif
                                 </td>
+                                <td>
+                                    <span class="badge {{ $event->timing_class ?? 'badge-ghost' }}">
+                                    {{ $event->timing_label ?? '未設定' }}
+                                  </span>
                                 <td>
                                     @switch($event->status)
                                         @case('draft') <span class="badge badge-ghost">下書き</span> @break
                                         @case('published') <span class="badge badge-info">公開中</span> @break
-                                        @case('ongoing') <span class="badge badge-warning">開催中</span> @break
-                                        @case('finished') <span class="badge badge-success">終了</span> @break
+                                        @case('cancelled') <span class="badge badge-warning">中止</span> @break
                                         @default <span class="badge">その他</span>
                                     @endswitch
                                 </td>

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Event;
+use App\Models\Announcement;
 use Laravel\Cashier\Subscription;
 use Carbon\Carbon;
 
@@ -37,6 +38,27 @@ class AdminDashboardController extends Controller
         // 直近イベント5件
         $recentEvents = Event::orderBy('start_at', 'desc')->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'userMonthlyCounts', 'recentEvents'));
+        $now = now();
+
+        $adminAnnouncements = Announcement::query()
+            ->where('visibility', 'admin')
+            ->where(function ($q) use ($now) {
+                $q->whereNull('publish_start_at')
+                  ->orWhere('publish_start_at', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('publish_end_at')
+                  ->orWhere('publish_end_at', '>=', $now);
+            })
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'stats',
+            'userMonthlyCounts',
+            'recentEvents',
+            'adminAnnouncements'
+        ));
     }
 }

@@ -147,17 +147,16 @@
                         <label class="block font-semibold mb-1">ステータス</label>
                         <select name="status" class="select select-bordered w-full">
                             <option value="draft" @selected(old('status', $event->status) === 'draft')>下書き</option>
-                            <option value="published" @selected(old('status', $event->status) === 'published')>公開中</option>
-                            <option value="ongoing" @selected(old('status', $event->status) === 'ongoing')>開催中</option>
-                            <option value="finished" @selected(old('status', $event->status) === 'finished')>終了</option>
+                            <option value="published" @selected(old('status', $event->status) === 'published')>公開</option>
+                            <option value="cancelled" @selected(old('status', $event->status) === 'cancelled')>中止</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="block font-semibold mb-1">公開範囲</label>
                         <select name="visibility" class="select select-bordered w-full">
-                            <option value="public" @selected(old('visibility', $event->visibility) === 'public')>一般公開</option>
                             <option value="membership" @selected(old('visibility', $event->visibility) === 'membership')>サークル向け</option>
+                            <option value="public" @selected(old('visibility', $event->visibility) === 'public')>一般公開</option>
                             <option value="hidden" @selected(old('visibility', $event->visibility) === 'hidden')>非公開</option>
                         </select>
                     </div>
@@ -175,6 +174,72 @@
         <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-8">
             <livewire:admin.event-images :event="$event" />
         </div>
+        
+        {{-- 参加者リスト --}}
+        <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-8">
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">参加者</h2>
+                    <p class="text-sm text-gray-500">参加予定（going）のユーザー一覧です。</p>
+                </div>
+        
+                <div class="text-sm text-gray-600">
+                    合計：<span class="font-semibold">{{ $participants->count() }}</span>名
+                </div>
+            </div>
+        
+            @if($participants->isEmpty())
+                <div class="p-6 bg-base-200 rounded-lg text-center text-sm text-gray-500">
+                    現在、参加者はまだいません。
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full text-sm">
+                        <thead class="bg-base-200">
+                            <tr>
+                                <th class="w-16">ID</th>
+                                <th>ユーザー</th>
+                                <th class="w-56">参加登録日時</th>
+                                <th class="w-24">ステータス</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($participants as $p)
+                                @php
+                                    $u = $p->user;
+                                @endphp
+        
+                                <tr>
+                                    <td>{{ $u?->id ?? '—' }}</td>
+        
+                                    <td class="font-semibold">
+                                        @if($u)
+                                            <a href="{{ route('admin.users.edit', $u->id) }}" class="link link-primary">
+                                                {{ $u->name }}
+                                            </a>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                {{ $u->email ?? '' }}
+                                            </div>
+                                        @else
+                                            <span class="text-gray-500">（ユーザーが見つかりません）</span>
+                                        @endif
+                                    </td>
+        
+                                    <td>
+                                        {{ $p->created_at?->format('Y/m/d H:i') ?? '—' }}
+                                    </td>
+        
+                                    <td>
+                                        <span class="badge badge-outline">{{ $p->status }}</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+        
 
         {{-- TinyMCE --}}
         <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.3/tinymce.min.js"></script>

@@ -6,7 +6,7 @@
             {!! $page->body1 !!}
         </div>
     @endif
-    
+    <livewire:dashboard.partials.announcements />
     @auth
         @if($user->role === 'admin')
           @include('livewire.dashboard.partials.paid')

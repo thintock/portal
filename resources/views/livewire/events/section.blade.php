@@ -51,6 +51,13 @@
           @if($next->status === 'cancelled')
             <span class="badge badge-error">中止</span>
           @endif
+          @if($next->status !== 'cancelled' && $next->is_ongoing)
+            <span class="badge badge-info animate-pulse">
+              開催中
+            </span>
+          @endif
+
+
         </div>
 
         {{-- タイトル --}}

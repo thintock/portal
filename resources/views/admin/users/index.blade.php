@@ -134,7 +134,7 @@
                                         filled($user->postal_code) &&
                                         filled($user->prefecture) &&
                                         filled($user->address1) &&
-                                        filled($user->phone);
+                                        filled($user->address2);
 
                                     // 誕生日表示（両方ある時だけ）
                                     $birthday = ($user->birthday_month && $user->birthday_day)

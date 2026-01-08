@@ -16,8 +16,8 @@ class AdminAnnouncementController extends Controller
     public function index()
     {
         $announcements = Announcement::query()
-            ->latest('publish_start_at')
-            ->paginate(30);
+        ->orderByDesc('created_at') // 作成日の新しい順
+        ->paginate(30);
 
         return view('admin.announcements.index', compact('announcements'));
     }

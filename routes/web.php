@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminRoomController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminAnnouncementController;
+use App\Http\Controllers\Admin\CsvUserConvertController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
@@ -80,6 +81,9 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::resource('pages', AdminPageController::class);
     Route::resource('events', AdminEventController::class);
     Route::resource('announcements', AdminAnnouncementController::class);
+    
+    // CSV
+    Route::get('/csv/users/download', [CsvUserConvertController::class, 'download'])->name('csv.users.download');
 });
 
 

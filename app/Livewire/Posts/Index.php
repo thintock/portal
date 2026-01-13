@@ -16,52 +16,46 @@ class Index extends Component
     public ?int $roomId = null;
     public string $q = '';
 
-    // 無限スクロール用
     public int $perPage = 20;
-    public bool $hasMore = true;
-    public bool $isLoading = false;
+    public int $step = 20; // 追加で読み込む件数
 
+    protected $listeners = [
+        'load-more-posts' => 'loadMore',
+    ];
+
+    // クエリ文字列に残す（戻る・共有に強い）
     protected $queryString = [
         'roomId' => ['except' => null],
         'q'      => ['except' => ''],
-        // 'page' は無限スクロールだと体験が崩れやすいので外す
+        // pageは使わない（perPage方式なので）
     ];
 
     public function updatingRoomId(): void
     {
-        $this->resetInfinite();
+        $this->resetList();
     }
 
     public function updatingQ(): void
     {
-        $this->resetInfinite();
+        $this->resetList();
     }
 
-    private function resetInfinite(): void
+    public function resetList(): void
     {
-        $this->resetPage();
-        $this->hasMore = true;
-        $this->isLoading = false;
+        $this->resetPage();     // 念のため（paginate内部で使われる）
+        $this->perPage = 20;    // 初期に戻す
     }
 
     public function loadMore(): void
     {
-        // 二重発火・終端を防ぐ
-        if ($this->isLoading || !$this->hasMore) return;
-
-        $this->isLoading = true;
-
-        // WithPagination の現在ページを進める
-        $this->setPage($this->getPage() + 1);
-
-        $this->isLoading = false;
+        $this->perPage += $this->step;
     }
 
     public function render()
     {
         $user = Auth::user();
 
-        $query = Post::query()
+        $posts = Post::query()
             ->with(['user', 'room'])
             ->whereHas('room', function ($query) use ($user) {
                 $query->where('visibility', 'public')
@@ -79,12 +73,8 @@ class Index extends Component
                 $keyword = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $this->q) . '%';
                 $q->where('body', 'like', $keyword);
             })
-            ->latest();
-
-        $posts = $query->paginate($this->perPage);
-
-        // 次ページがあるか
-        $this->hasMore = $posts->hasMorePages();
+            ->latest()
+            ->paginate($this->perPage);
 
         return view('livewire.posts.index', [
             'posts' => $posts,

@@ -28,34 +28,32 @@
         <div class="card-body p-0">
             <ul class="divide-y">
                 @forelse($posts as $post)
-                    <li class="hover:bg-base-200/40 transition">
+                    <li class="hover:bg-base-200/40 transition" wire:key="post-{{ $post->id }}">
                         <a href="{{ route('posts.show', $post) }}" class="block p-3 sm:p-4">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0 w-full">
-                                    <div class="text-sm mb-1 flex justify-between">
-                                        <div class="font-bold text-primary">
-                                            [{{ $post->room->name }}]
-                                        </div>
-                                        <div class="shrink-0 text-xs text-base-content/50 whitespace-nowrap">
-                                            {{ $post->created_at->format('Y/m/d H:i') }}
-                                        </div>
+                            <div class="min-w-0 w-full">
+                                <div class="text-sm mb-1 flex justify-between">
+                                    <div class="font-bold text-primary">
+                                        [{{ $post->room->name }}]
                                     </div>
+                                    <div class="shrink-0 text-xs text-base-content/50 whitespace-nowrap">
+                                        {{ $post->created_at->format('Y/m/d H:i') }}
+                                    </div>
+                                </div>
 
-                                    {{-- モバイル：100 / PC：200（※あなたの現行値のまま） --}}
-                                    <div class="text-sm text-base-content">
-                                        <span class="sm:hidden">
-                                            {{ \Illuminate\Support\Str::limit(strip_tags($post->body), 100) }}
-                                        </span>
-                                        <span class="hidden sm:inline">
-                                            {{ \Illuminate\Support\Str::limit(strip_tags($post->body), 200) }}
-                                        </span>
-                                    </div>
+                                {{-- モバイル：100 / PC：200（現行踏襲） --}}
+                                <div class="text-sm text-base-content">
+                                    <span class="sm:hidden">
+                                        {{ \Illuminate\Support\Str::limit(strip_tags($post->body), 100) }}
+                                    </span>
+                                    <span class="hidden sm:inline">
+                                        {{ \Illuminate\Support\Str::limit(strip_tags($post->body), 200) }}
+                                    </span>
+                                </div>
 
-                                    <div class="mt-2 text-xs text-base-content/60 flex flex-wrap gap-2 items-center">
-                                        <span class="badge badge-sm bg-gray-100 text-gray-600 border-none">
-                                            by {{ $post->user->name }}
-                                        </span>
-                                    </div>
+                                <div class="mt-2 text-xs text-base-content/60 flex flex-wrap gap-2 items-center">
+                                    <span class="badge badge-sm bg-gray-100 text-gray-600 border-none">
+                                        by {{ $post->user->name }}
+                                    </span>
                                 </div>
                             </div>
                         </a>
@@ -67,47 +65,37 @@
                 @endforelse
             </ul>
 
-            {{-- 無限スクロール：ローディング表示 --}}
-            <div class="p-4">
-                @if($hasMore)
+            {{-- 無限スクロール用トリガー --}}
+            @if($posts->hasMorePages())
+                <div class="p-4">
                     <div class="flex items-center justify-center gap-2 text-sm text-base-content/60">
                         <span class="loading loading-spinner loading-sm"></span>
                         <span>読み込み中…</span>
                     </div>
-                @else
-                    <div class="text-center text-xs text-base-content/50">
-                        これ以上投稿はありません。
-                    </div>
-                @endif
-            </div>
+                </div>
 
-            {{-- Sentinel（ここが見えたら loadMore） --}}
-            @if($hasMore)
                 <div
-                    x-data="{
-                        observer: null,
-                        init() {
-                            const el = this.$el;
-                            // 既存があれば破棄
-                            if (this.observer) this.observer.disconnect();
-
-                            this.observer = new IntersectionObserver((entries) => {
-                                entries.forEach((entry) => {
-                                    if (entry.isIntersecting) {
-                                        // 連打防止：Livewire側でもガードしているが念のため
-                                        this.$wire.loadMore();
-                                    }
-                                });
-                            }, { root: null, threshold: 0.1 });
-
-                            this.observer.observe(el);
-                        }
-                    }"
-                    x-init="init()"
-                    x-effect="init()"
-                    class="h-8"
+                    x-data
+                    x-init="
+                        let observer = new IntersectionObserver((entries) => {
+                          entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                              observer.unobserve($el); // 連打防止
+                              Livewire.dispatch('load-more-posts');
+                              setTimeout(() => observer.observe($el), 300); // DOM更新の猶予
+                            }
+                          });
+                        }, { root: null, threshold: 0.1 });
+                        observer.observe($el);
+                    "
+                    class="h-10"
                 ></div>
+            @else
+                <div class="p-4 text-center text-xs text-base-content/50">
+                    これ以上投稿はありません。
+                </div>
             @endif
+
         </div>
     </div>
 

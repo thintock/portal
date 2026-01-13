@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\CsvUserConvertController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
+use App\Livewire\Posts\Index as PostsIndex;
 use App\Livewire\Events\Show;
 use App\Livewire\Announcements\Show as AnnouncementShow;
 use App\Livewire\Members\MemberIndex;
@@ -61,6 +62,7 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
     Route::patch('room-members/{member}/role', [RoomMemberController::class, 'updateRole'])->name('room_members.update_role');
     Route::get('/rooms/{room}', Room::class)->name('rooms.show');
     Route::get('/posts/{post}', PostShow::class)->name('posts.show');
+    Route::get('/posts', PostsIndex::class)->name('posts.index');
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::get('/events/{slug}', Show::class)->name('events.show');
     Route::post('/events/{event}/join', [EventParticipantController::class, 'store'])->name('events.join');

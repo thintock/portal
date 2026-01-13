@@ -51,9 +51,11 @@
       <div class="max-h-96 overflow-y-auto space-y-2">
         @forelse($this->notifications as $n)
           <a href="#"
-             @click.prevent="$wire.markAsReadAndRedirect({{ $n['id'] }})"
-             class="block p-3 rounded-lg border transition duration-150
-                    {{ $n['read_at'] ? 'bg-neutral/5 border-neutral/30 hover:bg-neutral/10' : 'bg-info/5 border-info/30 hover:bg-info/10' }}">
+           wire:click.prevent="markAsReadAndRedirect({{ $n['id'] }})"
+           wire:key="notif-{{ $n['id'] }}"
+           class="block p-3 rounded-lg border transition duration-150
+                  {{ $n['read_at'] ? 'bg-neutral/5 border-neutral/30 hover:bg-neutral/10' : 'bg-info/5 border-info/30 hover:bg-info/10' }}">
+
             <div class="flex space-x-3 items-start">
 
               {{-- アバター --}}

@@ -56,8 +56,13 @@
                 {{-- イベント種別 --}}
                 <div>
                     <label class="block font-semibold mb-1">イベント種別</label>
-                    <input type="text" name="event_type" value="{{ old('event_type', $event->event_type) }}"
-                           class="input input-bordered w-full">
+                    <select name="event_type" class="select select-bordered w-full">
+                      <option value="">選択してください</option>
+                      <option value="online" @selected(old('event_type', $event->event_type)==='online')>オンラインイベント</option>
+                      <option value="sns" @selected(old('event_type', $event->event_type)==='sns')>SNSイベント</option>
+                      <option value="real" @selected(old('event_type', $event->event_type)==='real')>リアルイベント</option>
+                      <option value="distribution" @selected(old('event_type', $event->event_type)==='distribution')>配布型イベント</option>
+                    </select>
                 </div>
 
                 {{-- 概要（body1：テキスト） --}}
@@ -108,15 +113,14 @@
                     </div>
                 </div>
 
-                {{-- 会場／URL --}}
+                {{-- 会場名 --}}
                 <div>
-                  <label class="block font-semibold mb-1">会場区分</label>
-                  <select name="event_type" class="select select-bordered w-full">
+                  <label class="block font-semibold mb-1">会場名</label>
+                  <select name="location" class="select select-bordered w-full">
                       <option value="">選択してください</option>
-                      <option value="online" @selected(old('event_type', $event->event_type)==='online')>オンラインイベント</option>
-                      <option value="sns" @selected(old('event_type', $event->event_type)==='sns')>SNSイベント</option>
-                      <option value="real" @selected(old('event_type', $event->event_type)==='real')>リアルイベント</option>
-                      <option value="distribution" @selected(old('event_type', $event->event_type)==='distribution')>配布型イベント</option>
+                      <option value="zoom" @selected(old('location', $event->location)==='zoom')>ZOOM会場</option>
+                      <option value="insta" @selected(old('location', $event->location)==='insta')>Instagram会場</option>
+                      <option value="real" @selected(old('location', $event->location)==='real')>リアル会場</option>
                   </select>
                 </div>
 

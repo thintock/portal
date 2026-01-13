@@ -96,72 +96,95 @@
             <span>
               <strong>参加登録：</strong>{{ $event->recept ? '必要' : '不要' }}
             </span>
-
-            <span>
-              <strong>現在：</strong>{{ $total }}名
-              @if(!empty($event->capacity) && (int)$event->capacity > 0)
-                ／ {{ $event->capacity }}名
-              @endif
-            </span>
-
-            <span>
-              <strong>受付状況：</strong>
-              @if($event->is_full)
-                <span class="text-red-600 font-semibold">定員に達しています</span>
-              @else
-                <span class="text-green-700">受付中</span>
-              @endif
-            </span>
+            @if($event->recept)
+              <span>
+                <strong>現在：</strong>{{ $total }}名
+                @if(!empty($event->capacity) && (int)$event->capacity > 0)
+                  ／ {{ $event->capacity }}名
+                @endif
+              </span>
+  
+              <span>
+                <strong>受付状況：</strong>
+                @if($event->is_full)
+                  <span class="text-red-600 font-semibold">定員に達しています</span>
+                @else
+                  <span class="text-green-700">受付中</span>
+                @endif
+              </span>
+            @endif
           </div>
 
           {{-- ボタン群（右寄せ） --}}
           <div class="flex items-center gap-2 justify-end">
-            @if($event->is_joined)
+          
+            {{-- ✅ 中止は最優先（event.show 側にも status がある前提） --}}
+            @if($event->status === 'cancelled')
+              <button class="btn btn-sm btn-disabled" disabled>中止</button>
+          
+            {{-- ✅ 参加登録不要：RSVPは表示しない。join_url があれば会場入口のみ --}}
+            @elseif(!$event->recept)
               @if($event->join_url)
                 <a href="{{ $event->join_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
                   会場入口
                 </a>
               @endif
-              <livewire:events.rsvp-button :event="$event" wire:key="rsvp-show-{{ $event->id }}" />
-            @elseif(!$event->is_full)
-              <livewire:events.rsvp-button :event="$event" wire:key="rsvp-show-{{ $event->id }}" />
+          
+            {{-- ✅ 参加登録が必要：従来通り（満席制御あり） --}}
             @else
-              <button class="btn btn-sm btn-disabled" disabled>満席</button>
-            @endif
-          </div>
-
-        </div>
-
-        {{-- 参加者アバター（情報ブロック下段） --}}
-        <div class="mt-4 flex items-center justify-between gap-3">
-          <div class="flex -space-x-3">
-            @foreach($participants as $p)
-              @php
-                $avatar = $p->user->mediaFiles()->where('media_files.type', 'avatar')->first();
-              @endphp
-              <div class="w-9 h-9 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 border-base-200 shadow-sm"
-                   title="{{ $p->user->name }}">
-                @if($avatar)
-                  <img src="{{ Storage::url($avatar->path) }}" alt="avatar" class="w-full h-full object-cover" />
-                @else
-                  <span class="text-sm font-semibold text-gray-600">
-                    {{ mb_substr($p->user->name ?? '？', 0, 1) }}
-                  </span>
+              @if($event->is_joined)
+                @if($event->join_url)
+                  <a href="{{ $event->join_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
+                    会場入口
+                  </a>
                 @endif
-              </div>
-            @endforeach
-
-            @if($total > 10)
-              <div class="w-9 h-9 rounded-full bg-base-100 flex items-center justify-center text-sm border-2 border-base-200">
-                +{{ $total - 10 }}
-              </div>
+                <livewire:events.rsvp-button :event="$event" wire:key="rsvp-show-{{ $event->id }}" />
+          
+              @elseif(!$event->is_full)
+                <livewire:events.rsvp-button :event="$event" wire:key="rsvp-show-{{ $event->id }}" />
+          
+              @else
+                <button class="btn btn-sm btn-disabled" disabled>満席</button>
+              @endif
             @endif
+          
           </div>
 
-          <div class="text-xs text-base-content/60">
-            参加者：{{ $total }}名
-          </div>
+
         </div>
+        
+        @if($event->recept)
+          {{-- 参加者アバター（情報ブロック下段） --}}
+          <div class="mt-4 flex items-center justify-between gap-3">
+            <div class="flex -space-x-3">
+              @foreach($participants as $p)
+                @php
+                  $avatar = $p->user->mediaFiles()->where('media_files.type', 'avatar')->first();
+                @endphp
+                <div class="w-9 h-9 rounded-full overflow-hidden bg-base-100 flex items-center justify-center border-2 border-base-200 shadow-sm"
+                     title="{{ $p->user->name }}">
+                  @if($avatar)
+                    <img src="{{ Storage::url($avatar->path) }}" alt="avatar" class="w-full h-full object-cover" />
+                  @else
+                    <span class="text-sm font-semibold text-gray-600">
+                      {{ mb_substr($p->user->name ?? '？', 0, 1) }}
+                    </span>
+                  @endif
+                </div>
+              @endforeach
+  
+              @if($total > 10)
+                <div class="w-9 h-9 rounded-full bg-base-100 flex items-center justify-center text-sm border-2 border-base-200">
+                  +{{ $total - 10 }}
+                </div>
+              @endif
+            </div>
+  
+            <div class="text-xs text-base-content/60">
+              参加者：{{ $total }}名
+            </div>
+          </div>
+        @endif
       </div>
 
       {{-- ====== 本文（カード式で section を分ける） ====== --}}

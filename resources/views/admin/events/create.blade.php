@@ -33,8 +33,13 @@
                 {{-- イベント種別 --}}
                 <div>
                     <label class="block font-semibold mb-1">イベント種別</label>
-                    <input type="text" name="event_type" value="{{ old('event_type') }}"
-                           placeholder="例: オンラインパン教室" class="input input-bordered w-full">
+                    <select name="event_type" class="select select-bordered w-full">
+                      <option value="">選択してください</option>
+                      <option value="online")>オンラインイベント</option>
+                      <option value="sns")>SNSイベント</option>
+                      <option value="real")>リアルイベント</option>
+                      <option value="distribution")>配布型イベント</option>
+                    </select>
                 </div>
 
                 {{-- 概要（body1：テキスト） --}}
@@ -82,8 +87,13 @@
 
                 {{-- 会場／URL --}}
                 <div>
-                    <label class="block font-semibold mb-1">会場名またはオンラインURL</label>
-                    <input type="text" name="location" value="{{ old('location') }}" class="input input-bordered w-full">
+                    <label class="block font-semibold mb-1">会場名</label>
+                  <select name="location" class="select select-bordered w-full">
+                      <option value="">選択してください</option>
+                      <option value="zoom")>ZOOM会場</option>
+                      <option value="insta">Instagram会場</option>
+                      <option value="real">リアル会場</option>
+                  </select>
                 </div>
 
                 <div>

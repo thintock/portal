@@ -42,21 +42,22 @@
             {{ $next->starts_at_tz?->isoFormat('M/D(ddd) HH:mm') }}
             @if($next->ends_at_tz)〜{{ $next->ends_at_tz->isoFormat('HH:mm') }}@endif
           </span>
-          @if($next->is_joined)
-            <span class="badge badge-outline">参加予定</span>
+          @if($next->recept)
+            @if($next->is_joined)
+              <span class="badge badge-outline">参加予定</span>
+            @endif
+            @if($next->is_full)
+              <span class="badge badge-warning">満席</span>
+            @endif
+            @if($next->status === 'cancelled')
+              <span class="badge badge-error">中止</span>
+            @endif
+            @if($next->status !== 'cancelled' && $next->is_ongoing)
+              <span class="badge badge-info animate-pulse">
+                開催中
+              </span>
+            @endif
           @endif
-          @if($next->is_full)
-            <span class="badge badge-warning">満席</span>
-          @endif
-          @if($next->status === 'cancelled')
-            <span class="badge badge-error">中止</span>
-          @endif
-          @if($next->status !== 'cancelled' && $next->is_ongoing)
-            <span class="badge badge-info animate-pulse">
-              開催中
-            </span>
-          @endif
-
 
         </div>
 
@@ -96,19 +97,31 @@
                 {{ $next->capacity }}名
               @endif
             </span>
+            <span><strong>会場：</strong>
+              @php
+                $locationLabel = match ($next->location) {
+                  'zoom'  => 'ZOOM会場',
+                  'insta' => 'Instagram会場',
+                  'real'  => 'リアル会場',
+                  default => '未設定',
+                };
+              @endphp
+              {{ $locationLabel }}
+            </span>
             <span><strong>参加登録：</strong>{{ $next->recept ? '必要' : '不要' }}</span>
-            <span><strong>現在：</strong>{{ $total }}名
+            @if($next->recept)
+              <span><strong>現在：</strong>{{ $total }}名</span>
               @if(!empty($next->capacity) && $next->capacity > 0)
                 ／ {{ $next->capacity }}名
               @endif
-            </span>
-            <span><strong>受付状況：</strong>
-              @if($next->is_full)
-                <span class="text-red-600 font-semibold">定員に達しています</span>
-              @else
-                <span class="text-green-700">受付中</span>
-              @endif
-            </span>
+              <span><strong>受付状況：</strong>
+                @if($next->is_full)
+                  <span class="text-red-600 font-semibold">定員に達しています</span>
+                @else
+                  <span class="text-green-700">受付中</span>
+                @endif
+              </span>
+            @endif
           </div>
         </div>
 
@@ -119,43 +132,66 @@
           <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {{-- ボタン群 --}}
             <div class="flex items-center gap-2">
-              @if($next->is_joined)
+              {{-- ✅ 中止は最優先 --}}
+              @if($next->status === 'cancelled')
+                <button class="btn btn-sm btn-disabled" disabled>中止</button>
+            
+              {{-- ✅ 参加登録不要：RSVPは出さない。join_urlがあれば会場入口だけ --}}
+              @elseif(!$next->recept)
                 @if($next->join_url)
                   <a href="{{ $next->join_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
                     会場入口
                   </a>
+                @else
+                  {{-- join_url がない場合は何も出さない（要件通り） --}}
+                  {{-- 必要なら「詳細」だけで誘導 --}}
                 @endif
-                <livewire:events.rsvp-button :event="$next" wire:key="rsvp-next-{{ $next->id }}" />
-              @elseif(!$next->is_full)
-                <livewire:events.rsvp-button :event="$next" wire:key="rsvp-next-{{ $next->id }}" />
+            
+              {{-- ✅ 参加登録が必要：従来通り RSVP を出す（満席制御あり） --}}
               @else
-                <button class="btn btn-sm btn-disabled" disabled>満席</button>
+                @if($next->is_joined)
+                  {{-- 参加予定者は会場入口（あれば） + RSVP（キャンセル等） --}}
+                  @if($next->join_url)
+                    <a href="{{ $next->join_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
+                      会場入口
+                    </a>
+                  @endif
+                  <livewire:events.rsvp-button :event="$next" wire:key="rsvp-next-{{ $next->id }}" />
+            
+                @elseif(!$next->is_full)
+                  <livewire:events.rsvp-button :event="$next" wire:key="rsvp-next-{{ $next->id }}" />
+            
+                @else
+                  <button class="btn btn-sm btn-disabled" disabled>満席</button>
+                @endif
               @endif
             </div>
         
             {{-- アバター一覧（スマホでは次の行、PCでは横並びでボタンに重なる） --}}
-            <div class="flex -space-x-3 mt-2 sm:mt-0">
-              @foreach($participants as $p)
-                @php
-                  $avatar = $p->user->mediaFiles()->where('media_files.type', 'avatar')->first();
-                @endphp
-                <div class="w-9 h-9 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 border-base-100 shadow-sm"
-                     title="{{ $p->user->name }}">
-                  @if($avatar)
-                    <img src="{{ Storage::url($avatar->path) }}" alt="avatar" class="w-full h-full object-cover">
-                  @else
-                    <span class="text-sm font-semibold text-gray-600">
-                      {{ mb_substr($p->user->name ?? '？', 0, 1) }}
-                    </span>
-                  @endif
-                </div>
-              @endforeach
-              @if($total > 10)
-                <div class="w-9 h-9 rounded-full bg-base-200 flex items-center justify-center text-sm border-2 border-base-100">
-                  +{{ $total - 10 }}
-                </div>
-              @endif
-            </div>
+            @if($next->recept)
+              <div class="flex -space-x-3 mt-2 sm:mt-0">
+                @foreach($participants as $p)
+                  @php
+                    $avatar = $p->user->mediaFiles()->where('media_files.type', 'avatar')->first();
+                  @endphp
+                  <div class="w-9 h-9 rounded-full overflow-hidden bg-base-200 flex items-center justify-center border-2 border-base-100 shadow-sm"
+                       title="{{ $p->user->name }}">
+                    @if($avatar)
+                      <img src="{{ Storage::url($avatar->path) }}" alt="avatar" class="w-full h-full object-cover">
+                    @else
+                      <span class="text-sm font-semibold text-gray-600">
+                        {{ mb_substr($p->user->name ?? '？', 0, 1) }}
+                      </span>
+                    @endif
+                  </div>
+                @endforeach
+                @if($total > 10)
+                  <div class="w-9 h-9 rounded-full bg-base-200 flex items-center justify-center text-sm border-2 border-base-100">
+                    +{{ $total - 10 }}
+                  </div>
+                @endif
+              </div>
+            @endif
           </div>
         
           {{-- 右：詳細ボタン --}}

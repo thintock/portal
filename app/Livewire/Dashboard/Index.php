@@ -70,7 +70,7 @@ class Index extends Component
                       });
             })
             ->latest()
-            ->take(5)
+            ->take(7)
             ->get();
 
         return view('livewire.dashboard.index', [

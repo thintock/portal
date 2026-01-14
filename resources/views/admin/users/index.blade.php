@@ -24,7 +24,7 @@
                             {{ ($birthdayUsers ?? collect())->count() }}件
                         </div>
                     </div>
-        
+
                     @if(($birthdayUsers ?? collect())->isEmpty())
                         <div class="mt-3 p-3 bg-base-200 rounded text-sm text-gray-600">
                             対象期間の誕生日ユーザーはいません。
@@ -63,7 +63,7 @@
                                                             </div>
                                                         </div>
                                                     @endif
-        
+
                                                     <div class="min-w-0">
                                                         <div class="font-medium">
                                                             {{ \Illuminate\Support\Str::limit($bu->name ?? '', 20, '…') }}
@@ -74,15 +74,15 @@
                                                     </div>
                                                 </div>
                                             </td>
-        
+
                                             <td>
                                                 <span class="badge badge-soft badge-secondary text-white">
                                                     {{ $bday }}
                                                 </span>
                                             </td>
-        
+
                                             <td>{{ $bu->prefecture ?? '—' }}</td>
-        
+
                                             <td class="text-right">
                                                 <a href="{{ route('admin.users.edit', $bu) }}" class="btn btn-xs btn-info text-white">
                                                     編集
@@ -94,6 +94,96 @@
                             </table>
                         </div>
                     @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- 検索／フィルタ --}}
+        <div class="m-4">
+            <div class="card bg-white shadow">
+                <div class="card-body p-4 sm:p-6 space-y-3">
+
+                    <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col sm:flex-row gap-2 sm:items-center">
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ $q ?? request('q') }}"
+                            class="input input-bordered w-full"
+                            placeholder="名前/かな/会社名/住所/電話/メール/備考 などで検索"
+                        />
+
+                        {{-- hiddenでボタンフィルタ状態を保持 --}}
+                        <input type="hidden" name="email_verified" value="{{ $emailVerified ?? request('email_verified') }}">
+                        <input type="hidden" name="sub" value="{{ $subStatus ?? request('sub') }}">
+                        <input type="hidden" name="role" value="{{ $role ?? request('role') }}">
+
+                        <div class="flex gap-2">
+                            <button class="btn btn-sm btn-primary">検索</button>
+                            <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-outline">リセット</a>
+                        </div>
+                    </form>
+
+                    {{-- ボタンフィルタ（クエリを保持して切替） --}}
+                    @php
+                        $base = request()->only(['q']); // 文字検索は保持
+                        $is = fn($key, $val) => request($key) === $val;
+                    @endphp
+
+                    <div class="flex flex-wrap gap-2">
+                        {{-- email 未認証 --}}
+                        <a class="btn btn-xs {{ $is('email_verified','0') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['email_verified' => '0', 'sub' => request('sub'), 'role' => request('role')])) }}">
+                            メール未認証
+                        </a>
+
+                        {{-- email 認証済 --}}
+                        <a class="btn btn-xs {{ $is('email_verified','1') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['email_verified' => '1', 'sub' => request('sub'), 'role' => request('role')])) }}">
+                            メール認証済
+                        </a>
+
+                        {{-- サブスク有効 --}}
+                        <a class="btn btn-xs {{ $is('sub','active') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['sub' => 'active', 'email_verified' => request('email_verified'), 'role' => request('role')])) }}">
+                            サブスク有効
+                        </a>
+
+                        {{-- サブスク無効 --}}
+                        <a class="btn btn-xs {{ $is('sub','inactive') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['sub' => 'inactive', 'email_verified' => request('email_verified'), 'role' => request('role')])) }}">
+                            サブスク無効
+                        </a>
+
+                        {{-- role: admin/user/guest --}}
+                        <a class="btn btn-xs {{ $is('role','admin') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['role' => 'admin', 'email_verified' => request('email_verified'), 'sub' => request('sub')])) }}">
+                            管理者
+                        </a>
+
+                        <a class="btn btn-xs {{ $is('role','user') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['role' => 'user', 'email_verified' => request('email_verified'), 'sub' => request('sub')])) }}">
+                            一般
+                        </a>
+
+                        <a class="btn btn-xs {{ $is('role','guest') ? 'btn-primary text-white' : 'btn-outline' }}"
+                           href="{{ route('admin.users.index', array_merge($base, ['role' => 'guest', 'email_verified' => request('email_verified'), 'sub' => request('sub')])) }}">
+                            ゲスト
+                        </a>
+
+                        {{-- フィルタ解除（文字検索だけ残す） --}}
+                        <a class="btn btn-xs btn-ghost" href="{{ route('admin.users.index', $base) }}">
+                            フィルタ解除
+                        </a>
+                    </div>
+
+                    <div class="text-xs text-gray-500">
+                        条件：
+                        <span>q={{ request('q') ?: '—' }}</span>,
+                        <span>email={{ request('email_verified') ?? '—' }}</span>,
+                        <span>sub={{ request('sub') ?? '—' }}</span>,
+                        <span>role={{ request('role') ?? '—' }}</span>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -124,7 +214,7 @@
                         </thead>
 
                         <tbody>
-                            @foreach($users as $user)
+                            @forelse($users as $user)
                                 @php
                                     // 必須プロフ判定（null/空文字両対応）
                                     $profileCompleted =
@@ -142,8 +232,20 @@
                                         : null;
 
                                     // 退会予定（ends_at が未来）
-                                    $cancelScheduledAt = $user->subscription_cancel_scheduled_at;
-                                    $hasCancelSchedule = $cancelScheduledAt && $cancelScheduledAt->isFuture();
+                                    $cancelScheduledAt = $user->subscription_cancel_scheduled_at ?? null;
+                                    $hasCancelSchedule = $cancelScheduledAt && method_exists($cancelScheduledAt, 'isFuture') && $cancelScheduledAt->isFuture();
+
+                                    /**
+                                     * サブスク有効判定
+                                     * - Cashier を使っていて subscribed('default') が安全に呼べるならそれを使う
+                                     * - もしここで例外が出る環境なら、コントローラ側で渡した情報で判定する運用に寄せる
+                                     */
+                                    try {
+                                        $isSubscribed = method_exists($user, 'subscribed') ? $user->subscribed('default') : false;
+                                    } catch (\Throwable $e) {
+                                        // 代替：subscription_started_at があって、退会予定が過去ではない等で判定したい場合はここを調整
+                                        $isSubscribed = false;
+                                    }
                                 @endphp
 
                                 <tr>
@@ -218,7 +320,7 @@
                                     <td class="min-w-[180px]">
                                         <div class="flex flex-col gap-1">
                                             <div>
-                                                @if($user->subscribed('default'))
+                                                @if($isSubscribed)
                                                     <span class="badge badge-soft badge-primary text-white">有効</span>
                                                 @else
                                                     <span class="badge badge-error text-white">無効</span>
@@ -252,7 +354,13 @@
                                         </form>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="p-6 text-center text-sm text-base-content/60">
+                                        ユーザーが見つかりませんでした。
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

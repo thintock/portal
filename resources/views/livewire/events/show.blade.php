@@ -18,9 +18,9 @@
 
     // 投稿と同じ感覚で本文を整形（改行を活かす）
     $body1 = $event->body1 ? nl2br(e($event->body1)) : null;
-    // body2 は HTML が入る前提でそのまま
-    $body2 = $event->body2 ?? null;
-    $body3 = $event->body3 ? nl2br(e($event->body3)) : null;
+    // body2 / body3 は HTML が入る前提でそのまま
+    $body2 = $event->body2 ?: null;
+    $body3 = $event->body3 ?: null;
   @endphp
 
   {{-- ====== ページヘッダー（控えめ） ====== --}}

@@ -65,11 +65,12 @@
                 
                 {{-- 完了報告（body3：テキスト） --}}
                 <div class="mb-6">
-                  <label class="block font-semibold mb-1">完了報告</label>
+                  <label class="block font-semibold mb-1">完了報告（HTML可）</label>
                   <textarea 
+                      id="body3-editor" 
                       name="body3" 
-                      rows="5"
-                      class="textarea textarea-bordered w-full font-mono"
+                      rows="15"
+                      class="textarea textarea-bordered w-full"
                   >{{ old('body3') }}</textarea>
                 </div>
 
@@ -151,7 +152,7 @@
         <script>
         document.addEventListener('DOMContentLoaded', function () {
           tinymce.init({
-            selector: '#body2-editor',
+            selector: '#body2-editor, #body3-editor',
             height: 400,
             menubar: false,
             plugins: 'link image code lists',
@@ -160,6 +161,7 @@
           });
         });
         </script>
+
 
         {{-- slug自動生成（初回のみ） --}}
         <script>

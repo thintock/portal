@@ -16,9 +16,44 @@ class AdminUserController extends Controller
     /**
      * ユーザー一覧
      */
-    public function index()
+    public function index(Request $request)
     {
-        // ===== ① 誕生日リスト（今月 + 来月5日まで / 最大20） =====
+        // =========================================================
+        // 0) 受け取る検索パラメータ（クエリ文字列）
+        // =========================================================
+        $q            = trim((string) $request->query('q', ''));          // 文字検索
+        $emailVerified = $request->query('email_verified');              // '1' | '0' | null
+        $subStatus     = $request->query('sub');                         // 'active' | 'inactive' | null
+        $role          = $request->query('role');                        // 'admin' | 'user' | 'guest' | null
+    
+        // LIKE 検索のエスケープ
+        $escapeLike = function (string $value): string {
+            return str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $value);
+        };
+    
+        // 文字検索対象カラム
+        $searchableColumns = [
+            'name',
+            'first_name',
+            'last_name',
+            'first_name_kana',
+            'last_name_kana',
+            'instagram_id',
+            'company_name',
+            'postal_code',
+            'prefecture',
+            'address1',
+            'address2',
+            'address3',
+            'country',
+            'phone',
+            'remarks',
+            'email',
+        ];
+    
+        // =========================================================
+        // 1) 誕生日リスト（今月 + 来月5日まで / 最大20）
+        // =========================================================
         $now = Carbon::now('Asia/Tokyo')->startOfDay();
         $end = $now->copy()->addMonthNoOverflow()->day(5)->endOfDay();
     
@@ -31,6 +66,9 @@ class AdminUserController extends Controller
         $birthdayUsersQuery = User::query()
             ->whereNotNull('birthday_month')
             ->whereNotNull('birthday_day');
+    
+        // （任意）誕生日リストも、role / email認証 / サブスク状態で絞り込みたい場合はここに追従させる
+        // 今回は「一覧の検索」と独立でOKという前提で、誕生日リストには反映しない（必要なら追従版も出します）
     
         // 期間条件（年跨ぎも対応）
         if ($startKey <= $endKey) {
@@ -65,28 +103,85 @@ class AdminUserController extends Controller
             return $user;
         });
     
+        // =========================================================
+        // 2) 一覧（検索対応）
+        // =========================================================
+        $usersQuery = User::query()
+            ->with([
+                'mediaFiles' => function ($query) {
+                    $query->where('type', 'avatar')
+                          ->orderBy('media_relations.sort_order', 'asc');
+                },
+                'subscriptions' => function ($q) {
+                    // ※ あなたのDBに name が無いので入れない（既存仕様のまま）
+                    $q->select([
+                        'id',
+                        'user_id',
+                        'type',
+                        'stripe_status',
+                        'created_at',
+                        'ends_at',
+                    ])->orderByDesc('created_at');
+                },
+            ])
+            ->orderByDesc('created_at');
     
-        // ===== ② 一覧（既存処理） =====
-        $users = User::with([
-            'mediaFiles' => function ($query) {
-                $query->where('type', 'avatar')
-                      ->orderBy('media_relations.sort_order', 'asc');
-            },
-            'subscriptions' => function ($q) {
-                // ※ あなたのDBに name が無いので入れない
-                $q->select([
-                    'id',
-                    'user_id',
-                    'type',
-                    'stripe_status',
-                    'created_at',
-                    'ends_at',
-                ])->orderByDesc('created_at');
-            },
-        ])
-        ->orderByDesc('created_at')
-        ->paginate(20);
+        // 2-1) 文字検索（複数カラム OR）
+        if ($q !== '') {
+            $kw = '%' . $escapeLike($q) . '%';
     
+            $usersQuery->where(function ($query) use ($searchableColumns, $kw) {
+                foreach ($searchableColumns as $col) {
+                    $query->orWhere($col, 'like', $kw);
+                }
+            });
+        }
+    
+        // 2-2) email認証（ボタン検索）
+        // email_verified=1 -> 認証済み
+        // email_verified=0 -> 未認証
+        if ($emailVerified === '1') {
+            $usersQuery->whereNotNull('email_verified_at');
+        } elseif ($emailVerified === '0') {
+            $usersQuery->whereNull('email_verified_at');
+        }
+    
+        // 2-3) role（ボタン検索）
+        if (!empty($role)) {
+            $usersQuery->where('role', $role);
+        }
+    
+        // 2-4) サブスク状態（ボタン検索）
+        // Cashier / subscriptions テーブル前提：
+        // - type='default' を対象
+        // - stripe_status が active/trialing を有効扱い
+        // - ends_at が未来 or null を有効扱い
+        if ($subStatus === 'active') {
+            $usersQuery->whereHas('subscriptions', function ($q) {
+                $q->where('type', 'default')
+                  ->whereIn('stripe_status', ['active', 'trialing'])
+                  ->where(function ($q2) {
+                      $q2->whereNull('ends_at')
+                         ->orWhere('ends_at', '>', now());
+                  });
+            });
+        } elseif ($subStatus === 'inactive') {
+            $usersQuery->whereDoesntHave('subscriptions', function ($q) {
+                $q->where('type', 'default')
+                  ->whereIn('stripe_status', ['active', 'trialing'])
+                  ->where(function ($q2) {
+                      $q2->whereNull('ends_at')
+                         ->orWhere('ends_at', '>', now());
+                  });
+            });
+        }
+    
+        // 2-5) ページネーション（検索条件を維持）
+        $users = $usersQuery
+            ->paginate(20)
+            ->withQueryString();
+    
+        // 2-6) 表示用整形（既存ロジック）
         $users->getCollection()->transform(function ($user) {
             // avatar_url
             $avatar = $user->mediaFiles->first();
@@ -104,8 +199,18 @@ class AdminUserController extends Controller
             return $user;
         });
     
-        return view('admin.users.index', compact('users', 'birthdayUsers', 'now', 'end'));
+        return view('admin.users.index', compact(
+            'users',
+            'birthdayUsers',
+            'now',
+            'end',
+            'q',
+            'emailVerified',
+            'subStatus',
+            'role',
+        ));
     }
+
 
 
 

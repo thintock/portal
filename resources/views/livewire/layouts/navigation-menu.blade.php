@@ -80,8 +80,12 @@
     
                         <x-slot name="content">
                             @if(auth()->user()?->role === 'admin' || auth()->user()?->hasActiveSubscription())
+                                {{-- サブスク会員向けメニュー --}}
                                 <x-dropdown-link :href="route('members.member_index')">
                                     会員一覧
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('monthly-items.index')">
+                                    月次テーマ一覧
                                 </x-dropdown-link>
                             @endif
 
@@ -161,8 +165,12 @@
             {{-- メニュー下部 --}}
             <div class="mt-3 space-y-1">
                 @if(auth()->user()?->role === 'admin' || auth()->user()?->hasActiveSubscription())
+                    {{-- サブスク会員向けメニュー --}}
                     <x-responsive-nav-link :href="route('members.member_index')">
                         会員一覧
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('monthly-items.index')">
+                        月次テーマ一覧
                     </x-responsive-nav-link>
                 @endif
                 <x-responsive-nav-link :href="route('profile.edit')">

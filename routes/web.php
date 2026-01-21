@@ -15,7 +15,9 @@ use App\Http\Controllers\Admin\AdminRoomController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminAnnouncementController;
+use App\Http\Controllers\Admin\AdminMonthlyItemController;
 use App\Http\Controllers\Admin\CsvUserConvertController;
+use App\Http\Controllers\Admin\AdminMonthlyItemReportController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
@@ -24,6 +26,10 @@ use App\Livewire\Events\Show;
 use App\Livewire\Announcements\Show as AnnouncementShow;
 use App\Livewire\Members\MemberIndex;
 use App\Livewire\Dashboard\Index as DashboardIndex;
+use App\Livewire\MonthlyItems\Index as MonthlyItemsIndex;
+use App\Livewire\MonthlyItems\Show as MonthlyItemsShow;
+use App\Livewire\MonthlyItems\Feedback\Create as MonthlyFeedbackCreate;
+use App\Livewire\MonthlyItems\Feedback\Edit as MonthlyFeedbackEdit;
 
 // 誰でもOK
 Route::get('/', function () {
@@ -37,12 +43,10 @@ Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show')
 // 無料会員（認証済み）
 Route::middleware(['auth','verified'])->group(function () {
     Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
-
     // プロフィール
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
     // お知らせ（ユーザー側）
     Route::get('/announcements/{slug}', AnnouncementShow::class)->name('announcements.show');
     // 課金
@@ -56,7 +60,6 @@ Route::middleware(['auth','verified'])->group(function () {
 
 // 有料会員専用
 Route::middleware(['auth','verified','subscribed'])->group(function () {
-    // RoomMembers（参加/退出/役割変更）
     Route::post('rooms/{room}/join', [RoomMemberController::class, 'join'])->name('rooms.join');
     Route::delete('rooms/{room}/leave', [RoomMemberController::class, 'leave'])->name('rooms.leave');
     Route::patch('room-members/{member}/role', [RoomMemberController::class, 'updateRole'])->name('room_members.update_role');
@@ -67,6 +70,10 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
     Route::get('/events/{slug}', Show::class)->name('events.show');
     Route::post('/events/{event}/join', [EventParticipantController::class, 'store'])->name('events.join');
     Route::delete('/events/{event}/cancel', [EventParticipantController::class, 'destroy'])->name('events.cancel');
+    Route::get('/monthly-items', MonthlyItemsIndex::class)->name('monthly-items.index');
+    Route::get('/monthly-items/{monthlyItem}', MonthlyItemsShow::class)->name('monthly-items.show');
+    Route::get('/monthly-items/{monthlyItem}/feedback/create', MonthlyFeedbackCreate::class)->name('monthly-items.feedback.create');
+    Route::get('/monthly-items/{monthlyItem}/feedback/edit', MonthlyFeedbackEdit::class)->name('monthly-items.feedback.edit');
 });
 
 // 管理者専用
@@ -83,9 +90,11 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::resource('pages', AdminPageController::class);
     Route::resource('events', AdminEventController::class);
     Route::resource('announcements', AdminAnnouncementController::class);
-    
+    Route::resource('monthly-items', AdminMonthlyItemController::class);
     // CSV
     Route::get('/csv/users/download', [CsvUserConvertController::class, 'download'])->name('csv.users.download');
+    // レポート
+    Route::get('/monthly-items/{monthly_item}/report', [AdminMonthlyItemReportController::class, 'show'])->name('monthly-items.report');
 });
 
 

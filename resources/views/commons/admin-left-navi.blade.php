@@ -66,6 +66,14 @@
                   {{ request()->routeIs('admin.events.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
             イベント管理
         </a>
+        
+        {{-- 月次テーマ管理 --}}
+        <a href="{{ route('admin.monthly-items.index') }}"
+           class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                  {{ request()->routeIs('admin.monthly-items.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            月次テーマ管理
+        </a>
 
         {{-- 区切り線 --}}
         <div class="border-t border-slate-700 my-3"></div>

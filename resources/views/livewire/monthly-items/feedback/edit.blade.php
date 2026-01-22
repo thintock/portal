@@ -75,18 +75,20 @@
             </div>
           @endforeach
 
-          {{-- 追加ボタン --}}
+          {{-- 追加ボタン（単発） --}}
           <label class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 w-full h-24 sm:h-28 text-gray-400 hover:bg-gray-50 cursor-pointer transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             <span class="text-xs">追加</span>
-            <input type="file" wire:model="newImages" multiple accept="image/*" class="hidden" />
+          
+            {{-- ★ multiple を外し、newImage にする --}}
+            <input type="file" wire:model="newImage" accept="image/*" class="hidden" />
           </label>
-        </div>
+          
+          <div wire:loading wire:target="newImage" class="text-xs text-gray-500 mt-2">アップロード中...</div>
+          @error('newImage') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
 
-        <div wire:loading wire:target="newImages" class="text-xs text-gray-500 mt-2">アップロード中...</div>
-        @error('newImages.*') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
 
         @if($hasChanges)
           <div class="mt-2 text-xs text-yellow-700">変更があります。更新してください。</div>

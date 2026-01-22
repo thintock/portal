@@ -29,9 +29,31 @@ class Edit extends Component
      * - 新規: TemporaryUploadedFile
      */
     public array $images = [];
-    public array $newImages = [];
+
+    /**
+     * PostCreate と同じ：単発アップロード用
+     */
+    public $newImage = null;
 
     public bool $hasChanges = false;
+
+    /**
+     * Livewire が確実に拾える $rules 方式
+     */
+    protected array $rules = [
+        'title'    => 'required|string|max:255',
+        'body'     => 'required|string|max:1000',
+        'images'   => 'array|max:10',
+        // newImage は updatedNewImage で validateOnly する
+        'newImage' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,webp,gif',
+    ];
+
+    protected array $validationAttributes = [
+        'title'    => 'タイトル',
+        'body'     => '本文',
+        'images'   => '画像',
+        'newImage' => '画像',
+    ];
 
     public function mount(MonthlyItem $monthlyItem): void
     {
@@ -42,7 +64,6 @@ class Edit extends Component
 
         $userId = Auth::id();
 
-        // 「この月次の自分の投稿」を特定（1ユーザー=1投稿の前提）
         $post = FeedbackPost::query()
             ->where('monthly_item_id', $this->monthlyItem->id)
             ->where('user_id', $userId)
@@ -70,34 +91,36 @@ class Edit extends Component
         ]);
 
         $this->images = $this->feedbackPost->mediaFiles
-            ->map(fn ($m) => ['id' => $m->id, 'path' => $m->path])
+            ->map(fn ($m) => ['id' => (int) $m->id, 'path' => $m->path])
             ->toArray();
 
-        $this->newImages = [];
+        $this->newImage = null;
         $this->hasChanges = false;
+        $this->resetErrorBag();
     }
 
-    public function updatedNewImages(): void
+    /**
+     * PostCreate と同じ：単発選択 → 検証 → images へ追加 → バッファクリア
+     */
+    public function updatedNewImage(): void
     {
-        if (empty($this->newImages)) return;
+        if (empty($this->newImage)) return;
 
-        $this->validate([
-            'newImages'   => ['array'],
-            'newImages.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,webp,gif'],
-        ], [], [
-            'newImages'   => '画像',
-            'newImages.*' => '画像',
-        ]);
+        $this->resetErrorBag('newImage');
+        $this->resetErrorBag('images');
 
-        $total = count($this->images) + count($this->newImages);
+        $this->validateOnly('newImage');
+
+        $total = count($this->images) + 1;
         if ($total > 10) {
             $this->addError('images', '画像は最大10枚までです。');
-            $this->newImages = [];
+            $this->newImage = null;
             return;
         }
 
-        $this->images = array_values(array_merge($this->images, $this->newImages));
-        $this->newImages = [];
+        $this->images[] = $this->newImage;
+        $this->newImage = null;
+
         $this->hasChanges = true;
     }
 
@@ -156,17 +179,13 @@ class Edit extends Component
 
     public function save()
     {
-        // 受付外は更新不可
         abort_unless($this->monthlyItem->isFeedbackOpen(), 403);
 
+        // タイトル/本文/配列上限の検証
         $this->validate([
-            'title'  => ['required', 'string', 'max:255'],
-            'body'   => ['required', 'string', 'max:1000'],
-            'images' => ['array', 'max:10'],
-        ], [], [
-            'title'  => 'タイトル',
-            'body'   => '本文',
-            'images' => '画像',
+            'title'  => $this->rules['title'],
+            'body'   => $this->rules['body'],
+            'images' => $this->rules['images'],
         ]);
 
         $disk = config('filesystems.default', 'public');
@@ -177,7 +196,7 @@ class Edit extends Component
                 'body'  => $this->body,
             ]);
 
-            // 並び順を完全に作り直す
+            // 並び順を完全に作り直す（relationsだけ）
             MediaRelation::where('mediable_type', FeedbackPost::class)
                 ->where('mediable_id', $this->feedbackPost->id)
                 ->whereHas('mediaFile', fn ($q) => $q->where('type', 'feedback_image'))
@@ -222,7 +241,6 @@ class Edit extends Component
 
     public function deletePost()
     {
-        // 受付外は削除不可（要件次第で外してOK）
         abort_unless($this->monthlyItem->isFeedbackOpen(), 403);
 
         $disk = config('filesystems.default', 'public');

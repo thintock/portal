@@ -75,24 +75,22 @@
       
               <button type="button"
                 wire:click="removeMedia({{ $i }})"
-                class="absolute top-1 right-1 btn btn-xs btn-circle bg-red-500 text-white hover:bg-red-600">
+                class="absolute top-1 right-1 btn btn-xs btn-circle btn-neutral text-white">
                 ✕
               </button>
       
               <div class="absolute bottom-1 right-1 flex gap-1">
                 @if($i > 0)
-                  <button type="button" wire:click="moveUp({{ $i }})"
-                    class="btn btn-xs btn-circle bg-gray-100 text-gray-700 hover:bg-gray-200">⬆</button>
+                  <button type="button" wire:click="moveUp({{ $i }})" class="btn btn-xs btn-circle">⬆</button>
                 @endif
                 @if($i < count($media) - 1)
-                  <button type="button" wire:click="moveDown({{ $i }})"
-                    class="btn btn-xs btn-circle bg-gray-100 text-gray-700 hover:bg-gray-200">⬇</button>
+                  <button type="button" wire:click="moveDown({{ $i }})" class="btn btn-xs btn-circle">⬇</button>
                 @endif
               </div>
             </div>
           @endforeach
       
-          {{-- 追加（1枚ずつ） --}}
+          {{-- 追加ボタン（PostCreate と同じ：単発追加） --}}
           <label class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 w-full h-24 sm:h-28 text-gray-400 hover:bg-gray-50 cursor-pointer transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -103,9 +101,8 @@
         </div>
       
         <div wire:loading wire:target="newMedia" class="text-xs text-gray-500 mt-2">アップロード中...</div>
-        @error('newMedia') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
+        @error('newMedia.*') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
       </div>
-
 
       <div class="flex justify-end">
         <button

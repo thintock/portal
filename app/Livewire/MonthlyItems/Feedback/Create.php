@@ -21,60 +21,56 @@ class Create extends Component
     public string $title = '';
     public string $body  = '';
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
-    public array $media = [];
-
-    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
-    public $newMedia = null;
+    /** PostCreate と同じ思想 */
+    public array $media = [];      // 本体（並び替え対象）
+    public array $newMedia = [];   // 選択直後のバッファ（1件でも配列に寄せる）
 
     public function mount(MonthlyItem $monthlyItem): void
     {
         $this->monthlyItem = $monthlyItem;
 
-        // 受付中以外は投稿不可
         abort_unless($this->monthlyItem->isFeedbackOpen(), 403);
 
-        // 既に投稿済みなら edit に飛ばす
         $existing = FeedbackPost::query()
             ->where('monthly_item_id', $this->monthlyItem->id)
-            ->where('user_id', Auth::id())
+            ->where('user_id', auth()->id())
             ->first();
 
         if ($existing) {
-            redirect()
-                ->route('monthly-items.feedback.edit', $this->monthlyItem)
+            redirect()->route('monthly-items.feedback.edit', $this->monthlyItem)
                 ->with('success', 'すでに投稿済みのため編集画面を開きました。');
         }
     }
 
     /**
-     * 画像を1枚選択したら media に追加
+     * PostCreate と同様：ファイル選択直後に newMedia.* を検証 → media にマージ
      */
     public function updatedNewMedia(): void
     {
-        if (!$this->newMedia) return;
+        if (empty($this->newMedia)) return;
 
         $this->validate([
-            'newMedia' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,webp,gif'],
+            'newMedia'   => 'array',
+            'newMedia.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif',
         ], [], [
-            'newMedia' => '画像',
+            'newMedia.*' => '画像',
         ]);
 
-        if (count($this->media) >= 10) {
+        $total = count($this->media) + count($this->newMedia);
+        if ($total > 10) {
             $this->addError('media', '画像は最大10枚までです。');
-            $this->reset('newMedia');
+            $this->newMedia = [];
             return;
         }
 
-        $this->media[] = $this->newMedia;
-
-        // 同じファイルをもう一度選べるように必ず reset
-        $this->reset('newMedia');
+        $this->media = array_values(array_merge($this->media, $this->newMedia));
+        $this->newMedia = [];
     }
 
     public function removeMedia(int $index): void
     {
         if (!isset($this->media[$index])) return;
+
         unset($this->media[$index]);
         $this->media = array_values($this->media);
     }
@@ -95,7 +91,7 @@ class Create extends Component
     {
         abort_unless($this->monthlyItem->isFeedbackOpen(), 403);
 
-        $userId = Auth::id();
+        $userId = (int) Auth::id();
 
         $validated = $this->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -108,7 +104,6 @@ class Create extends Component
             'media' => '画像',
         ]);
 
-        // 1人1回（サーバ側でも再チェック）
         $exists = FeedbackPost::where('monthly_item_id', $this->monthlyItem->id)
             ->where('user_id', $userId)
             ->exists();
@@ -124,9 +119,9 @@ class Create extends Component
         DB::transaction(function () use ($validated, $userId, $disk) {
             $post = FeedbackPost::create([
                 'monthly_item_id' => $this->monthlyItem->id,
-                'user_id' => (int) $userId,
-                'title' => $validated['title'],
-                'body' => $validated['body'],
+                'user_id'         => $userId,
+                'title'           => $validated['title'],
+                'body'            => $validated['body'],
             ]);
 
             foreach ($this->media as $i => $file) {
@@ -149,12 +144,12 @@ class Create extends Component
 
         return redirect()
             ->route('monthly-items.show', $this->monthlyItem)
-            ->with('success', 'メッセージを投稿しました。');
+            ->with('success', 'フィードバックを投稿しました。');
     }
 
     public function render()
     {
         return view('livewire.monthly-items.feedback.create')
-            ->layout('layouts.app', ['title' => 'メッセージ投稿']);
+            ->layout('layouts.app', ['title' => 'フィードバック投稿']);
     }
 }

@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+
 use App\Models\MonthlyItem;
 use App\Models\MediaFile;
 use App\Models\MediaRelation;
@@ -16,25 +17,36 @@ class MonthlyItemImages extends Component
 
     public int $monthlyItemId;
 
-    public $cover = null;        // カバー（既存配列 or 新規 UploadedFile）
-    public array $gallery = [];  // 既存配列 + 新規 UploadedFile の混在
-    public array $newGallery = [];
+    // cover: 既存配列 or TemporaryUploadedFile or null
+    public $cover = null;
+
+    // gallery: 既存配列 + TemporaryUploadedFile の混在
+    public array $gallery = [];
+
+    // PostCreate と同じ「単発追加」
+    public $newGallery = null;
+
     public bool $hasChanges = false;
 
     protected $listeners = ['refreshMonthlyItemImages' => '$refresh'];
 
-    protected function rules()
-    {
-        return [
-            'cover'        => 'nullable',
-            'gallery'      => 'array|max:30',
-            'gallery.*'    => 'nullable',
-            'newGallery'   => 'array',
-            'newGallery.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,gif',
-        ];
-    }
+    /**
+     * ★ Livewire が確実に検出できる $rules プロパティ方式
+     * validateOnly() がここを参照する
+     */
+    protected array $rules = [
+        'cover'     => 'nullable|file|max:10240|mimes:jpg,jpeg,png,webp,gif',
+        'gallery'   => 'array|max:30',
+        'newGallery'=> 'nullable|file|max:10240|mimes:jpg,jpeg,png,webp,gif',
+    ];
 
-    public function mount(MonthlyItem $monthlyItem)
+    protected array $validationAttributes = [
+        'cover'      => 'カバー画像',
+        'gallery'    => 'ギャラリー画像',
+        'newGallery' => '追加画像',
+    ];
+
+    public function mount(MonthlyItem $monthlyItem): void
     {
         $this->monthlyItemId = (int) $monthlyItem->id;
         $this->reloadImages();
@@ -44,38 +56,62 @@ class MonthlyItemImages extends Component
     {
         $item = MonthlyItem::findOrFail($this->monthlyItemId);
 
-        // カバー
+        // cover
         $cover = $item->mediaFiles()->where('type', 'monthly_item_cover')->first();
-        $this->cover = $cover ? ['id' => $cover->id, 'path' => $cover->path] : null;
+        $this->cover = $cover ? ['id' => (int) $cover->id, 'path' => $cover->path] : null;
 
-        // ギャラリー
+        // gallery
         $this->gallery = $item->mediaFiles()
             ->where('type', 'monthly_item_gallery')
             ->orderBy('media_relations.sort_order')
             ->get()
-            ->map(fn ($m) => ['id' => $m->id, 'path' => $m->path])
+            ->map(fn ($m) => ['id' => (int) $m->id, 'path' => $m->path])
             ->toArray();
 
-        $this->newGallery = [];
+        $this->newGallery = null;
         $this->hasChanges = false;
+        $this->resetErrorBag();
     }
 
+    /**
+     * cover は単発アップロードなので validateOnly('cover') でOK
+     * ※ cover が既存配列のときは検証しない
+     */
+    public function updatedCover(): void
+    {
+        if (empty($this->cover) || is_array($this->cover)) return;
+
+        $this->validateOnly('cover');
+        $this->hasChanges = true;
+    }
+
+    /**
+     * PostCreate と同じ：単発選択→検証→galleryへ追加→newGalleryをnullに戻す
+     */
     public function updatedNewGallery(): void
     {
         if (empty($this->newGallery)) return;
 
-        $this->validateOnly('newGallery.*');
+        $this->resetErrorBag('newGallery');
+        $this->resetErrorBag('gallery');
 
-        $total = count($this->gallery) + count($this->newGallery);
+        // 単発検証（$rules 参照）
+        $this->validateOnly('newGallery');
+
+        // 上限チェック
+        $total = count($this->gallery) + 1;
         if ($total > 30) {
             $this->addError('gallery', 'ギャラリー画像は最大30枚までです。');
-            $this->newGallery = [];
+            $this->newGallery = null;
             return;
         }
 
         // 末尾に追加
-        $this->gallery = array_merge($this->gallery, $this->newGallery);
-        $this->newGallery = [];
+        $this->gallery[] = $this->newGallery;
+
+        // バッファクリア（重要）
+        $this->newGallery = null;
+
         $this->hasChanges = true;
     }
 
@@ -84,10 +120,8 @@ class MonthlyItemImages extends Component
         if ($this->cover && is_array($this->cover) && isset($this->cover['id'])) {
             $mediaId = (int) $this->cover['id'];
 
-            // relation 削除
             MediaRelation::where('media_file_id', $mediaId)->delete();
 
-            // 物理削除 + media_files 削除
             $media = MediaFile::find($mediaId);
             if ($media) {
                 $disk = config('filesystems.default', 'public');
@@ -105,10 +139,10 @@ class MonthlyItemImages extends Component
     {
         if (!isset($this->gallery[$index])) return;
 
-        $item = $this->gallery[$index];
+        $g = $this->gallery[$index];
 
-        if (is_array($item) && isset($item['id'])) {
-            $mediaId = (int) $item['id'];
+        if (is_array($g) && isset($g['id'])) {
+            $mediaId = (int) $g['id'];
 
             MediaRelation::where('media_file_id', $mediaId)->delete();
 
@@ -122,9 +156,8 @@ class MonthlyItemImages extends Component
 
         unset($this->gallery[$index]);
         $this->gallery = array_values($this->gallery);
-        $this->hasChanges = false;
 
-        $this->reloadImages();
+        $this->hasChanges = true;
     }
 
     public function moveUp(int $i): void
@@ -143,7 +176,8 @@ class MonthlyItemImages extends Component
 
     public function save(): void
     {
-        $this->validate();
+        // gallery の構造だけ確認（ファイル検証は追加時点で済ませる）
+        $this->validateOnly('gallery');
 
         $item = MonthlyItem::findOrFail($this->monthlyItemId);
         $disk = config('filesystems.default', 'public');
@@ -160,7 +194,6 @@ class MonthlyItemImages extends Component
 
             if ($this->cover) {
                 if (is_array($this->cover) && isset($this->cover['id'])) {
-                    // 既存を再リンク
                     MediaRelation::create([
                         'mediable_type' => MonthlyItem::class,
                         'mediable_id'   => $item->id,
@@ -168,7 +201,6 @@ class MonthlyItemImages extends Component
                         'sort_order'    => 0,
                     ]);
                 } elseif (is_object($this->cover)) {
-                    // 新規アップロード
                     $media = MediaFile::uploadAndCreate(
                         $this->cover,
                         $item,

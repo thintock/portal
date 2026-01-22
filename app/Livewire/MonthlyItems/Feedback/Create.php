@@ -21,9 +21,11 @@ class Create extends Component
     public string $title = '';
     public string $body  = '';
 
-    // 画像（Create方式）
+    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $media = [];
-    public array $newMedia = [];
+
+    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
+    public $newMedia = null;
 
     public function mount(MonthlyItem $monthlyItem): void
     {
@@ -32,49 +34,47 @@ class Create extends Component
         // 受付中以外は投稿不可
         abort_unless($this->monthlyItem->isFeedbackOpen(), 403);
 
-        $userId = Auth::id();
-
-        // 既に投稿済みなら edit に飛ばす（UI崩壊を防ぐ）
+        // 既に投稿済みなら edit に飛ばす
         $existing = FeedbackPost::query()
             ->where('monthly_item_id', $this->monthlyItem->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->first();
 
         if ($existing) {
-            redirect()->route('monthly-items.feedback.edit', $this->monthlyItem)
+            redirect()
+                ->route('monthly-items.feedback.edit', $this->monthlyItem)
                 ->with('success', 'すでに投稿済みのため編集画面を開きました。');
         }
     }
 
     /**
-     * 画像選択直後：検証して media にマージ
+     * 画像を1枚選択したら media に追加
      */
     public function updatedNewMedia(): void
     {
-        if (empty($this->newMedia)) return;
+        if (!$this->newMedia) return;
 
         $this->validate([
-            'newMedia'   => ['array'],
-            'newMedia.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,webp,gif'],
+            'newMedia' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,webp,gif'],
         ], [], [
-            'newMedia.*' => '画像',
+            'newMedia' => '画像',
         ]);
 
-        $total = count($this->media) + count($this->newMedia);
-        if ($total > 10) {
+        if (count($this->media) >= 10) {
             $this->addError('media', '画像は最大10枚までです。');
-            $this->newMedia = [];
+            $this->reset('newMedia');
             return;
         }
 
-        $this->media = array_values(array_merge($this->media, $this->newMedia));
-        $this->newMedia = [];
+        $this->media[] = $this->newMedia;
+
+        // 同じファイルをもう一度選べるように必ず reset
+        $this->reset('newMedia');
     }
 
     public function removeMedia(int $index): void
     {
         if (!isset($this->media[$index])) return;
-
         unset($this->media[$index]);
         $this->media = array_values($this->media);
     }
@@ -82,20 +82,17 @@ class Create extends Component
     public function moveUp(int $index): void
     {
         if ($index <= 0) return;
-
         [$this->media[$index - 1], $this->media[$index]] = [$this->media[$index], $this->media[$index - 1]];
     }
 
     public function moveDown(int $index): void
     {
         if ($index >= count($this->media) - 1) return;
-
         [$this->media[$index + 1], $this->media[$index]] = [$this->media[$index], $this->media[$index + 1]];
     }
 
     public function save()
     {
-        // 二重送信/期間外ガード
         abort_unless($this->monthlyItem->isFeedbackOpen(), 403);
 
         $userId = Auth::id();
@@ -111,7 +108,7 @@ class Create extends Component
             'media' => '画像',
         ]);
 
-        // 1人1回（サーバ側で再チェック）
+        // 1人1回（サーバ側でも再チェック）
         $exists = FeedbackPost::where('monthly_item_id', $this->monthlyItem->id)
             ->where('user_id', $userId)
             ->exists();
@@ -152,12 +149,12 @@ class Create extends Component
 
         return redirect()
             ->route('monthly-items.show', $this->monthlyItem)
-            ->with('success', 'フィードバックを投稿しました。');
+            ->with('success', 'メッセージを投稿しました。');
     }
 
     public function render()
     {
         return view('livewire.monthly-items.feedback.create')
-            ->layout('layouts.app', ['title' => 'フィードバック投稿']);
+            ->layout('layouts.app', ['title' => 'メッセージ投稿']);
     }
 }

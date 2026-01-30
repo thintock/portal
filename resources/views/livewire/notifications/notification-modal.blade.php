@@ -15,20 +15,20 @@
         <button class="btn btn-sm btn-ghost" wire:click="close">✕</button>
       </div>
 
-      {{-- タブ切替（DaisyUI: btn-groupバージョン） --}}
+      {{-- タブ切替 --}}
       <div class="btn-group mb-3 w-full justify-center">
         <button type="button"
                 wire:click="$set('filter','all')"
                 class="btn btn-sm {{ $filter==='all' ? 'btn-active btn-primary text-white' : 'btn-outline' }}">
             全て
         </button>
-      
+
         <button type="button"
                 wire:click="$set('filter','comment')"
                 class="btn btn-sm {{ $filter==='comment' ? 'btn-active btn-primary text-white' : 'btn-outline' }}">
             コメント
         </button>
-      
+
         <button type="button"
                 wire:click="$set('filter','reaction')"
                 class="btn btn-sm {{ $filter==='reaction' ? 'btn-active btn-primary text-white' : 'btn-outline' }}">
@@ -36,14 +36,32 @@
         </button>
       </div>
 
-
       {{-- 操作ボタン --}}
-      <div class="flex justify-between items-center mb-3">
-        <button class="btn btn-xs btn-outline"
-                wire:click="markAllAsRead"
-                onclick="return confirm('通知をすべて既読にしますか？')">
-          全て既読にする
-        </button>
+      <div class="flex justify-between items-center mb-3 gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+
+          {{-- ✅ confirm OK の時だけ実行（wire:click を使わない） --}}
+          <button
+            type="button"
+            class="btn btn-xs btn-outline"
+            x-on:click.prevent="
+              if (confirm('通知をすべて既読にしますか？')) {
+                $wire.markAllAsRead()
+              }
+            "
+          >
+            全て既読にする
+          </button>
+
+          {{-- ✅ 未読のみ / 既読も表示 トグル --}}
+          <button type="button"
+                  wire:click="toggleShowRead"
+                  class="btn btn-xs {{ $showRead ? 'btn-primary text-white' : 'btn-outline' }}">
+            {{ $showRead ? '既読も表示中' : '既読も表示' }}
+          </button>
+
+        </div>
+
         <span class="text-xs text-neutral/50">最新30件を表示</span>
       </div>
 
@@ -51,10 +69,10 @@
       <div class="max-h-96 overflow-y-auto space-y-2">
         @forelse($this->notifications as $n)
           <a href="#"
-           wire:click.prevent="markAsReadAndRedirect({{ $n['id'] }})"
-           wire:key="notif-{{ $n['id'] }}"
-           class="block p-3 rounded-lg border transition duration-150
-                  {{ $n['read_at'] ? 'bg-neutral/5 border-neutral/30 hover:bg-neutral/10' : 'bg-info/5 border-info/30 hover:bg-info/10' }}">
+             wire:click.prevent="markAsReadAndRedirect({{ $n['id'] }})"
+             wire:key="notif-{{ $n['id'] }}"
+             class="block p-3 rounded-lg border transition duration-150
+                    {{ $n['read_at'] ? 'bg-neutral/5 border-neutral/30 hover:bg-neutral/10' : 'bg-info/5 border-info/30 hover:bg-info/10' }}">
 
             <div class="flex space-x-3 items-start">
 
@@ -91,7 +109,9 @@
             </div>
           </a>
         @empty
-          <p class="text-center text-neutral/50 py-6 text-sm">通知はありません。</p>
+          <p class="text-center text-neutral/50 py-6 text-sm">
+            {{ $showRead ? '通知はありません。' : '未読の通知はありません。' }}
+          </p>
         @endforelse
       </div>
     </div>

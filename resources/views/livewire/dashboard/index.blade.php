@@ -10,16 +10,19 @@
     @auth
         @if($user->role === 'admin')
           @include('livewire.dashboard.partials.paid')
+          @include('livewire.dashboard.partials.latest')
           @include('livewire.dashboard.partials.room')
           @include('livewire.dashboard.partials.monthly')
           <livewire:events.section />
           @include('livewire.dashboard.partials.google')
         @elseif($user->role === 'guest')
           @include('livewire.dashboard.partials.guest')
+          @include('livewire.dashboard.partials.latest')
           @include('livewire.dashboard.partials.room')
           <livewire:events.section />
         @elseif($user->subscribed('default'))
           @include('livewire.dashboard.partials.paid')
+          @include('livewire.dashboard.partials.latest')
           @include('livewire.dashboard.partials.room')
           @include('livewire.dashboard.partials.monthly')
           <livewire:events.section />

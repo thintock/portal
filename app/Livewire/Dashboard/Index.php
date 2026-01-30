@@ -59,21 +59,25 @@ class Index extends Component
             ->paginate(12);
 
         // 新着投稿（所属または公開ルームのみ）
-        $latestPosts = Post::with(['user', 'room'])
-            ->whereHas('room', function ($query) use ($user) {
-                $query->where('visibility', 'public')
-                    ->orWhere(function ($q) use ($user) {
-                        $q->where('visibility', 'members')
-                            ->whereHas('members', fn ($sub) => $sub->where('user_id', $user->id));
-                    })
-                    ->orWhere(function ($q) use ($user) {
-                        $q->where('visibility', 'private')
-                            ->whereHas('members', fn ($sub) => $sub->where('user_id', $user->id));
-                    });
-            })
-            ->latest()
-            ->take(7)
-            ->get();
+        $latestPosts = Post::with([
+            'user',
+            'room',
+            'mediaFiles' => fn ($q) => $q->where('type', 'post')->orderBy('media_relations.sort_order'),
+        ])
+        ->whereHas('room', function ($query) use ($user) {
+            $query->where('visibility', 'public')
+                ->orWhere(function ($q) use ($user) {
+                    $q->where('visibility', 'members')
+                        ->whereHas('members', fn ($sub) => $sub->where('user_id', $user->id));
+                })
+                ->orWhere(function ($q) use ($user) {
+                    $q->where('visibility', 'private')
+                        ->whereHas('members', fn ($sub) => $sub->where('user_id', $user->id));
+                });
+        })
+        ->latest()
+        ->take(7)
+        ->get();
 
         /**
          * ==============================

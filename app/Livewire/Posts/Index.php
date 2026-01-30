@@ -17,17 +17,15 @@ class Index extends Component
     public string $q = '';
 
     public int $perPage = 20;
-    public int $step = 20; // 追加で読み込む件数
+    public int $step = 20;
 
     protected $listeners = [
         'load-more-posts' => 'loadMore',
     ];
 
-    // クエリ文字列に残す（戻る・共有に強い）
     protected $queryString = [
         'roomId' => ['except' => null],
         'q'      => ['except' => ''],
-        // pageは使わない（perPage方式なので）
     ];
 
     public function updatingRoomId(): void
@@ -42,8 +40,8 @@ class Index extends Component
 
     public function resetList(): void
     {
-        $this->resetPage();     // 念のため（paginate内部で使われる）
-        $this->perPage = 20;    // 初期に戻す
+        $this->resetPage();
+        $this->perPage = 20;
     }
 
     public function loadMore(): void
@@ -56,7 +54,13 @@ class Index extends Component
         $user = Auth::user();
 
         $posts = Post::query()
-            ->with(['user', 'room'])
+            ->with([
+                'user',
+                'room',
+                // ✅ サムネ生成のため（post の最新一覧にも同じロジックを使う）
+                'mediaFiles' => fn ($q) => $q->where('media_files.type', 'post')
+                    ->orderBy('media_relations.sort_order'),
+            ])
             ->whereHas('room', function ($query) use ($user) {
                 $query->where('visibility', 'public')
                     ->orWhere(function ($q) use ($user) {

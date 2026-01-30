@@ -10,7 +10,12 @@ use Illuminate\Support\Str;
 class NotificationModal extends Component
 {
     public bool $showModal = false;
-    public string $filter = 'all'; // all | comment | reaction
+
+    /** all | comment | reaction */
+    public string $filter = 'all';
+
+    /** ✅ デフォルトは未読のみ表示 */
+    public bool $showRead = false;
 
     protected $listeners = [
         'open-notifications' => 'open',
@@ -27,29 +32,36 @@ class NotificationModal extends Component
         $this->showModal = false;
     }
 
+    public function toggleShowRead(): void
+    {
+        $this->showRead = ! $this->showRead;
+    }
+
     /**
-     * 通知リスト（フィルタ対応）
+     * 通知リスト（フィルタ + 未読/既読表示対応）
      */
     public function getNotificationsProperty()
     {
-        $query = Notification::with(['sender.mediaFiles']) // ✅ eager load
+        $query = Notification::with(['sender.mediaFiles'])
             ->where('user_id', Auth::id())
             ->whereNotNull('notifiable_type')
-            ->latest()
-            ->take(30);
+            ->latest();
 
+        // ✅ デフォルトは未読のみ
+        if (! $this->showRead) {
+            $query->whereNull('read_at');
+        }
+
+        // ✅ 種別フィルタ（showRead と同時に効く）
         if ($this->filter === 'comment') {
             $query->whereIn('type', ['comment', 'reply']);
         } elseif ($this->filter === 'reaction') {
             $query->where('type', 'reaction');
         }
 
-        return $query->get()->map(fn ($n) => $this->formatNotification($n));
+        return $query->take(30)->get()->map(fn ($n) => $this->formatNotification($n));
     }
 
-    /**
-     * 通知を整形
-     */
     protected function formatNotification($n): array
     {
         $map = [
@@ -61,9 +73,7 @@ class NotificationModal extends Component
 
         $meta = $map[$n->type] ?? ['icon' => '🔔', 'title' => 'お知らせ'];
 
-        // ✅ sender が null の場合も安全
-        $avatar = $n->sender?->mediaFiles
-            ->firstWhere('type', 'avatar');
+        $avatar = $n->sender?->mediaFiles->firstWhere('type', 'avatar');
 
         return [
             'id'              => $n->id,
@@ -71,9 +81,7 @@ class NotificationModal extends Component
             'title'           => $meta['title'],
             'sender'          => $n->sender?->name ?? 'ユーザー名未登録',
             'avatar'          => $avatar?->path,
-            'message'         => $n->message
-                                    ? Str::limit(strip_tags($n->message), 100)
-                                    : null,
+            'message'         => $n->message ? Str::limit(strip_tags($n->message), 100) : null,
             'read_at'         => $n->read_at,
             'created_at'      => $n->created_at?->diffForHumans(),
             'type'            => $n->type,
@@ -83,7 +91,7 @@ class NotificationModal extends Component
     }
 
     /**
-     * 現在のフィルタに応じて既読対象を変える
+     * 現在のフィルタに応じて「未読のみ」を既読にする
      */
     public function markAllAsRead(): void
     {
@@ -106,15 +114,12 @@ class NotificationModal extends Component
         }
     }
 
-    /**
-     * 通知個別クリック時の処理
-     */
     public function markAsReadAndRedirect($id): void
     {
         $notification = Notification::where('user_id', Auth::id())->find($id);
-        if (!$notification) return;
+        if (! $notification) return;
 
-        if (!$notification->read_at) {
+        if (! $notification->read_at) {
             $notification->update(['read_at' => now()]);
         }
 

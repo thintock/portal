@@ -30,6 +30,7 @@ use App\Livewire\MonthlyItems\Index as MonthlyItemsIndex;
 use App\Livewire\MonthlyItems\Show as MonthlyItemsShow;
 use App\Livewire\MonthlyItems\Feedback\Create as MonthlyFeedbackCreate;
 use App\Livewire\MonthlyItems\Feedback\Edit as MonthlyFeedbackEdit;
+use App\Livewire\SavedPosts\Index as SavedPostsIndex;
 
 // 誰でもOK
 Route::get('/', function () {
@@ -74,6 +75,7 @@ Route::middleware(['auth','verified','subscribed'])->group(function () {
     Route::get('/monthly-items/{monthlyItem}', MonthlyItemsShow::class)->name('monthly-items.show');
     Route::get('/monthly-items/{monthlyItem}/feedback/create', MonthlyFeedbackCreate::class)->name('monthly-items.feedback.create');
     Route::get('/monthly-items/{monthlyItem}/feedback/edit', MonthlyFeedbackEdit::class)->name('monthly-items.feedback.edit');
+    Route::get('/saved-posts', SavedPostsIndex::class)->name('saved-posts.index');
 });
 
 // 管理者専用

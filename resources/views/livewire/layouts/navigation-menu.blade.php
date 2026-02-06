@@ -82,13 +82,10 @@
                             @if(auth()->user()?->role === 'admin' || auth()->user()?->hasActiveSubscription())
                                 {{-- サブスク会員向けメニュー --}}
                                 <x-dropdown-link :href="route('members.member_index')">
-                                    ベイクル会員一覧
+                                    会員一覧
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('monthly-items.index')">
-                                    毎月のテーマ
-                                </x-dropdown-link>
-                                <x-dropdown-link :href="route('saved-posts.index')">
-                                    保存した投稿
+                                    月次テーマ一覧
                                 </x-dropdown-link>
                             @endif
 
@@ -170,13 +167,10 @@
                 @if(auth()->user()?->role === 'admin' || auth()->user()?->hasActiveSubscription())
                     {{-- サブスク会員向けメニュー --}}
                     <x-responsive-nav-link :href="route('members.member_index')">
-                        ベイクル会員一覧
+                        会員一覧
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('monthly-items.index')">
-                        毎月のテーマ
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('saved-posts.index')">
-                        保存した投稿
+                        月次テーマ一覧
                     </x-responsive-nav-link>
                 @endif
                 <x-responsive-nav-link :href="route('profile.edit')">

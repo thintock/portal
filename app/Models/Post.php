@@ -91,4 +91,10 @@ class Post extends Model
                     ->withPivot('sort_order')
                     ->orderBy('sort_order');
     }
+    
+    // 投稿保存
+    public function savedPosts(): HasMany
+    {
+        return $this->hasMany(\App\Models\SavedPost::class);
+    }
 }

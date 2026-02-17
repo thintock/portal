@@ -152,8 +152,9 @@
 
     
     {{-- 4段目：リアクション--}}
-    <div class="px-2 flex items-center space-x-4">
+    <div class="px-2 flex items-center">
       <livewire:reactions.reaction-button :model="$post" :key="'post-like-'.$post->id" />
+      <livewire:saved-posts.save-button :post="$post" :key="'post-save-'.$post->id" />
     </div>
 
     {{-- 5段目：コメント --}}

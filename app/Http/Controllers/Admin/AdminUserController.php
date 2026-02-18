@@ -273,63 +273,38 @@ class AdminUserController extends Controller
     // Stripe再連携
     public function syncStripe(User $user)
     {
-        if (! $user->stripe_id) {
-            return back()->with('error', 'Stripe顧客IDがありません');
-        }
-    
         try {
-            Stripe::setApiKey(config('services.stripe.secret'));
-    
-            // Stripeからsubscription取得
-            $stripeSubs = StripeSubscription::all([
-                'customer' => $user->stripe_id,
-                'status'   => 'all',
-                'limit'    => 5,
-            ]);
-    
-            if ($stripeSubs->isEmpty()) {
-                return back()->with('error', 'Stripe側にsubscriptionが存在しません');
+            if (!$user->stripe_id) {
+                return back()->with('error', 'Stripe顧客IDがありません');
             }
     
-            $latest = collect($stripeSubs->data)
-                ->sortByDesc('created')
-                ->first();
+            Stripe::setApiKey(config('services.stripe.secret'));
     
-            // ローカルsubscription取得
-            $localSub = $user->subscriptions()
+            // ローカルのsubscription取得
+            $localSub = CashierSubscription::where('user_id', $user->id)
                 ->where('type', 'default')
                 ->latest()
                 ->first();
     
-            if ($localSub) {
-                $localSub->stripe_status = $latest->status;
-                $localSub->ends_at = $latest->cancel_at
-                    ? Carbon::createFromTimestamp($latest->cancel_at)
-                    : null;
-                $localSub->save();
+            if (!$localSub) {
+                return back()->with('error', 'ローカルにサブスクが存在しません');
             }
     
-            // 会員番号ロジック復旧（active時のみ）
-            if (in_array($latest->status, ['active', 'trialing'])) {
-                if (! $user->member_number) {
-                    $next = (MemberNumberHistory::max('number') ?? 0) + 1;
+            // Stripeから取得
+            $stripeSub = StripeSubscription::retrieve($localSub->stripe_id);
     
-                    $user->member_number = $next;
-                    $user->save();
+            // 状態更新
+            $localSub->update([
+                'stripe_status' => $stripeSub->status,
+                'ends_at' => $stripeSub->cancel_at
+                    ? \Carbon\Carbon::createFromTimestamp($stripeSub->cancel_at)
+                    : null,
+            ]);
     
-                    MemberNumberHistory::create([
-                        'user_id' => $user->id,
-                        'number' => $next,
-                        'assigned_at' => now(),
-                    ]);
-                }
-            }
-    
-            return back()->with('success', 'Stripe状態を同期しました（'.$latest->status.'）');
+            return back()->with('success', 'Stripe状態を正常に同期しました');
     
         } catch (\Exception $e) {
-            Log::error('Stripe sync error: '.$e->getMessage());
-            return back()->with('error', 'Stripe同期に失敗しました');
+            return back()->with('error', $e->getMessage());
         }
     }
 }

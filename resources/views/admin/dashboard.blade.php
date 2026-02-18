@@ -62,13 +62,44 @@
             </div>
         </div>
 
-        {{-- 月次新規ユーザー推移 --}}
-        <div class="bg-base-100 shadow-sm rounded-lg p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">月次新規ユーザー数</h3>
-                <a href="{{ route('admin.users.index') }}" class="link link-primary text-sm">ユーザー管理へ</a>
+        {{-- 月次グラフエリア --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+            {{-- 新規ユーザー登録数 --}}
+            <div class="bg-base-100 shadow-sm rounded-lg p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-base font-semibold">新規ユーザー登録数</h3>
+                    <a href="{{ route('admin.users.index') }}" class="link link-primary text-xs">
+                        ユーザー管理へ
+                    </a>
+                </div>
+                <canvas id="usersChart" height="90"></canvas>
             </div>
-            <canvas id="usersChart" height="100"></canvas>
+        
+            {{-- ベイクル会員数 --}}
+            <div class="bg-base-100 shadow-sm rounded-lg p-4">
+                <h3 class="text-base font-semibold mb-3">ベイクル会員数</h3>
+                <canvas id="subsChart" height="90"></canvas>
+            </div>
+        
+            {{-- 月次 投稿数 --}}
+            <div class="bg-base-100 shadow-sm rounded-lg p-4">
+                <h3 class="text-base font-semibold mb-3">投稿数</h3>
+                <canvas id="postsChart" height="90"></canvas>
+            </div>
+        
+            {{-- 月次 コメント数 --}}
+            <div class="bg-base-100 shadow-sm rounded-lg p-4">
+                <h3 class="text-base font-semibold mb-3">コメント数</h3>
+                <canvas id="commentsChart" height="90"></canvas>
+            </div>
+        
+            {{-- 月次 いいね数 --}}
+            <div class="bg-base-100 shadow-sm rounded-lg p-4">
+                <h3 class="text-base font-semibold mb-3">いいね数</h3>
+                <canvas id="likesChart" height="90"></canvas>
+            </div>
+        
         </div>
 
         {{-- イベント情報 --}}
@@ -94,22 +125,11 @@
                                 <td class="font-medium">{{ $event->title }}</td>
                                 <td>{{ $event->capacity ?? 'なし' }}</td>
                                 <td>{{ $event->activeParticipants()->count() }}</td>
-                                <td>{{ $event->starts_at?->format('Y/m/d') }}</td>
+                                <td>{{ $event->start_at?->format('Y/m/d') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        {{-- 管理メニュー --}}
-        <div class="bg-base-100 shadow-sm rounded-lg p-6">
-            <h3 class="text-lg font-semibold mb-4">管理メニュー</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                <a href="{{ route('admin.users.index') }}" class="btn btn-outline btn-sm">👤 ユーザー</a>
-                <a href="{{ route('admin.pages.index') }}" class="btn btn-outline btn-sm">📄 ページ</a>
-                <a href="{{ route('admin.events.index') }}" class="btn btn-outline btn-sm">📅 イベント</a>
-                <a href="" class="btn btn-outline btn-sm">📝 投稿</a>
             </div>
         </div>
     </div>
@@ -141,5 +161,36 @@
                 }
             }
         });
+    </script>
+    <script>
+      const labels = {!! json_encode(array_keys($userMonthlyCounts)) !!};
+    
+      const makeLine = (id, label, values) => {
+        const ctx = document.getElementById(id);
+        if (!ctx) return;
+    
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label,
+              data: values,
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true,
+            }]
+          },
+          options: {
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      };
+    
+      makeLine('subsChart', '契約中ユーザー数', {!! json_encode(array_values($subscriptionMonthlyCounts)) !!});
+      makeLine('postsChart', '投稿数',         {!! json_encode(array_values($postMonthlyCounts)) !!});
+      makeLine('commentsChart', 'コメント数',   {!! json_encode(array_values($commentMonthlyCounts)) !!});
+      makeLine('likesChart', 'いいね数',       {!! json_encode(array_values($likeMonthlyCounts)) !!});
     </script>
 </x-admin-layout>

@@ -24,7 +24,7 @@
 
                             {{-- 日付 --}}
                             <div class="text-xs text-base-content/60 whitespace-nowrap">
-                                {{ $a->updated_at?->format('Y/m/d') }}
+                                {{ $a->created_at?->format('Y/m/d') }}
                             </div>
                         </a>
                     </li>

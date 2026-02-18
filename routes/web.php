@@ -93,6 +93,8 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::resource('events', AdminEventController::class);
     Route::resource('announcements', AdminAnnouncementController::class);
     Route::resource('monthly-items', AdminMonthlyItemController::class);
+    // stripe更新
+    Route::post('/users/{user}/stripe-sync', [AdminUserController::class, 'syncStripe'])->name('users.stripe-sync');
     // CSV
     Route::get('/csv/users/download', [CsvUserConvertController::class, 'download'])->name('csv.users.download');
     // レポート
@@ -102,6 +104,5 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
 
 // Stripe Webhook
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
-// Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook']);
 
 require __DIR__.'/auth.php';

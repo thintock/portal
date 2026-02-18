@@ -97,4 +97,14 @@ class Post extends Model
     {
         return $this->hasMany(\App\Models\SavedPost::class);
     }
+    
+    protected static function booted(): void
+    {
+        static::deleting(function ($post) {
+            // SoftDeleteのときだけ（forceDeleteはDBのCASCADEに任せてもいいが、二重でもOK）
+            if (! $post->isForceDeleting()) {
+                $post->savedPosts()->delete();
+            }
+        });
+    }
 }

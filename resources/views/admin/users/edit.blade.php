@@ -146,6 +146,14 @@
                     <li><b>pm_last_four:</b> {{ $user->pm_last_four ?? '-' }}</li>
                     <li><b>trial_ends_at:</b> {{ $user->trial_ends_at ?? '-' }}</li>
                 </ul>
+                
+                <form method="POST" action="{{ route('admin.users.stripe-sync', $user->id) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Stripeの最新状態と同期しますか？')">
+                        🔄 Stripe状態を同期
+                    </button>
+                </form>
+
             </div>
 
             <div class="flex space-x-2">

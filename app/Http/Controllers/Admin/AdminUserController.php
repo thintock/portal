@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Stripe\Stripe;
+use Stripe\Subscription as StripeSubscription;
+use Illuminate\Support\Facades\Log;
 
 class AdminUserController extends Controller
 {
@@ -265,5 +268,68 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'ユーザーを削除しました。');
+    }
+    
+    // Stripe再連携
+    public function syncStripe(User $user)
+    {
+        if (! $user->stripe_id) {
+            return back()->with('error', 'Stripe顧客IDがありません');
+        }
+    
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+    
+            // Stripeからsubscription取得
+            $stripeSubs = StripeSubscription::all([
+                'customer' => $user->stripe_id,
+                'status'   => 'all',
+                'limit'    => 5,
+            ]);
+    
+            if ($stripeSubs->isEmpty()) {
+                return back()->with('error', 'Stripe側にsubscriptionが存在しません');
+            }
+    
+            $latest = collect($stripeSubs->data)
+                ->sortByDesc('created')
+                ->first();
+    
+            // ローカルsubscription取得
+            $localSub = $user->subscriptions()
+                ->where('type', 'default')
+                ->latest()
+                ->first();
+    
+            if ($localSub) {
+                $localSub->stripe_status = $latest->status;
+                $localSub->ends_at = $latest->cancel_at
+                    ? Carbon::createFromTimestamp($latest->cancel_at)
+                    : null;
+                $localSub->save();
+            }
+    
+            // 会員番号ロジック復旧（active時のみ）
+            if (in_array($latest->status, ['active', 'trialing'])) {
+                if (! $user->member_number) {
+                    $next = (MemberNumberHistory::max('number') ?? 0) + 1;
+    
+                    $user->member_number = $next;
+                    $user->save();
+    
+                    MemberNumberHistory::create([
+                        'user_id' => $user->id,
+                        'number' => $next,
+                        'assigned_at' => now(),
+                    ]);
+                }
+            }
+    
+            return back()->with('success', 'Stripe状態を同期しました（'.$latest->status.'）');
+    
+        } catch (\Exception $e) {
+            Log::error('Stripe sync error: '.$e->getMessage());
+            return back()->with('error', 'Stripe同期に失敗しました');
+        }
     }
 }

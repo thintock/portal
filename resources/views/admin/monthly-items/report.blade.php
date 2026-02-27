@@ -100,7 +100,12 @@
       </div>
 
       @if(!empty($monthlyItem->description))
-        <div class="desc">{{ strip_tags($monthlyItem->description) }}</div>
+        @php
+          $desc = trim(strip_tags($monthlyItem->description));
+          $descLimited = \Illuminate\Support\Str::limit($desc, 300);
+        @endphp
+        
+        <div class="desc">{{ $descLimited }}</div>
       @endif
 
       @if($cover)

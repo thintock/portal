@@ -18,7 +18,9 @@ class Show extends Component
     public function mount(MonthlyItem $monthlyItem)
     {
         $this->monthlyItem = $monthlyItem->load([
-            'mediaFiles' => fn ($q) => $q->where('media_files.type', 'monthly_item_cover'),
+            'mediaFiles' => fn ($q) => $q
+            ->whereIn('media_files.type', ['monthly_item_cover', 'monthly_item_gallery'])
+            ->orderBy('media_relations.sort_order'),
 
             // 投稿は新しい順
             'feedbackPosts' => fn ($q) => $q->orderByDesc('created_at'),

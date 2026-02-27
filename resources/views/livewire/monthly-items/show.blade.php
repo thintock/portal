@@ -1,6 +1,7 @@
 <div class="max-w-4xl mx-auto p-1 pt-4 pb-8 space-y-4">
   @php
-    $cover = $monthlyItem->mediaFiles->first(); // monthly_item_cover を load 済み想定
+    $cover = $monthlyItem->mediaFiles->firstWhere('type', 'monthly_item_cover');
+    $gallery = $monthlyItem->mediaFiles->where('type', 'monthly_item_gallery')->values();
   @endphp
 
   {{-- 上部：月次概要（スマホは縦、PCは横） --}}
@@ -25,7 +26,38 @@
       </div>
 
       <div class="text-sm mt-2 break-words">
-        {{ \Illuminate\Support\Str::limit(strip_tags($monthlyItem->description), 300) }}
+        @php
+          $fullText = trim(strip_tags($monthlyItem->description ?? ''));
+          $isLong = mb_strlen($fullText) > 300;
+        @endphp
+        
+        <div class="text-sm mt-2 break-words" x-data="{ open: false }">
+          @if($isLong)
+        
+            {{-- 省略表示 --}}
+            <div x-show="!open">
+              {!! nl2br(e(\Illuminate\Support\Str::limit($fullText, 300))) !!}
+              <button type="button"
+                      class="text-blue-600 text-xs ml-2"
+                      @click="open = true">
+                つづきを表示
+              </button>
+            </div>
+        
+            {{-- 全文表示 --}}
+            <div x-show="open" x-cloak>
+              {!! nl2br(e($fullText)) !!}
+              <button type="button"
+                      class="text-blue-600 text-xs ml-2"
+                      @click="open = false">
+                閉じる
+              </button>
+            </div>
+        
+          @else
+            {!! nl2br(e($fullText)) !!}
+          @endif
+        </div>
       </div>
 
       {{-- 受付情報 + ステータス --}}
@@ -50,15 +82,30 @@
         <img
           src="{{ $cover->url }}"
           alt="monthly cover"
-          class="w-full h-44 sm:h-52 md:h-56 object-cover rounded-lg border border-base-200"
+          class="w-full h-44 sm:h-52 md:h-56 object-cover rounded-lg border border-base-200 cursor-pointer hover:opacity-90 transition"
           loading="lazy"
+          @click="$dispatch('open-modal', 'image-viewer'); $dispatch('set-image', { src: '{{ $cover->url }}' })"
         >
       </div>
     @endif
   </div>
 
+  @if($gallery->isNotEmpty())
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+      @foreach($gallery as $m)
+        <img
+          src="{{ $m->url }}"
+          class="w-full h-28 sm:h-32 md:h-36 object-cover rounded border cursor-pointer hover:opacity-90 transition"
+          loading="lazy"
+          alt="monthly gallery"
+          @click="$dispatch('open-modal', 'image-viewer'); $dispatch('set-image', { src: '{{ $m->url }}' })"
+        >
+      @endforeach
+    </div>
+  @endif
+  
   <div class="divider"></div>
-
+  
   {{-- CTA：未投稿のみ create / 投稿済みなら edit（受付中のみ） --}}
   @auth
     <div class="space-y-2">

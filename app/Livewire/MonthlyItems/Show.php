@@ -10,6 +10,9 @@ class Show extends Component
 {
     public MonthlyItem $monthlyItem;
 
+    public ?MonthlyItem $prevItem = null;
+    public ?MonthlyItem $nextItem = null;
+    
     public ?FeedbackPost $myPost = null;
 
     public bool $canCreate = false;
@@ -31,6 +34,19 @@ class Show extends Component
             // 投稿の添付画像
             'feedbackPosts.mediaFiles' => fn ($q) => $q->where('media_files.type', 'feedback_image'),
         ]);
+        
+        // ✅ 前後の月次テーマ（存在する場合だけ）
+        $this->prevItem = MonthlyItem::query()
+            ->where('month', '<', $this->monthlyItem->month)
+            ->where('status', 'published') // 公開中だけ出すなら
+            ->orderByDesc('month')
+            ->first();
+
+        $this->nextItem = MonthlyItem::query()
+            ->where('month', '>', $this->monthlyItem->month)
+            ->where('status', 'published')
+            ->orderBy('month')
+            ->first();
 
         $userId = auth()->id();
 

@@ -3,7 +3,38 @@
     $cover = $monthlyItem->mediaFiles->firstWhere('type', 'monthly_item_cover');
     $gallery = $monthlyItem->mediaFiles->where('type', 'monthly_item_gallery')->values();
   @endphp
-
+  {{-- 月次ナビゲーション --}}
+  <div class="flex items-center justify-between gap-2 mb-2">
+  
+    {{-- 左：前の月 --}}
+    <div class="min-w-0">
+      @if($prevItem)
+        <a href="{{ route('monthly-items.show', $prevItem) }}"
+           class="btn btn-sm btn-outline">
+          ← 前の月
+        </a>
+      @endif
+    </div>
+  
+    {{-- 中央：一覧（常時表示） --}}
+    <div class="min-w-0 text-center">
+      <a href="{{ route('monthly-items.index') }}"
+         class="btn btn-sm btn-outline">
+        月次テーマ一覧
+      </a>
+    </div>
+  
+    {{-- 右：次の月 --}}
+    <div class="min-w-0 text-right">
+      @if($nextItem)
+        <a href="{{ route('monthly-items.show', $nextItem) }}"
+           class="btn btn-sm btn-outline">
+          次の月 →
+        </a>
+      @endif
+    </div>
+  
+  </div>
   {{-- 上部：月次概要（スマホは縦、PCは横） --}}
   <div class="flex flex-col md:flex-row items-start justify-between gap-4">
     {{-- 左：テキスト --}}
@@ -29,34 +60,47 @@
         @php
           $fullText = trim(strip_tags($monthlyItem->description ?? ''));
           $isLong = mb_strlen($fullText) > 300;
+      
+          // URLリンク化用関数
+          $linkify = function ($text) {
+              $text = e($text); // まずエスケープ
+      
+              return preg_replace(
+                  '/(https?:\/\/[^\s]+)/',
+                  '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline break-all">$1</a>',
+                  $text
+              );
+          };
         @endphp
-        
-        <div class="text-sm mt-2 break-words" x-data="{ open: false }">
+      
+        <div x-data="{ open: false }">
+      
           @if($isLong)
-        
+      
             {{-- 省略表示 --}}
             <div x-show="!open">
-              {!! nl2br(e(\Illuminate\Support\Str::limit($fullText, 300))) !!}
+              {!! nl2br($linkify(\Illuminate\Support\Str::limit($fullText, 300))) !!}
               <button type="button"
                       class="text-blue-600 text-xs ml-2"
                       @click="open = true">
                 つづきを表示
               </button>
             </div>
-        
+      
             {{-- 全文表示 --}}
             <div x-show="open" x-cloak>
-              {!! nl2br(e($fullText)) !!}
+              {!! nl2br($linkify($fullText)) !!}
               <button type="button"
                       class="text-blue-600 text-xs ml-2"
                       @click="open = false">
                 閉じる
               </button>
             </div>
-        
+      
           @else
-            {!! nl2br(e($fullText)) !!}
+            {!! nl2br($linkify($fullText)) !!}
           @endif
+      
         </div>
       </div>
 
@@ -210,7 +254,6 @@
 
   <div class="pt-2 flex items-center justify-between gap-2">
     <a href="{{ route('dashboard') }}" class="btn btn-sm btn-ghost">← ダッシュボードへ</a>
-    <a href="{{ route('monthly-items.index') }}" class="btn btn-sm btn-ghost">月次テーマ一覧</a>
   </div>
 
 </div>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\PointLedger;
+use App\Models\PointRedemption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -241,8 +243,36 @@ class AdminUserController extends Controller
         } else {
             $avatar_url = null;
         }
+        
+        $now = now();
     
-        return view('admin.users.edit', compact('user', 'avatar_url'));
+        $pointBalance = (int) PointLedger::query()
+            ->where('user_id', $user->id)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>=', $now);
+            })
+            ->sum('delta'); 
+        
+        $pointLedgers = PointLedger::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('id')
+            ->paginate(30, ['*'], 'points_page')
+            ->withQueryString();
+        
+        $pointRedemptions = PointRedemption::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get();
+            
+        return view('admin.users.edit', compact(
+            'user',
+            'avatar_url',
+            'pointBalance',
+            'pointLedgers',
+            'pointRedemptions',
+        ));
     }
 
 

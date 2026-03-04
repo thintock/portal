@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\MediaFile;
 use App\Models\MediaRelation;
+use App\Models\PointLedger;
+use App\Models\PointRule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,10 +31,44 @@ class ProfileController extends Controller
             ->where('media_files.type', 'avatar')
             ->orderBy('media_relations.sort_order', 'asc')
             ->first();
+        
+        $now = now();
 
+        // 有効ポイント（expires_at が null または未来）
+        $pointBalance = (int) PointLedger::query()
+            ->where('user_id', $user->id)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>=', $now);
+            })
+            ->sum('delta');
+
+        // 「何の操作に何ポイント」一覧（全体ルール）
+        // config('points.actions') をラベルとして使う前提
+        $actions = (array) config('points.actions', []);
+
+        $rules = PointRule::query()
+            ->whereIn('action_type', array_keys($actions))
+            ->orderBy('action_type')
+            ->get()
+            ->keyBy('action_type');
+
+        $pointActionRows = collect($actions)->map(function ($label, $actionType) use ($rules) {
+            $r = $rules->get($actionType);
+
+            return [
+                'label'       => $label,
+                'action_type' => $actionType,
+                'points'      => (int) ($r?->base_points ?? 0),
+                'is_active'   => (bool) ($r?->is_active ?? true),
+            ];
+        })->values();
+        
         return view('profile.edit', [
             'user'   => $user,
             'avatar' => $avatar,
+            'pointBalance'    => $pointBalance,
+            'pointActionRows' => $pointActionRows,
         ]);
     }
 

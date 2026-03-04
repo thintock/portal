@@ -38,7 +38,7 @@ class AdminAnnouncementController extends Controller
         $validated = $request->validate([
             'title'            => ['required', 'string', 'max:255'],
             'slug'             => ['nullable', 'string', 'max:255', 'unique:announcements,slug'],
-            'body'             => ['nullable', 'string'], // HTML可なら string でOK
+            'body'             => ['nullable', 'string'], 
             'visibility'       => ['required', 'in:public,membership,admin'],
             'publish_start_at' => ['nullable', 'date'],
             'publish_end_at'   => ['nullable', 'date', 'after:publish_start_at'],

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\AdminAnnouncementController;
 use App\Http\Controllers\Admin\AdminMonthlyItemController;
 use App\Http\Controllers\Admin\CsvUserConvertController;
 use App\Http\Controllers\Admin\AdminMonthlyItemReportController;
+use App\Http\Controllers\Admin\PointSettingsController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Room;
 use App\Livewire\PostShow;
@@ -99,6 +100,12 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::get('/csv/users/download', [CsvUserConvertController::class, 'download'])->name('csv.users.download');
     // レポート
     Route::get('/monthly-items/{monthly_item}/report', [AdminMonthlyItemReportController::class, 'show'])->name('monthly-items.report');
+    // ポイント
+    Route::get('/points', [PointSettingsController::class, 'index'])->name('points.index');
+        Route::post('/points', [PointSettingsController::class, 'bulkUpdate'])->name('points.bulkUpdate');
+        Route::get('/points/rooms', [PointSettingsController::class, 'rooms'])->name('points.rooms');
+        Route::get('/points/rooms/{room}', [PointSettingsController::class, 'room'])->name('points.room');
+        Route::post('/points/rooms/{room}', [PointSettingsController::class, 'roomBulkUpdate'])->name('points.roomBulkUpdate');
 });
 
 

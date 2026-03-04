@@ -15,6 +15,7 @@
                         </button>
                     </div>
                     <p class="text-sm text-gray-500 mt-1">会員情報の確認と変更ができます。</p>  
+                    @include('profile.partials.points-summary', ['pointBalance' => $pointBalance ?? 0,'pointActionRows' => $pointActionRows ?? collect(),])
                     @include('profile.partials.update-profile-information-form')
                 </div>
             </div>

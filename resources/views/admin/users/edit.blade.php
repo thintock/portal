@@ -161,5 +161,12 @@
                 <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">戻る</a>
             </div>
         </form>
+        {{-- ✅ フォーム外に追加（ネストフォーム回避） --}}
+        @include('admin.users.partials.points', [
+          'user' => $user,
+          'pointBalance' => $pointBalance ?? 0,
+          'pointLedgers' => $pointLedgers,
+        ])
+        
     </div>
 </x-admin-layout>

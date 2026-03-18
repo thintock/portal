@@ -59,6 +59,22 @@
             ルーム管理
         </a>
         
+        {{-- 投稿管理 --}}
+        <a href="{{ route('admin.posts.index') }}"
+           class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                  {{ request()->routeIs('admin.posts.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            投稿管理
+        </a>
+        
+        {{-- コメント管理 --}}
+        <a href="{{ route('admin.comments.index') }}"
+           class="flex items-center px-3 py-2 rounded-md transition 
+                  hover:bg-primary/30 hover:text-white
+                  {{ request()->routeIs('admin.comments.*') ? 'bg-primary/40 text-white font-semibold' : '' }}">
+            コメント管理
+        </a>
+        
         {{-- イベント管理 --}}
         <a href="{{ route('admin.events.index') }}"
            class="flex items-center px-3 py-2 rounded-md transition 

@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\PointRule;
 use App\Models\RoomPointRule;
 use App\Models\PointLedger;
+use App\Models\PointRedemption;
+use App\Models\PointReward;
 use App\Models\User;
 use App\Models\Room;
 use Illuminate\Database\Eloquent\Model;
@@ -13,12 +15,7 @@ use Illuminate\Support\Carbon;
 
 class PointService
 {
-    /**
-     * 付与（earn）
-     * - subject は Post/Comment/Order 等の Eloquent Model
-     * - room は任意（投稿/コメントなら room_id を渡す）
-     * - 二重付与防止：unique_point_action により同一subject+actionの earn は1回だけ
-     */
+    // ポイント付与（earn）
     public function earn(
         User $user,
         string $actionType,
@@ -66,12 +63,7 @@ class PointService
         });
     }
 
-    /**
-     * 取消（revoke）
-     * - 対象 subject の earn を探し、その delta 分だけマイナス台帳を切る
-     * - すでに revoke 済みならスキップ
-     * - SoftDelete/ForceDelete どちらでも呼べる
-     */
+    //ポイント取消
     public function revoke(
         User $user,
         string $actionType,
@@ -125,52 +117,65 @@ class PointService
         });
     }
 
-    /**
-     * 交換（redeem）
-     * - 現在残高から差し引きたいだけなら ledger に redeem(-points) を切るだけでOK
-     * - 在庫や承認フローは point_redemptions を使う（ここではledgerのみ）
-     */
-    public function redeem(
-        User $user,
-        int $points,
-        ?Model $subject = null,
-        ?array $meta = null,
-        ?Carbon $now = null
-    ): PointLedger {
-        $now ??= now();
-
-        if ($points <= 0) {
-            throw new \InvalidArgumentException('points must be positive.');
-        }
-
-        // 残高チェック（期限切れ除外）
-        $balance = $this->balance($user, $now);
-        if ($balance < $points) {
-            throw new \RuntimeException('insufficient points.');
-        }
-
-        return DB::transaction(function () use ($user, $points, $subject, $meta, $now) {
-            return PointLedger::create([
-                'user_id'      => $user->id,
-                'delta'        => -1 * abs($points),
-                'reason'       => 'redeem',
-                'action_type'  => null,
-                'subject_type' => $subject?->getMorphClass(),
-                'subject_id'   => $subject?->getKey(),
-                'room_id'      => null,
-                'expires_at'   => null,
-                'meta_json'    => $meta ? json_encode($meta, JSON_UNESCAPED_UNICODE) : null,
-                'created_at'   => $now,
-                'updated_at'   => $now,
+    // 交換
+    public function redeem(User $user, PointReward $reward)
+    {
+        return DB::transaction(function () use ($user, $reward) {
+    
+            // ユーザーロック（二重交換防止）
+            $user = User::whereKey($user->id)
+                ->lockForUpdate()
+                ->first();
+    
+            // reward ロック（在庫管理用）
+            $reward = PointReward::whereKey($reward->id)
+                ->lockForUpdate()
+                ->first();
+    
+            if (!$reward->is_active) {
+                throw new \Exception('この景品は現在交換できません。');
+            }
+    
+            if ($reward->stock !== null && $reward->stock <= 0) {
+                throw new \Exception('在庫がありません。');
+            }
+    
+            $balance = $this->balance($user);
+    
+            if ($balance < $reward->points_cost) {
+                throw new \Exception('ポイントが不足しています。');
+            }
+    
+            // 在庫減算
+            if ($reward->stock !== null) {
+                $reward->decrement('stock');
+            }
+    
+            // redemption 作成
+            $redemption = PointRedemption::create([
+                'user_id' => $user->id,
+                'point_reward_id' => $reward->id,
+                'points_used' => $reward->points_cost,
+                'status' => 'requested'
             ]);
+    
+            // ledger 記録
+            PointLedger::create([
+                'user_id' => $user->id,
+                'delta' => -$reward->points_cost,
+                'reason' => 'redeem',
+                'subject_type' => PointRedemption::class,
+                'subject_id' => $redemption->id,
+                'meta_json' => json_encode([
+                    'reward_name' => $reward->name
+                ])
+            ]);
+    
+            return $redemption;
         });
     }
 
-    /**
-     * 残高（期限内の earn + revoke + redeem の合計）
-     * - earn は expires_at を見る
-     * - revoke/redeem は expires_at null 想定なので常に計上される
-     */
+    // 残高
     public function balance(User $user, ?Carbon $now = null): int
     {
         $now ??= now();

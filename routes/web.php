@@ -9,9 +9,12 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventParticipantController;
+use App\Http\Controllers\PointRewardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminRoomController;
+use App\Http\Controllers\Admin\AdminPostController;
+use App\Http\Controllers\Admin\AdminCommentController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminAnnouncementController;
@@ -58,6 +61,10 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::get('/billing/cancel',  [BillingController::class, 'cancel'])->name('billing.cancel');
     Route::get('/billing/portal',  [BillingController::class, 'portal'])->name('billing.portal');
     Route::get('/members', MemberIndex::class)->name('members.member_index');
+    // ポイント景品
+    Route::get('/rewards', [PointRewardController::class, 'index'])->name('rewards.index');
+    Route::post('/rewards/{reward}/redeem', [PointRewardController::class, 'redeem'])->name('rewards.redeem');
+    Route::get('/rewards/history', [PointRewardController::class, 'history'])->name('rewards.history');
 });
 
 // 有料会員専用
@@ -91,6 +98,11 @@ Route::middleware(['auth','verified','is_admin'])->prefix('admin')->name('admin.
     Route::resource('users', AdminUserController::class)->names('users')->except('show');
     Route::resource('rooms', AdminRoomController::class)->except('show');
     Route::resource('pages', AdminPageController::class);
+    Route::get('/posts', [AdminPostController::class, 'index'])->name('posts.index');
+    Route::delete('/posts/{post}', [AdminPostController::class, 'destroy'])->name('posts.destroy');
+    Route::get('/comments', [AdminCommentController::class, 'index'])->name('comments.index');
+    Route::delete('/comments/{comment}', [AdminCommentController::class, 'destroy'])->name('comments.destroy');
+
     Route::resource('events', AdminEventController::class);
     Route::resource('announcements', AdminAnnouncementController::class);
     Route::resource('monthly-items', AdminMonthlyItemController::class);

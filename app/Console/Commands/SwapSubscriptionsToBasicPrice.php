@@ -9,52 +9,52 @@ use Illuminate\Support\Facades\Log;
 class SwapSubscriptionsToBasicPrice extends Command
 {
     /**
-     * 実行例：
+     * Examples:
      *
-     * dry-run:
-     * php artisan subscriptions:swap-basic-price --dry-run
+     * Dry run:
+     * php artisan subscriptions:swap-basic-price --dry-run --old_price=price_xxx
      *
-     * 1ユーザーだけ実行:
-     * php artisan subscriptions:swap-basic-price --user_id=41
+     * Run for a single user:
+     * php artisan subscriptions:swap-basic-price --old_price=price_xxx --user_id=41
      *
-     * 全対象実行:
-     * php artisan subscriptions:swap-basic-price
+     * Run for all target users:
+     * php artisan subscriptions:swap-basic-price --old_price=price_xxx
      */
     protected $signature = 'subscriptions:swap-basic-price
-        {--dry-run : 実際には変更せず、対象だけ表示する}
-        {--user_id= : 特定ユーザーIDだけ実行する}
-        {--old_price= : 旧Stripe Price IDを上書き指定する}
-        {--new_price= : 新Stripe Price IDを上書き指定する}
+        {--dry-run : Show target subscriptions without making changes}
+        {--user_id= : Run only for a specific user ID}
+        {--old_price= : Override the old Stripe Price ID}
+        {--new_price= : Override the new Stripe Price ID}
     ';
 
-    protected $description = '既存の有効サブスクリプションを旧Priceから新Priceへ日割りなしで切り替えます';
+    protected $description = 'Swap active subscriptions from the old Stripe Price to the new Stripe Price without proration';
 
     public function handle(): int
     {
-        // .envのSTRIPE_PRICE_BASICを新PriceIDとして使用
-        // 旧PriceIDはオプション必須（デフォルトなし）
+        // Use STRIPE_PRICE_BASIC from .env as the default new Price ID.
+        // The old Price ID must be explicitly provided using --old_price.
         $defaultNewPriceId = env('STRIPE_PRICE_BASIC');
-        $defaultOldPriceId = null; // 旧IDはハードコードしない。--old_price で必ず明示する
+        $defaultOldPriceId = null;
 
         $oldPriceId = (string) ($this->option('old_price') ?: $defaultOldPriceId);
         $newPriceId = (string) ($this->option('new_price') ?: $defaultNewPriceId);
 
         if ($oldPriceId === '' || $newPriceId === '') {
-            $this->error('old_price または new_price が空です。--old_price=price_xxx で明示してください。');
+            $this->error('old_price or new_price is empty. Please specify --old_price=price_xxx.');
             return self::FAILURE;
         }
 
         if ($oldPriceId === $newPriceId) {
-            $this->error('old_price と new_price が同じです。');
+            $this->error('old_price and new_price are the same.');
             return self::FAILURE;
         }
 
         $dryRun = (bool) $this->option('dry-run');
         $userId = $this->option('user_id');
 
-        $this->info('旧Price: ' . $oldPriceId);
-        $this->info('新Price: ' . $newPriceId);
-        $this->info($dryRun ? 'モード: dry-run（変更なし）' : 'モード: 実行');
+        $this->info('Old Price: ' . $oldPriceId);
+        $this->info('New Price: ' . $newPriceId);
+        $this->info($dryRun ? 'Mode: dry-run (no changes will be made)' : 'Mode: execute');
 
         $query = User::query()
             ->whereHas('subscriptions', function ($q) use ($oldPriceId) {
@@ -80,15 +80,15 @@ class SwapSubscriptionsToBasicPrice extends Command
         $users = $query->get();
 
         $this->line('');
-        $this->info('対象ユーザー数: ' . $users->count());
+        $this->info('Target user count: ' . $users->count());
 
         if ($users->isEmpty()) {
-            $this->warn('対象ユーザーがいません。');
+            $this->warn('No target users found.');
             return self::SUCCESS;
         }
 
         foreach ($users as $user) {
-            // with()でロード済みのリレーションから取得（追加クエリなし）
+            // Use the already eager-loaded subscription relation.
             $subscription = $user->subscriptions->first();
 
             $this->line(sprintf(
@@ -103,12 +103,12 @@ class SwapSubscriptionsToBasicPrice extends Command
 
         if ($dryRun) {
             $this->line('');
-            $this->info('dry-run のため変更は行っていません。');
+            $this->info('Dry-run mode: no changes were made.');
             return self::SUCCESS;
         }
 
-        if (! $this->confirm("上記 {$users->count()} 件を新Priceへ切り替えます。実行しますか？")) {
-            $this->warn('中止しました。');
+        if (! $this->confirm("Swap {$users->count()} subscription(s) to the new Price. Continue?")) {
+            $this->warn('Operation cancelled.');
             return self::SUCCESS;
         }
 
@@ -118,7 +118,7 @@ class SwapSubscriptionsToBasicPrice extends Command
 
         foreach ($users as $user) {
             try {
-                // with()でロード済みのリレーションから取得（追加クエリなし）
+                // Use the already eager-loaded subscription relation.
                 $subscription = $user->subscriptions->first();
 
                 if (! $subscription) {
@@ -129,7 +129,7 @@ class SwapSubscriptionsToBasicPrice extends Command
 
                 if ($subscription->stripe_price !== $oldPriceId) {
                     $skipped++;
-                    $this->warn("skip user_id={$user->id}: current price is not old price ({$subscription->stripe_price})");
+                    $this->warn("skip user_id={$user->id}: current price is not the old price ({$subscription->stripe_price})");
                     continue;
                 }
 
@@ -142,10 +142,10 @@ class SwapSubscriptionsToBasicPrice extends Command
                 $oldPriceBeforeSwap = $subscription->stripe_price;
                 $stripeSubscriptionId = $subscription->stripe_id;
 
-                // 日割りなしでPrice差し替え
+                // Swap Price without proration.
                 $subscription->noProrate()->swap($newPriceId);
 
-                // ローカルモデルを最新化
+                // Refresh the local subscription model.
                 $subscription->refresh();
 
                 $success++;
@@ -189,7 +189,7 @@ class SwapSubscriptionsToBasicPrice extends Command
         }
 
         $this->line('');
-        $this->info("完了 success={$success} failed={$failed} skipped={$skipped}");
+        $this->info("Completed: success={$success} failed={$failed} skipped={$skipped}");
 
         return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }

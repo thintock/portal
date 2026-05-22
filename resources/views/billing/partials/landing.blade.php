@@ -85,7 +85,7 @@
         <div class="relative max-w-4xl mx-auto px-6 text-center">
     
             {{-- ▼ 募集後：申込フォーム --}}
-            <div id="recruiting-form" class="{{ $isRecruiting ? '' : 'hidden' }}">
+            <div id="recruiting-form">
                 <h2 class="text-3xl sm:text-4xl font-bold text-gray-600 mb-4">
                     今すぐ参加して<br class="sm:hidden">仲間とつながろう
                 </h2>
@@ -109,7 +109,7 @@
                                            focus:ring-2 focus:ring-primary bg-white text-gray-800">
                                 @if ($prices['basic'] ?? false)
                                     <option value="{{ $prices['basic'] }}">
-                                        サークル会員（月額 ¥2,980）
+                                        サークル会員（月額 ¥330）
                                     </option>
                                 @endif
                             </select>
@@ -126,80 +126,12 @@
                 </div>
     
                 <p class="mt-10 text-sm text-gray-600">
-                    月額 <span class="font-bold text-error">¥2,980（税込）</span>
+                    月額 <span class="font-bold text-error">¥330（税込）</span>
                     — いつでもキャンセルできます。
                 </p>
             </div>
-    
-            {{-- ▼ 募集前：カウントダウン --}}
-            <div id="countdown-block" class="{{ $isRecruiting ? 'hidden' : '' }}">
-                <p class="text-sm text-gray-600 mb-2">
-                    ベイクルの会員募集期間は毎月25日12:00から月末22:59までです。
-                </p>
-    
-                <p class="text-md text-gray-600 mb-2 font-bold">
-                    次回募集開始まで
-                </p>
-    
-                <div class="mx-auto max-w-md bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl
-                            p-6 sm:p-8 border border-white/40">
-                    <div id="countdown"
-                         class="flex justify-center gap-3 text-2xl sm:text-4xl
-                                font-bold text-primary animate-pulse">
-                        <span><span id="days">--</span>日</span>
-                        <span><span id="hours">--</span>時間</span>
-                        <span><span id="minutes">--</span>分</span>
-                        <span><span id="seconds">--</span>秒</span>
-                    </div>
-                </div>
-    
-                <p class="mt-3 text-xs text-gray-600 font-bold">
-                    毎月25日 12:00 に募集を開始します
-                </p>
-            </div>
-    
         </div>
     </section>
 
-    {{-- カウントダウンJS --}}
-    @if(!$isRecruiting && $nextRecruitingAt)
-<script>
-    const target = new Date("{{ $nextRecruitingAt->format('Y-m-d H:i:s') }}").getTime();
-
-    const countdownBlock = document.getElementById('countdown-block');
-    const recruitingForm = document.getElementById('recruiting-form');
-
-    const timer = setInterval(() => {
-        const now = new Date().getTime();
-        const diff = target - now;
-
-        if (diff <= 0) {
-            clearInterval(timer);
-
-            // UI切替
-            countdownBlock.classList.add('hidden');
-            recruitingForm.classList.remove('hidden');
-            recruitingForm.classList.add('animate-fade-in');
-
-            // 状態ズレ防止（保険）
-            setTimeout(() => {
-                location.reload();
-            }, 8000);
-
-            return;
-        }
-
-        document.getElementById('days').textContent =
-            Math.floor(diff / (1000 * 60 * 60 * 24));
-        document.getElementById('hours').textContent =
-            Math.floor((diff / (1000 * 60 * 60)) % 24);
-        document.getElementById('minutes').textContent =
-            Math.floor((diff / (1000 * 60)) % 60);
-        document.getElementById('seconds').textContent =
-            Math.floor((diff / 1000) % 60);
-
-    }, 1000);
-</script>
-@endif
-
+    
 

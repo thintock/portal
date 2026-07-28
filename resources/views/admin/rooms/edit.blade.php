@@ -163,7 +163,9 @@
                                 <td>{{ $user?->id ?? '—' }}</td>
                         
                                 <td class="font-semibold whitespace-nowrap">
-                                    {{ $user?->name ?: '—' }}
+                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="link link-primary">
+                                        {{ $user?->name ?: '—' }}
+                                    </a>
                                 </td>
                         
                                 <td>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use App\Models\RoomMember;
 use App\Models\MediaFile;
 use App\Models\MediaRelation;
 use Illuminate\Http\Request;
@@ -92,7 +93,13 @@ class AdminRoomController extends Controller
 
     public function edit(Room $room)
     {
-        return view('admin.rooms.edit', compact('room'));
+        $members = RoomMember::query()
+        ->where('room_id', $room->id)
+        ->with('user')
+        ->latest('joined_at')
+        ->get();
+
+        return view('admin.rooms.edit', compact('room', 'members'));
     }
 
     public function update(Request $request, Room $room)

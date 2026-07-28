@@ -104,4 +104,110 @@
             </form>
         </div>
     </div>
+    {{-- ルーム参加者一覧 --}}
+    <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mt-8">
+        <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">
+                    ルーム参加者
+                </h2>
+    
+                <p class="text-sm text-gray-500 mt-1">
+                    このルームに参加しているユーザーの一覧です。
+                </p>
+            </div>
+    
+            <div class="text-sm text-gray-600">
+                合計：
+                <span class="font-semibold">{{ $members->count() }}</span>
+                名
+            </div>
+        </div>
+    
+        @if($members->isEmpty())
+            <div class="p-6 bg-base-200 rounded-lg text-center text-sm text-gray-500">
+                現在、このルームに参加しているユーザーはいません。
+            </div>
+        @else
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full text-sm">
+                    <thead class="bg-base-200">
+                        <tr>
+                            <th>ID</th>
+                            <th>名前</th>
+                            <th>メールアドレス</th>
+                            <th>郵便番号</th>
+                            <th>住所</th>
+                            <th>電話番号</th>
+                            <th>権限</th>
+                            <th>参加日時</th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        @foreach($members as $member)
+                            @php
+                                $user = $member->user;
+                        
+                                $address = $user
+                                    ? collect([
+                                        $user->prefecture,
+                                        $user->address1,
+                                        $user->address2,
+                                        $user->address3,
+                                    ])->filter()->implode('')
+                                    : null;
+                            @endphp
+                        
+                            <tr>
+                                <td>{{ $user?->id ?? '—' }}</td>
+                        
+                                <td class="font-semibold whitespace-nowrap">
+                                    {{ $user?->name ?: '—' }}
+                                </td>
+                        
+                                <td>
+                                    @if($user?->email)
+                                        <a href="mailto:{{ $user->email }}"
+                                           class="link link-primary">
+                                            {{ $user->email }}
+                                        </a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                        
+                                <td class="whitespace-nowrap">
+                                    {{ $user?->postal_code ?: '—' }}
+                                </td>
+                        
+                                <td class="min-w-64">
+                                    {{ $address ?: '—' }}
+                                </td>
+                        
+                                <td class="whitespace-nowrap">
+                                    @if($user?->phone)
+                                        <a href="tel:{{ $user->phone }}"
+                                           class="link link-primary">
+                                            {{ $user->phone }}
+                                        </a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                        
+                                <td class="whitespace-nowrap">
+                                    {{ $member->role ?: '—' }}
+                                </td>
+                        
+                                <td class="whitespace-nowrap">
+                                    {{ $member->joined_at?->format('Y/m/d H:i') ?? '—' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
 </x-admin-layout>

@@ -182,14 +182,18 @@
         
         {{-- 参加者リスト --}}
         <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-8">
-            <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-gray-800">参加者</h2>
-                    <p class="text-sm text-gray-500">参加予定（going）のユーザー一覧です。</p>
+                    <p class="text-sm text-gray-500 mt-1">
+                        参加予定（going）のユーザー一覧です。
+                    </p>
                 </div>
         
                 <div class="text-sm text-gray-600">
-                    合計：<span class="font-semibold">{{ $participants->count() }}</span>名
+                    合計：
+                    <span class="font-semibold">{{ $participants->count() }}</span>
+                    名
                 </div>
             </div>
         
@@ -203,38 +207,85 @@
                         <thead class="bg-base-200">
                             <tr>
                                 <th class="w-16">ID</th>
-                                <th>ユーザー</th>
-                                <th class="w-56">参加登録日時</th>
-                                <th class="w-24">ステータス</th>
+                                <th>名前</th>
+                                <th>メールアドレス</th>
+                                <th>郵便番号</th>
+                                <th>住所</th>
+                                <th>電話番号</th>
+                                <th>参加登録日時</th>
+                                <th>ステータス</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($participants as $p)
                                 @php
                                     $u = $p->user;
+
+                                    $address = $u
+                                        ? collect([
+                                            $u->prefecture,
+                                            $u->address1,
+                                            $u->address2,
+                                            $u->address3,
+                                        ])->filter()->implode('')
+                                        : null;
                                 @endphp
         
                                 <tr>
                                     <td>{{ $u?->id ?? '—' }}</td>
         
-                                    <td class="font-semibold">
+                                    <td class="font-semibold whitespace-nowrap">
                                         @if($u)
-                                            <a href="{{ route('admin.users.edit', $u->id) }}" class="link link-primary">
-                                                {{ $u->name }}
+                                            <a
+                                                href="{{ route('admin.users.edit', $u->id) }}"
+                                                class="link link-primary"
+                                            >
+                                                {{ $u->name ?: '—' }}
                                             </a>
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                {{ $u->email ?? '' }}
-                                            </div>
                                         @else
                                             <span class="text-gray-500">（ユーザーが見つかりません）</span>
                                         @endif
                                     </td>
-        
+
                                     <td>
+                                        @if($u?->email)
+                                            <a
+                                                href="mailto:{{ $u->email }}"
+                                                class="link link-primary"
+                                            >
+                                                {{ $u->email }}
+                                            </a>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+
+                                    <td class="whitespace-nowrap">
+                                        {{ $u?->postal_code ?: '—' }}
+                                    </td>
+
+                                    <td class="min-w-64">
+                                        {{ $address ?: '—' }}
+                                    </td>
+
+                                    <td class="whitespace-nowrap">
+                                        @if($u?->phone)
+                                            <a
+                                                href="tel:{{ $u->phone }}"
+                                                class="link link-primary"
+                                            >
+                                                {{ $u->phone }}
+                                            </a>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+        
+                                    <td class="whitespace-nowrap">
                                         {{ $p->created_at?->format('Y/m/d H:i') ?? '—' }}
                                     </td>
         
-                                    <td>
+                                    <td class="whitespace-nowrap">
                                         <span class="badge badge-outline">{{ $p->status }}</span>
                                     </td>
                                 </tr>

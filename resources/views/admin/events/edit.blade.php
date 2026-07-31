@@ -181,7 +181,7 @@
         </div>
         
         {{-- 参加者リスト --}}
-        <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mb-8">
+        <div class="card w-full min-w-0 max-w-full overflow-hidden bg-white shadow p-4 sm:p-6 lg:p-8 mt-8" style="contain: inline-size;">
             <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-gray-800">参加者</h2>
@@ -202,19 +202,19 @@
                     現在、参加者はまだいません。
                 </div>
             @else
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full text-sm">
+                <div class="block w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain">
+                    <table class="table table-zebra min-w-[1400px] text-sm">
                         <thead class="bg-base-200">
                             <tr>
-                                <th class="w-16">ID</th>
-                                <th>ニックネーム</th>
-                                <th>名前</th>
-                                <th>メールアドレス</th>
-                                <th>郵便番号</th>
-                                <th>住所</th>
-                                <th>電話番号</th>
-                                <th>参加登録日時</th>
-                                <th>ステータス</th>
+                                <th class="w-16 whitespace-nowrap">ID</th>
+                                <th class="whitespace-nowrap">ニックネーム</th>
+                                <th class="whitespace-nowrap">名前</th>
+                                <th class="whitespace-nowrap">メールアドレス</th>
+                                <th class="whitespace-nowrap">郵便番号</th>
+                                <th class="min-w-64 whitespace-nowrap">住所</th>
+                                <th class="whitespace-nowrap">電話番号</th>
+                                <th class="whitespace-nowrap">参加登録日時</th>
+                                <th class="whitespace-nowrap">ステータス</th>
                             </tr>
                         </thead>
                         <tbody>

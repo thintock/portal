@@ -105,7 +105,7 @@
         </div>
     </div>
     {{-- ルーム参加者一覧 --}}
-    <div class="card bg-white shadow p-4 sm:p-6 lg:p-8 mt-8">
+    <div class="card w-full min-w-0 max-w-full overflow-hidden bg-white shadow p-4 sm:p-6 lg:p-8 mt-8" style="contain: inline-size;">
         <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-lg font-bold text-gray-800">
@@ -129,19 +129,19 @@
                 現在、このルームに参加しているユーザーはいません。
             </div>
         @else
-            <div class="overflow-x-auto">
-                <table class="table table-zebra w-full text-sm">
+            <div class="block w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain">
+                <table class="table table-zebra min-w-[1400px] text-sm">
                     <thead class="bg-base-200">
                         <tr>
-                            <th>ID</th>
-                            <th>ニックネーム</th>
-                            <th>名前</th>
-                            <th>メールアドレス</th>
-                            <th>郵便番号</th>
-                            <th>住所</th>
-                            <th>電話番号</th>
-                            <th>権限</th>
-                            <th>参加日時</th>
+                            <th class="w-16 whitespace-nowrap">ID</th>
+                            <th class="whitespace-nowrap">ニックネーム</th>
+                            <th class="whitespace-nowrap">名前</th>
+                            <th class="whitespace-nowrap">メールアドレス</th>
+                            <th class="whitespace-nowrap">郵便番号</th>
+                            <th class="min-w-64 whitespace-nowrap">住所</th>
+                            <th class="whitespace-nowrap">電話番号</th>
+                            <th class="whitespace-nowrap">権限</th>
+                            <th class="whitespace-nowrap">参加日時</th>
                         </tr>
                     </thead>
     
@@ -161,52 +161,66 @@
                             @endphp
                         
                             <tr>
-                                <td>{{ $user?->id ?? '—' }}</td>
+                                <td class="whitespace-nowrap">
+                                    {{ $user?->id ?? '—' }}
+                                </td>
                         
                                 <td class="font-semibold whitespace-nowrap">
-                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="link link-primary">
-                                        {{ $user?->name ?: '—' }}
-                                    </a>
+                                    @if($user)
+                                        <a
+                                            href="{{ route('admin.users.edit', $user) }}"
+                                            class="link link-primary"
+                                        >
+                                            {{ $user->name ?: '—' }}
+                                        </a>
+                                    @else
+                                        —
+                                    @endif
                                 </td>
                                 
                                 <td class="whitespace-nowrap">
-                                    {{ $user?->last_name ?: '-' }} {{ $user?->first_name ?: '-' }}
+                                    {{ $user?->last_name ?: '—' }}
+                                    {{ $user?->first_name ?: '—' }}
                                 </td>
-                        
-                                <td>
+
+                                <td class="whitespace-nowrap">
                                     @if($user?->email)
-                                        <a href="mailto:{{ $user->email }}"
-                                           class="link link-primary">
+                                        <a
+                                            href="mailto:{{ $user->email }}"
+                                            class="link link-primary"
+                                        >
                                             {{ $user->email }}
                                         </a>
                                     @else
                                         —
                                     @endif
                                 </td>
-                        
+
                                 <td class="whitespace-nowrap">
                                     {{ $user?->postal_code ?: '—' }}
                                 </td>
-                        
+
                                 <td class="min-w-64">
                                     {{ $address ?: '—' }}
                                 </td>
-                        
+
                                 <td class="whitespace-nowrap">
                                     @if($user?->phone)
-                                        <a href="tel:{{ $user->phone }}"
-                                           class="link link-primary">
+                                        <a
+                                            href="tel:{{ $user->phone }}"
+                                            class="link link-primary"
+                                        >
                                             {{ $user->phone }}
                                         </a>
                                     @else
                                         —
                                     @endif
                                 </td>
-                        
+
                                 <td class="whitespace-nowrap">
                                     {{ $member->role ?: '—' }}
                                 </td>
-                        
+
                                 <td class="whitespace-nowrap">
                                     {{ $member->joined_at?->format('Y/m/d H:i') ?? '—' }}
                                 </td>
@@ -217,4 +231,5 @@
             </div>
         @endif
     </div>
+</div>
 </x-admin-layout>

@@ -134,6 +134,7 @@
                     <thead class="bg-base-200">
                         <tr>
                             <th>ID</th>
+                            <th>ニックネーム</th>
                             <th>名前</th>
                             <th>メールアドレス</th>
                             <th>郵便番号</th>
@@ -166,6 +167,10 @@
                                     <a href="{{ route('admin.users.edit', $user->id) }}" class="link link-primary">
                                         {{ $user?->name ?: '—' }}
                                     </a>
+                                </td>
+                                
+                                <td class="whitespace-nowrap">
+                                    {{ $user?->last_name ?: '-' }} {{ $user?->first_name ?: '-' }}
                                 </td>
                         
                                 <td>

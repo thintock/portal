@@ -207,6 +207,7 @@
                         <thead class="bg-base-200">
                             <tr>
                                 <th class="w-16">ID</th>
+                                <th>ニックネーム</th>
                                 <th>名前</th>
                                 <th>メールアドレス</th>
                                 <th>郵便番号</th>
@@ -235,24 +236,18 @@
                                     <td>{{ $u?->id ?? '—' }}</td>
         
                                     <td class="font-semibold whitespace-nowrap">
-                                        @if($u)
-                                            <a
-                                                href="{{ route('admin.users.edit', $u->id) }}"
-                                                class="link link-primary"
-                                            >
-                                                {{ $u->name ?: '—' }}
-                                            </a>
-                                        @else
-                                            <span class="text-gray-500">（ユーザーが見つかりません）</span>
-                                        @endif
+                                        <a href="{{ route('admin.users.edit', $u->id) }}" class="link link-primary">
+                                            {{ $u?->name ?: '—' }}
+                                        </a>    
                                     </td>
-
+                                    
+                                    <td class="whitespace-nowrap">
+                                        {{ $u?->last_name ?: '-' }} {{ $u?->first_name ?: '-' }}
+                                    </td>
+                                    
                                     <td>
                                         @if($u?->email)
-                                            <a
-                                                href="mailto:{{ $u->email }}"
-                                                class="link link-primary"
-                                            >
+                                            <a href="mailto:{{ $u->email }}" class="link link-primary" >
                                                 {{ $u->email }}
                                             </a>
                                         @else
